@@ -10,7 +10,6 @@ import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.TechCapabilityRepository;
 import org.springframework.data.domain.Pageable;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
