@@ -7,8 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.beeline.capability.domain.TechCapability;
 
-import java.util.List;
-
 @Repository
 public interface TechCapabilityRepository extends JpaRepository<TechCapability, String> {
 

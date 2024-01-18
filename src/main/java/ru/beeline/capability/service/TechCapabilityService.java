@@ -4,16 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.TechCapabilityRepository;
 import org.springframework.data.domain.Pageable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class TechCapabilityService {
@@ -30,11 +27,6 @@ public class TechCapabilityService {
         }
         Pageable pageable = new OffsetBasedPageRequest(offset, limit == null || limit == 0 ? Integer.MAX_VALUE : limit, Sort.by(Sort.Direction.ASC, "name"));
         Page<TechCapability> techCapabilities = techCapabilityRepository.findCapabilities(pageable);
-        Map<TechCapability, List<BusinessCapability>> techCapabilitiesWithParentsMap = new HashMap<>();
-        techCapabilities.getContent().forEach(tc-> {
-            List<BusinessCapability> parents = businessCapabilityRepository.findParents(tc.getId(), Sort.by(Sort.Direction.ASC, "name"));
-            techCapabilitiesWithParentsMap.put(tc, parents);
-        });
-        return TechCapabilityDTO.convert(techCapabilities.toList(), techCapabilitiesWithParentsMap);
+        return TechCapabilityDTO.convert(techCapabilities.toList());
     }
 }

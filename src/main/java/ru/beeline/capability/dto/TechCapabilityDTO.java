@@ -2,12 +2,10 @@ package ru.beeline.capability.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.TechCapability;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @Setter
 @Getter
@@ -28,7 +26,7 @@ public class TechCapabilityDTO {
     private Long owner;
     private List<BCParentDTO> parents;
 
-    public static List<TechCapabilityDTO> convert(List<TechCapability> techCapabilities, Map<TechCapability, List<BusinessCapability>> techCapabilitiesWithParentsMap) {
+    public static List<TechCapabilityDTO> convert(List<TechCapability> techCapabilities) {
         List<TechCapabilityDTO> techCapabilityDTOS = new ArrayList<>();
         for(TechCapability techCapability : techCapabilities) {
             TechCapabilityDTO techCapabilityDTO = TechCapabilityDTO.builder()
@@ -41,7 +39,7 @@ public class TechCapabilityDTO {
                     .createdDate(techCapability.getCreatedDate())
                     .lastModifiedDate(techCapability.getLastModifiedDate())
                     .owner(techCapability.getOwner())
-                    .parents(BCParentDTO.convert(techCapabilitiesWithParentsMap.get(techCapability)))
+                    .parents(BCParentDTO.convert(techCapability.getParents()))
                     .build();
             techCapabilityDTOS.add(techCapabilityDTO);
         }
