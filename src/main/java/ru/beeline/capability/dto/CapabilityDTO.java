@@ -23,7 +23,6 @@ public class CapabilityDTO {
         TechCapabilityShortDTO techCapabilityDTO = TechCapabilityShortDTO.convert(techCapability);
         List<BusinessCapability> businessCapabilities = techCapability.getParents().stream()
                 .map(TechCapabilityRelations::getBusinessCapability)
-                .filter(businessCapability -> Objects.isNull(businessCapability.getDeletedDate()))
                 .collect(Collectors.toList());
         List<BusinessCapabilityDTO> parentDtos = BusinessCapabilityDTO.convert(businessCapabilities);
 
