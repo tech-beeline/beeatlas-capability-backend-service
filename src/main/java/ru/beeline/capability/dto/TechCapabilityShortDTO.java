@@ -13,31 +13,30 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TechCapabilityDTO {
+public class TechCapabilityShortDTO {
 
     private Long id;
     private String code;
     private String name;
     private String description;
+    private String type;
     private String author;
     private String link;
     private Date createdDate;
     @JsonProperty("updatedDate")
     private Date lastModifiedDate;
-    private Long owner;
-    private List<BCParentDTO> parents;
 
-    public static List<TechCapabilityDTO> convert(List<TechCapability> techCapabilities) {
-        List<TechCapabilityDTO> techCapabilityDTOS = new ArrayList<>();
+    public static List<TechCapabilityShortDTO> convert(List<TechCapability> techCapabilities) {
+        List<TechCapabilityShortDTO> techCapabilityDTOS = new ArrayList<>();
         for (TechCapability techCapability : techCapabilities) {
-            TechCapabilityDTO techCapabilityDTO = convert(techCapability);
+            TechCapabilityShortDTO techCapabilityDTO = convert(techCapability);
             techCapabilityDTOS.add(techCapabilityDTO);
         }
         return techCapabilityDTOS;
     }
 
-    public static TechCapabilityDTO convert(TechCapability techCapability) {
-        return TechCapabilityDTO.builder()
+    public static TechCapabilityShortDTO convert(TechCapability techCapability) {
+        return TechCapabilityShortDTO.builder()
                 .id(techCapability.getId())
                 .code(techCapability.getCode())
                 .name(techCapability.getName())
@@ -46,8 +45,6 @@ public class TechCapabilityDTO {
                 .link(techCapability.getLink())
                 .createdDate(techCapability.getCreatedDate())
                 .lastModifiedDate(techCapability.getLastModifiedDate())
-                .owner(techCapability.getOwner())
-                .parents(BCParentDTO.convert(techCapability.getParents()))
                 .build();
     }
 }

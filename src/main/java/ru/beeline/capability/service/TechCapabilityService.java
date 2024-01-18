@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.beeline.capability.domain.TechCapability;
+import ru.beeline.capability.dto.CapabilityDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
@@ -28,5 +29,10 @@ public class TechCapabilityService {
         Pageable pageable = new OffsetBasedPageRequest(offset, limit == null || limit == 0 ? Integer.MAX_VALUE : limit, Sort.by(Sort.Direction.ASC, "name"));
         Page<TechCapability> techCapabilities = techCapabilityRepository.findCapabilities(pageable);
         return TechCapabilityDTO.convert(techCapabilities.toList());
+    }
+    public CapabilityDTO getCapabilityById(Long id) {
+        TechCapability techCapability = techCapabilityRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tech Capability не найдено"));
+        return CapabilityDTO.convert(techCapability);
     }
 }

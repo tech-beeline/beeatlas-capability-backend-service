@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tech_capability", schema = "capability")
+@Table(name = "tech_capability")
 public class TechCapability {
 
     @Id
@@ -42,5 +42,4 @@ public class TechCapability {
     @OneToMany
     @JoinColumn(name = "id_child")
     private List<TechCapabilityRelations> parents;
-
 }
