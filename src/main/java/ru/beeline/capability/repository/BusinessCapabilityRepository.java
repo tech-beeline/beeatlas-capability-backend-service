@@ -10,4 +10,7 @@ import java.util.List;
 public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapability, Long> {
 
     List<BusinessCapability> findAllByParentIdAndDeletedDateIsNull(Long parentId);
+
+    Boolean existsByParentId(Long parentId);
+
 }

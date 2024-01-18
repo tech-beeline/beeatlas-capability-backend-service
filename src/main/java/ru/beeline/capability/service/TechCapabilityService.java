@@ -6,10 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.beeline.capability.domain.TechCapability;
-import ru.beeline.capability.dto.CapabilityDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
-import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.TechCapabilityRepository;
 
 import java.util.List;
@@ -22,8 +20,6 @@ public class TechCapabilityService {
     @Autowired
     private TechCapabilityRepository techCapabilityRepository;
 
-    @Autowired
-    private BusinessCapabilityRepository businessCapabilityRepository;
 
     public List<TechCapabilityDTO> getCapabilities(Integer limit, Integer offset) {
         if (offset == null) {
@@ -34,12 +30,12 @@ public class TechCapabilityService {
         return TechCapabilityDTO.convert(techCapabilities.toList());
     }
 
-    public CapabilityDTO getCapabilityById(Long id) {
+    public TechCapabilityDTO getCapabilityById(Long id) {
         TechCapability techCapability = techCapabilityRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tech Capability не найдено"));
         techCapability.setParents(techCapability.getParents().stream()
                 .filter(businessCapability -> Objects.isNull(businessCapability.getTechCapability().getDeletedDate()))
                 .collect(Collectors.toList()));
-        return CapabilityDTO.convert(techCapability);
+        return TechCapabilityDTO.convert(techCapability);
     }
 }

@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.dto.BusinessCapabilityChildrenDTO;
+import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.capability.service.BusinessCapabilityService;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -15,7 +16,13 @@ public class BusinessCapabilityController {
 
     @GetMapping("/{id}/children")
     @ApiOperation(value = "Получение всех дочерних бизнес возможностей", response = BusinessCapabilityChildrenDTO.class)
-    public BusinessCapabilityChildrenDTO getAllTech(@PathVariable Long id) {
+    public BusinessCapabilityChildrenDTO getKidsById(@PathVariable Long id) {
         return businessCapabilityService.getChildren(id);
+    }
+
+    @GetMapping("/{id}")
+    @ApiOperation(value = "Получение бизнес возможности по идентификатору", response = BusinessCapabilityShortDTO.class)
+    public BusinessCapabilityShortDTO getById(@PathVariable Long id) {
+        return businessCapabilityService.getById(id);
     }
 }

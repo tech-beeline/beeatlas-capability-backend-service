@@ -7,5 +7,5 @@ import ru.beeline.capability.domain.TechCapabilityRelations;
 
 @Repository
 public interface TechCapabilityRelationsRepository extends JpaRepository<TechCapabilityRelations, String> {
-
+    Boolean existsByBusinessCapability(Long businessCapabilityId);
 }

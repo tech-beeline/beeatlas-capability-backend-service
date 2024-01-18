@@ -3,7 +3,6 @@ package ru.beeline.capability.controller;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.beeline.capability.dto.CapabilityDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.service.TechCapabilityService;
 
@@ -24,10 +23,9 @@ public class TechCapabilityController {
         return techCapabilityService.getCapabilities(limit, offset);
     }
 
-    @
-            GetMapping("/tech-capabilities/{id}")
-    @ApiOperation(value = "получение технической возможности", response = CapabilityDTO.class)
-    public CapabilityDTO getAllTech(@PathVariable Long id) {
+    @GetMapping("/tech-capabilities/{id}")
+    @ApiOperation(value = "получение технической возможности", response = TechCapabilityDTO.class)
+    public TechCapabilityDTO getAllTech(@PathVariable Long id) {
         return techCapabilityService.getCapabilityById(id);
     }
 }
