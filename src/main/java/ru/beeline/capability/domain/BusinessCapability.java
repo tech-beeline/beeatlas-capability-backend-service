@@ -1,9 +1,9 @@
 package ru.beeline.capability.domain;
 
 import lombok.*;
-
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Builder
 @Getter
@@ -35,4 +35,8 @@ public class BusinessCapability {
     private String link;
     @Column(name = "is_domain")
     private boolean isDomain;
+
+    @OneToMany
+    @JoinColumn(name = "id_parent")
+    private List<TechCapabilityRelations> children;
 }

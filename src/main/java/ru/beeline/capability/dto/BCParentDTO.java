@@ -2,11 +2,10 @@ package ru.beeline.capability.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-import ru.beeline.capability.domain.BusinessCapability;
+import ru.beeline.capability.domain.TechCapabilityRelations;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Setter
 @Getter
@@ -27,24 +26,26 @@ public class BCParentDTO {
     private boolean isDomain;
     private boolean hasChildren;
 
-    public static List<BCParentDTO> convert(List<BusinessCapability> businessCapabilities) {
+    public static List<BCParentDTO> convert(List<TechCapabilityRelations> relations) {
         List<BCParentDTO> parents = new ArrayList<>();
-        for (BusinessCapability businessCapability : businessCapabilities) {
+        for (TechCapabilityRelations relation : relations) {
             BCParentDTO bcParentDTO = BCParentDTO.builder()
-                    .id(businessCapability.getId())
-                    .code(businessCapability.getCode())
-                    .name(businessCapability.getName())
-                    .description(businessCapability.getDescription())
-                    .author(businessCapability.getAuthor())
-                    .status(businessCapability.getStatus())
-                    .link(businessCapability.getLink())
-                    .createdDate(businessCapability.getCreatedDate())
-                    .lastModifiedDate(businessCapability.getLastModifiedDate())
-                    .isDomain(businessCapability.isDomain())
+                    .id(relation.getBusinessCapability().getId())
+                    .code(relation.getBusinessCapability().getCode())
+                    .name(relation.getBusinessCapability().getName())
+                    .description(relation.getBusinessCapability().getDescription())
+                    .author(relation.getBusinessCapability().getAuthor())
+                    .status(relation.getBusinessCapability().getStatus())
+                    .link(relation.getBusinessCapability().getLink())
+                    .createdDate(relation.getBusinessCapability().getCreatedDate())
+                    .lastModifiedDate(relation.getBusinessCapability().getLastModifiedDate())
+                    .isDomain(relation.getBusinessCapability().isDomain())
                     .hasChildren(true)
                     .build();
             parents.add(bcParentDTO);
         }
-        return parents;
+        return parents.stream()
+                .sorted(Comparator.comparing(BCParentDTO::getName))
+                .collect(Collectors.toList());
     }
 }
