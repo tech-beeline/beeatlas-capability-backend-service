@@ -9,9 +9,9 @@ import java.util.List;
 
 @Repository
 public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapability, String> {
-    @Query(value = "SELECT b FROM capability.business_capability b INNER JOIN capability.tech_capability_relations r " +
-            "ON b.id = r.id_parent " +
-            "WHERE r.id_child=?1 AND " +
-            "b.deleted_date is NULL ORDER BY b.id", nativeQuery = true)
-    List<BusinessCapability> findParents(Long childId);
+    @Query(value = "SELECT b FROM BusinessCapability b INNER JOIN TechCapabilityRelations r " +
+            "ON b.id = r.idParent " +
+            "WHERE r.idChild=?1 AND " +
+            "b.deletedDate is NULL ORDER BY b.id")
+    List<BusinessCapability> findParents(Long id);
 }
