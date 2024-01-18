@@ -31,7 +31,7 @@ CREATE TABLE capability.business_capability
     parent_id integer NULL,
     author varchar(255) NOT NULL,
     link varchar(255) NULL,
-    "isDomain" boolean NOT NULL
+    is_domain boolean NOT NULL
 )
 ;
 
@@ -46,8 +46,8 @@ CREATE TABLE capability.find_name_sort_table
 (
     id INTEGER PRIMARY KEY,
     name varchar(255) NOT NULL,
-    "typeId" integer NOT NULL,
-    "idRef" integer NOT NULL
+    type_id integer NOT NULL,
+    id_ref integer NOT NULL
 )
 ;
 
@@ -69,9 +69,9 @@ CREATE TABLE capability.tech_capability
 
 CREATE TABLE capability.tech_capability_relations
 (
-    "idRel" INTEGER PRIMARY KEY,
-    "idParent" integer NOT NULL,
-    "idChild" integer NOT NULL
+    id_rel INTEGER PRIMARY KEY,
+    id_parent integer NOT NULL,
+    id_child integer NOT NULL
 )
 ;
 
@@ -80,10 +80,10 @@ CREATE TABLE capability.tech_capability_relations
 CREATE INDEX "IXFK_Capability_UserProfile" ON capability.business_capability(owner ASC)
 ;
 
-CREATE INDEX "IXFK_findNameSortTable_Domain" ON capability.find_name_sort_table ("idRef" ASC)
+CREATE INDEX "IXFK_findNameSortTable_Domain" ON capability.find_name_sort_table (id_ref ASC)
 ;
 
-CREATE INDEX "IXFK_findNameSortTable_entityType" ON capability.find_name_sort_table ("typeId" ASC)
+CREATE INDEX "IXFK_findNameSortTable_entityType" ON capability.find_name_sort_table (type_id ASC)
 ;
 
 CREATE INDEX "nameIndex" ON capability.find_name_sort_table (name ASC)
@@ -93,31 +93,31 @@ CREATE INDEX "nameIndex" ON capability.find_name_sort_table (name ASC)
 CREATE INDEX "IXFK_TechCapability_UserProfile" ON capability.tech_capability (owner ASC)
 ;
 
-CREATE INDEX "IXFK_TechCapabilityRelations_BusinesCapability" ON capability.tech_capability_relations ("idParent" ASC)
+CREATE INDEX "IXFK_TechCapabilityRelations_BusinesCapability" ON capability.tech_capability_relations (id_parent ASC)
 ;
 
-CREATE INDEX "IXFK_TechCapabilityRelations_TechCapability" ON capability.tech_capability_relations ("idChild" ASC)
+CREATE INDEX "IXFK_TechCapabilityRelations_TechCapability" ON capability.tech_capability_relations (id_child ASC)
 ;
 
 /* Create Foreign Key Constraints */
 
 ALTER TABLE capability.find_name_sort_table ADD CONSTRAINT "FK_findNameSortTable_BusinesCapability"
-    FOREIGN KEY ("idRef") REFERENCES capability.business_capability (id) ON DELETE Cascade ON UPDATE No Action
+    FOREIGN KEY (id_ref) REFERENCES capability.business_capability (id) ON DELETE Cascade ON UPDATE No Action
 ;
 
 ALTER TABLE capability.find_name_sort_table ADD CONSTRAINT "FK_findNameSortTable_entityType"
-    FOREIGN KEY ("typeId") REFERENCES entity_type (id) ON DELETE No Action ON UPDATE No Action
+    FOREIGN KEY (type_id) REFERENCES entity_type (id) ON DELETE No Action ON UPDATE No Action
 ;
 
 ALTER TABLE capability.find_name_sort_table ADD CONSTRAINT "FK_findNameSortTable_TechCapability"
-    FOREIGN KEY ("idRef") REFERENCES capability.tech_capability (id) ON DELETE Cascade ON UPDATE No Action
+    FOREIGN KEY (id_ref) REFERENCES capability.tech_capability (id) ON DELETE Cascade ON UPDATE No Action
 ;
 
 
 ALTER TABLE capability.tech_capability_relations ADD CONSTRAINT "FK_TechCapabilityRelations_BusinesCapability"
-    FOREIGN KEY ("idParent") REFERENCES capability.business_capability (id) ON DELETE No Action ON UPDATE No Action
+    FOREIGN KEY (id_parent) REFERENCES capability.business_capability (id) ON DELETE No Action ON UPDATE No Action
 ;
 
 ALTER TABLE capability.tech_capability_relations ADD CONSTRAINT "FK_TechCapabilityRelations_TechCapability"
-    FOREIGN KEY ("idChild") REFERENCES capability.tech_capability (id) ON DELETE No Action ON UPDATE No Action
+    FOREIGN KEY (id_child) REFERENCES capability.tech_capability (id) ON DELETE No Action ON UPDATE No Action
 ;
