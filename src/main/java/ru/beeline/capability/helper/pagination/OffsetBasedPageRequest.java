@@ -29,7 +29,7 @@ public class OffsetBasedPageRequest  implements Pageable, Serializable {
             throw new IllegalArgumentException("Offset index must not be less than zero!");
         }
 
-        if (limit < 1) {
+        if (limit < 0) {
             throw new IllegalArgumentException("Limit must not be less than one!");
         }
         this.limit = limit;

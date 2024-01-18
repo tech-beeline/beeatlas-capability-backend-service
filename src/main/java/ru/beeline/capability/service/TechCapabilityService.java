@@ -27,7 +27,7 @@ public class TechCapabilityService {
         if(offset == null) {
             offset = 0;
         }
-        Pageable pageable = new OffsetBasedPageRequest(offset, limit == null ? Integer.MAX_VALUE : limit);
+        Pageable pageable = new OffsetBasedPageRequest(offset, limit == null || limit == 0 ? Integer.MAX_VALUE : limit);
         Page<TechCapability> techCapabilities = techCapabilityRepository.findCapabilities(pageable);
         Map<TechCapability, List<BusinessCapability>> techCapabilitiesWithParentsMap = new HashMap<>();
         for(TechCapability techCapability : techCapabilities.toList()) {
