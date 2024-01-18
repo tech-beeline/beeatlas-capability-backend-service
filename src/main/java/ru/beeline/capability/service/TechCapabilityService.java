@@ -2,6 +2,7 @@ package ru.beeline.capability.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.TechCapability;
@@ -27,14 +28,13 @@ public class TechCapabilityService {
         if(offset == null) {
             offset = 0;
         }
-        Pageable pageable = new OffsetBasedPageRequest(offset, limit == null || limit == 0 ? Integer.MAX_VALUE : limit);
+        Pageable pageable = new OffsetBasedPageRequest(offset, limit == null || limit == 0 ? Integer.MAX_VALUE : limit, Sort.by(Sort.Direction.ASC, "name"));
         Page<TechCapability> techCapabilities = techCapabilityRepository.findCapabilities(pageable);
         Map<TechCapability, List<BusinessCapability>> techCapabilitiesWithParentsMap = new HashMap<>();
-        for(TechCapability techCapability : techCapabilities.toList()) {
-            List<BusinessCapability> parents = businessCapabilityRepository.findParents(techCapability.getId());
-            techCapabilitiesWithParentsMap.put(techCapability, parents);
-        }
-
-        return TechCapabilityDTO.convert(techCapabilitiesWithParentsMap);
+        techCapabilities.getContent().forEach(tc-> {
+            List<BusinessCapability> parents = businessCapabilityRepository.findParents(tc.getId(), Sort.by(Sort.Direction.ASC, "name"));
+            techCapabilitiesWithParentsMap.put(tc, parents);
+        });
+        return TechCapabilityDTO.convert(techCapabilities.toList(), techCapabilitiesWithParentsMap);
     }
 }

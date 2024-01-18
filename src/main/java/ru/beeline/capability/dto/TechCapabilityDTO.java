@@ -28,9 +28,9 @@ public class TechCapabilityDTO {
     private Long owner;
     private List<BCParentDTO> parents;
 
-    public static List<TechCapabilityDTO> convert(Map<TechCapability, List<BusinessCapability>> techCapabilitiesWithParentsMap) {
+    public static List<TechCapabilityDTO> convert(List<TechCapability> techCapabilities, Map<TechCapability, List<BusinessCapability>> techCapabilitiesWithParentsMap) {
         List<TechCapabilityDTO> techCapabilityDTOS = new ArrayList<>();
-        for(TechCapability techCapability : techCapabilitiesWithParentsMap.keySet()) {
+        for(TechCapability techCapability : techCapabilities) {
             TechCapabilityDTO techCapabilityDTO = TechCapabilityDTO.builder()
                     .id(techCapability.getId())
                     .code(techCapability.getCode())

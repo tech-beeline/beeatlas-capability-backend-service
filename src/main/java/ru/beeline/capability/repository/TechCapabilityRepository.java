@@ -12,6 +12,6 @@ import java.util.List;
 @Repository
 public interface TechCapabilityRepository extends JpaRepository<TechCapability, String> {
 
-    @Query("SELECT c FROM TechCapability c WHERE c.deletedDate is NULL ORDER BY c.id")
+    @Query("SELECT c FROM TechCapability c WHERE c.deletedDate is NULL ORDER BY c.name")
     Page<TechCapability> findCapabilities(Pageable pageable);
 }
