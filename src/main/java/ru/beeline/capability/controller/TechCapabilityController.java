@@ -23,7 +23,7 @@ public class TechCapabilityController {
         return techCapabilityService.getCapabilities(limit, offset);
     }
 
-    @GetMapping("/tech-capabilities/{id}")
+    @GetMapping("/{id}")
     @ApiOperation(value = "получение технической возможности", response = TechCapabilityDTO.class)
     public TechCapabilityDTO getAllTech(@PathVariable Long id) {
         return techCapabilityService.getCapabilityById(id);

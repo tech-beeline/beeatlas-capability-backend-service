@@ -7,10 +7,13 @@ import ru.beeline.capability.dto.BusinessCapabilityChildrenDTO;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.capability.service.BusinessCapabilityService;
 
+import java.util.List;
+
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/v1/business-capability")
 public class BusinessCapabilityController {
+
     @Autowired
     private BusinessCapabilityService businessCapabilityService;
 
@@ -25,4 +28,14 @@ public class BusinessCapabilityController {
     public BusinessCapabilityShortDTO getById(@PathVariable Long id) {
         return businessCapabilityService.getById(id);
     }
+
+    @GetMapping
+    @ApiOperation(value = "Получение бизнес возможностей")
+    public List<BusinessCapabilityShortDTO> getBusinessCapabilities(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "findBy", required = false) String findBy,
+            @RequestParam(value = "offset", required = false) Integer offset) {
+        return businessCapabilityService.getCapabilities(limit, offset, findBy);
+    }
+
 }

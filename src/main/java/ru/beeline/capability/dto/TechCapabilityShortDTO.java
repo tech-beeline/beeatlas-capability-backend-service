@@ -5,6 +5,7 @@ import lombok.*;
 import ru.beeline.capability.domain.TechCapability;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -32,6 +33,7 @@ public class TechCapabilityShortDTO {
             TechCapabilityShortDTO techCapabilityDTO = convert(techCapability);
             techCapabilityDTOS.add(techCapabilityDTO);
         }
+        techCapabilityDTOS.sort(Comparator.comparing(TechCapabilityShortDTO::getName));
         return techCapabilityDTOS;
     }
 

@@ -32,6 +32,11 @@ public class BusinessCapability {
     private String author;
     @Column(name = "parent_id")
     private Long parentId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id", insertable = false, updatable = false)
+    private BusinessCapability parentEntity;
+
     private String link;
     @Column(name = "is_domain")
     private boolean isDomain;

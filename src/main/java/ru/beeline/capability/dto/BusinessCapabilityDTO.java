@@ -5,6 +5,7 @@ import lombok.*;
 import ru.beeline.capability.domain.BusinessCapability;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -34,6 +35,7 @@ public class BusinessCapabilityDTO {
             BusinessCapabilityDTO businessCapabilityDTO = convert(businessCapability);
             businessCapabilityDTOS.add(businessCapabilityDTO);
         }
+        businessCapabilityDTOS.sort(Comparator.comparing(BusinessCapabilityDTO::getName));
         return businessCapabilityDTOS;
     }
 
@@ -46,6 +48,7 @@ public class BusinessCapabilityDTO {
                 .author(techCapability.getAuthor())
                 .link(techCapability.getLink())
                 .createdDate(techCapability.getCreatedDate())
+                .hasChildren(!techCapability.getChildren().isEmpty())
                 .build();
     }
 }

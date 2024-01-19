@@ -3,6 +3,7 @@ package ru.beeline.capability.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import ru.beeline.capability.domain.BusinessCapability;
+import ru.beeline.capability.domain.TechCapability;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,8 +28,17 @@ public class BusinessCapabilityShortDTO {
     private Long owner;
     private boolean isDomain;
     private boolean hasChildren;
+
     private BCParentDTO parent;
 
+    public static List<BusinessCapabilityShortDTO> convert(List<BusinessCapability> businessCapabilities) {
+        List<BusinessCapabilityShortDTO> techCapabilityDTOS = new ArrayList<>();
+        for (BusinessCapability businessCapability : businessCapabilities) {
+            BusinessCapabilityShortDTO techCapabilityDTO = convert(businessCapability,businessCapability.getParentEntity(), true);
+            techCapabilityDTOS.add(techCapabilityDTO);
+        }
+        return techCapabilityDTOS;
+    }
     public static BusinessCapabilityShortDTO convert(BusinessCapability businessCapability, BusinessCapability parent, boolean hasCKids) {
         return BusinessCapabilityShortDTO.builder()
                 .id(businessCapability.getId())
