@@ -33,7 +33,7 @@ public class BusinessCapabilityController {
     @ApiOperation(value = "Получение бизнес возможностей")
     public List<BusinessCapabilityShortDTO> getBusinessCapabilities(
             @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "findBy", required = false) String findBy,
+            @RequestParam(value = "findBy", required = false, defaultValue = "ALL") String findBy,
             @RequestParam(value = "offset", required = false) Integer offset) {
         return businessCapabilityService.getCapabilities(limit, offset, findBy);
     }

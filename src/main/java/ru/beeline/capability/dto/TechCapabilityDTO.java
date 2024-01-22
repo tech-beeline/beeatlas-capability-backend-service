@@ -7,6 +7,7 @@ import ru.beeline.capability.domain.TechCapability;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Setter
 @Getter
@@ -24,6 +25,7 @@ public class TechCapabilityDTO {
     private Date createdDate;
     @JsonProperty("updatedDate")
     private Date lastModifiedDate;
+    private Date deletedDate;
     private Long owner;
     private List<BCParentDTO> parents;
 
@@ -37,6 +39,9 @@ public class TechCapabilityDTO {
     }
 
     public static TechCapabilityDTO convert(TechCapability techCapability) {
+        if(Objects.isNull(techCapability)){
+            return null;
+        }
         return TechCapabilityDTO.builder()
                 .id(techCapability.getId())
                 .code(techCapability.getCode())
@@ -46,6 +51,7 @@ public class TechCapabilityDTO {
                 .link(techCapability.getLink())
                 .createdDate(techCapability.getCreatedDate())
                 .lastModifiedDate(techCapability.getLastModifiedDate())
+                .deletedDate(techCapability.getDeletedDate())
                 .owner(techCapability.getOwner())
                 .parents(BCParentDTO.convert(techCapability.getParents()))
                 .build();

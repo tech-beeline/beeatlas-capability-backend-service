@@ -34,7 +34,7 @@ public class TechCapabilityService {
         TechCapability techCapability = techCapabilityRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tech Capability не найдено"));
         techCapability.setParents(techCapability.getParents().stream()
-                .filter(businessCapability -> Objects.isNull(businessCapability.getTechCapability().getDeletedDate()))
+                .filter(businessCapability -> Objects.isNull(businessCapability.getBusinessCapability().getDeletedDate()))
                 .collect(Collectors.toList()));
         return TechCapabilityDTO.convert(techCapability);
     }

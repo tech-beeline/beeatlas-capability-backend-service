@@ -1,6 +1,7 @@
 package ru.beeline.capability.domain;
 
 import lombok.*;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
@@ -33,7 +34,7 @@ public class BusinessCapability {
     @Column(name = "parent_id")
     private Long parentId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "parent_id", insertable = false, updatable = false)
     private BusinessCapability parentEntity;
 

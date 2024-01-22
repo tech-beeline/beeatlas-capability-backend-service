@@ -20,6 +20,6 @@ public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapa
     @Query("SELECT c FROM BusinessCapability c WHERE c.deletedDate is NULL ORDER BY c.name")
     Page<BusinessCapability> findCapabilities(Pageable pageable);
 
-    @Query("SELECT c FROM BusinessCapability c WHERE c.deletedDate is NULL and c.parentId is null ORDER BY c.name")
+    @Query("SELECT c FROM BusinessCapability c WHERE c.deletedDate is NULL and c.parentId is null and c.isDomain is true ORDER BY c.name")
     Page<BusinessCapability> findCapabilitiesWithoutParent(Pageable pageable);
 }

@@ -10,7 +10,6 @@ import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.BusinessCapabilityChildrenDTO;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
-import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
@@ -42,12 +41,15 @@ public class BusinessCapabilityService {
     public BusinessCapabilityShortDTO getById(Long id) {
         BusinessCapability businessCapability = businessCapabilityRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Business Capability не найдено"));
-        BusinessCapability parent = businessCapabilityRepository.findById(businessCapability.getParentId()).orElseGet(null);
-        return BusinessCapabilityShortDTO.convert(businessCapability, parent, checkHasKids(id));
+
+        if (businessCapability.getParentEntity() != null && businessCapability.getParentEntity().getDeletedDate() != null)
+            businessCapability.setParentEntity(null);
+
+        return BusinessCapabilityShortDTO.convert(businessCapability, checkHasKids(businessCapability));
     }
 
-    private boolean checkHasKids(Long id) {
-        return techCapabilityRelationsRepository.existsByBusinessCapability(id) || businessCapabilityRepository.existsByParentId(id);
+    private boolean checkHasKids(BusinessCapability businessCapability) {
+        return techCapabilityRelationsRepository.existsByBusinessCapability(businessCapability) || businessCapabilityRepository.existsByParentId(businessCapability.getId());
     }
 
     public List<BusinessCapabilityShortDTO> getCapabilities(Integer limit, Integer offset, String findBy) {
@@ -59,6 +61,9 @@ public class BusinessCapabilityService {
         switch (FindBy.valueOf(findBy)) {
             case ALL:
                 businessCapabilities = businessCapabilityRepository.findCapabilities(pageable);
+                businessCapabilities.stream()
+                        .filter(сapability -> Objects.nonNull(сapability.getParentEntity()) && Objects.nonNull(сapability.getParentEntity().getDeletedDate()))
+                        .forEach(сapability -> сapability.setParentEntity(null));
                 break;
             case CORE:
                 businessCapabilities = businessCapabilityRepository.findCapabilitiesWithoutParent(pageable);
@@ -69,6 +74,7 @@ public class BusinessCapabilityService {
 
         return BusinessCapabilityShortDTO.convert(businessCapabilities.toList());
     }
+
     enum FindBy {
         ALL,
         CORE
