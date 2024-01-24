@@ -5,44 +5,40 @@ import lombok.*;
 import ru.beeline.capability.domain.TechCapability;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TechCapabilityDTO {
+public class TechCapabilityShortDTO {
 
     private Long id;
     private String code;
     private String name;
     private String description;
+    private String type;
     private String author;
     private String link;
     private Date createdDate;
     @JsonProperty("updatedDate")
     private Date lastModifiedDate;
-    private Date deletedDate;
-    private Long owner;
-    private List<BCParentDTO> parents;
 
-    public static List<TechCapabilityDTO> convert(List<TechCapability> techCapabilities) {
-        List<TechCapabilityDTO> techCapabilityDTOS = new ArrayList<>();
+    public static List<TechCapabilityShortDTO> convert(List<TechCapability> techCapabilities) {
+        List<TechCapabilityShortDTO> techCapabilityDTOS = new ArrayList<>();
         for (TechCapability techCapability : techCapabilities) {
-            TechCapabilityDTO techCapabilityDTO = convert(techCapability);
+            TechCapabilityShortDTO techCapabilityDTO = convert(techCapability);
             techCapabilityDTOS.add(techCapabilityDTO);
         }
+        techCapabilityDTOS.sort(Comparator.comparing(TechCapabilityShortDTO::getName));
         return techCapabilityDTOS;
     }
 
-    public static TechCapabilityDTO convert(TechCapability techCapability) {
-        if(Objects.isNull(techCapability)){
-            return null;
-        }
-        return TechCapabilityDTO.builder()
+    public static TechCapabilityShortDTO convert(TechCapability techCapability) {
+        return TechCapabilityShortDTO.builder()
                 .id(techCapability.getId())
                 .code(techCapability.getCode())
                 .name(techCapability.getName())
@@ -51,9 +47,6 @@ public class TechCapabilityDTO {
                 .link(techCapability.getLink())
                 .createdDate(techCapability.getCreatedDate())
                 .lastModifiedDate(techCapability.getLastModifiedDate())
-                .deletedDate(techCapability.getDeletedDate())
-                .owner(techCapability.getOwner())
-                .parents(BCParentDTO.convert(techCapability.getParents()))
                 .build();
     }
 }

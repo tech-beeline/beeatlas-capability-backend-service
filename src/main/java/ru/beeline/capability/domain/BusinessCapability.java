@@ -1,6 +1,7 @@
 package ru.beeline.capability.domain;
 
 import lombok.*;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "business_capability", schema = "capability")
+@Table(name = "business_capability")
 public class BusinessCapability {
 
     @Id
@@ -32,6 +33,11 @@ public class BusinessCapability {
     private String author;
     @Column(name = "parent_id")
     private Long parentId;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_id", insertable = false, updatable = false)
+    private BusinessCapability parentEntity;
+
     private String link;
     @Column(name = "is_domain")
     private boolean isDomain;
