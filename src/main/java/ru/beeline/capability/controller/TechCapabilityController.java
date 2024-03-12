@@ -2,6 +2,8 @@ package ru.beeline.capability.controller;
 
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.service.TechCapabilityService;
@@ -21,6 +23,12 @@ public class TechCapabilityController {
     public List<TechCapabilityDTO> getTechCapabilities(@RequestParam(value = "limit", required = false) Integer limit,
                                                        @RequestParam(value = "offset", required = false) Integer offset) {
         return techCapabilityService.getCapabilities(limit, offset);
+    }
+
+    @PutMapping
+    @ApiOperation(value = "Изменение технической возможности")
+    public ResponseEntity getTechCapabilities(@RequestBody TechCapabilityDTO capability) {
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
