@@ -2,9 +2,13 @@ package ru.beeline.capability.controller;
 
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.dto.BusinessCapabilityChildrenDTO;
+import ru.beeline.capability.dto.BusinessCapabilityDTOTemp;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
+import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.service.BusinessCapabilityService;
 
 import java.util.List;
@@ -38,4 +42,9 @@ public class BusinessCapabilityController {
         return businessCapabilityService.getCapabilities(limit, offset, findBy);
     }
 
+    @PutMapping
+    @ApiOperation(value = "Изменение бизнес возможности")
+    public ResponseEntity getBusinessCapabilities(@RequestBody BusinessCapabilityDTOTemp capability) {
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }
