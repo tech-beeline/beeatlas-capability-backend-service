@@ -16,7 +16,7 @@ public class BusinessCapabilityDTOTemp {
     private String status;
     private String author;
     private String link;
-    private Long owner;
+    private String owner;
     private String parents;
     private Boolean isDomain;
 }
