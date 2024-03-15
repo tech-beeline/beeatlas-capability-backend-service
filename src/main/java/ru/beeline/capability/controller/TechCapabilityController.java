@@ -27,7 +27,7 @@ public class TechCapabilityController {
 
     @PutMapping
     @ApiOperation(value = "Изменение технической возможности")
-    public ResponseEntity getTechCapabilities(@RequestBody TechCapabilityDTO capability) {
+    public ResponseEntity getTechCapabilities(@RequestBody String capability) {
         return new ResponseEntity(HttpStatus.OK);
     }
 
