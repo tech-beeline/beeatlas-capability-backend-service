@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
+import ru.beeline.capability.repository.TechCapabilityFunctionRepository;
 import ru.beeline.capability.repository.TechCapabilityRepository;
 
 import java.util.List;
@@ -19,7 +20,6 @@ public class TechCapabilityService {
 
     @Autowired
     private TechCapabilityRepository techCapabilityRepository;
-
 
     public List<TechCapabilityDTO> getCapabilities(Integer limit, Integer offset) {
         if (offset == null) {

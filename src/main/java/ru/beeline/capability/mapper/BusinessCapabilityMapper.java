@@ -1,34 +1,13 @@
-package ru.beeline.capability.dto;
+package ru.beeline.capability.mapper;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.*;
 import ru.beeline.capability.domain.BusinessCapability;
+import ru.beeline.fdmlib.dto.capability.BusinessCapabilityDTO;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
-@Setter
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class BusinessCapabilityDTO {
-    private Long id;
-    private String code;
-    private String name;
-    private String description;
-    private String author;
-    private String status;
-    private String link;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-    private Date createdDate;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-    private Date updatedDate;
-    private boolean isDomain;
-    private boolean hasChildren;
-
+public class BusinessCapabilityMapper {
     public static List<BusinessCapabilityDTO> convert(List<BusinessCapability> businessCapabilities) {
         List<BusinessCapabilityDTO> businessCapabilityDTOS = new ArrayList<>();
         for (BusinessCapability businessCapability : businessCapabilities) {
