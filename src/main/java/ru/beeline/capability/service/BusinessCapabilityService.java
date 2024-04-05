@@ -9,11 +9,14 @@ import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.BusinessCapabilityChildrenDTO;
+import ru.beeline.capability.dto.BusinessCapabilityParentDTO;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
+import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -29,7 +32,7 @@ public class BusinessCapabilityService {
 
     public BusinessCapabilityChildrenDTO getChildren(Long id) {
         List<TechCapability> techCapabilities = businessCapabilityRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Business Capability не найдено"))
+                .orElseThrow(() -> new NotFoundException("Business Capability не найдено"))
                 .getChildren().stream()
                 .map(TechCapabilityRelations::getTechCapability)
                 .filter(techCapability -> Objects.isNull(techCapability.getDeletedDate()))
@@ -38,9 +41,24 @@ public class BusinessCapabilityService {
         return BusinessCapabilityChildrenDTO.convert(techCapabilities, businessCapabilitiesKids);
     }
 
+    public BusinessCapabilityParentDTO getParents(Long id) {
+        ArrayList<Long> result = new ArrayList<>();
+        while (true) {
+            id = businessCapabilityRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Business Capability не найдено"))
+                    .getParentId();
+
+            if (Objects.isNull(id)) {
+                return new BusinessCapabilityParentDTO(result);
+            } else {
+                result.add(id);
+            }
+        }
+    }
+
     public BusinessCapabilityShortDTO getById(Long id) {
         BusinessCapability businessCapability = businessCapabilityRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Business Capability не найдено"));
+                .orElseThrow(() -> new NotFoundException("Business Capability не найдено"));
 
         if (businessCapability.getParentEntity() != null && businessCapability.getParentEntity().getDeletedDate() != null)
             businessCapability.setParentEntity(null);

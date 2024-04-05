@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.dto.BusinessCapabilityChildrenDTO;
+import ru.beeline.capability.dto.BusinessCapabilityParentDTO;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.capability.service.BusinessCapabilityService;
 
@@ -23,6 +24,12 @@ public class BusinessCapabilityController {
     @ApiOperation(value = "Получение всех дочерних бизнес возможностей", response = BusinessCapabilityChildrenDTO.class)
     public BusinessCapabilityChildrenDTO getKidsById(@PathVariable Long id) {
         return businessCapabilityService.getChildren(id);
+    }
+
+    @GetMapping("/{id}/parents")
+    @ApiOperation(value = "Получение всех родительских бизнес возможностей", response = BusinessCapabilityParentDTO.class)
+    public BusinessCapabilityParentDTO getParentsById(@PathVariable Long id) {
+        return businessCapabilityService.getParents(id);
     }
 
     @GetMapping("/{id}")

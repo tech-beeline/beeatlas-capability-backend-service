@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.dto.TechCapabilityDTO;
+import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
 import ru.beeline.capability.repository.TechCapabilityRepository;
 
@@ -31,7 +32,7 @@ public class TechCapabilityService {
 
     public TechCapabilityDTO getCapabilityById(Long id) {
         TechCapability techCapability = techCapabilityRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tech Capability не найдено"));
+                .orElseThrow(() -> new NotFoundException("Tech Capability не найдено"));
         techCapability.setParents(techCapability.getParents().stream()
                 .filter(businessCapability -> Objects.isNull(businessCapability.getBusinessCapability().getDeletedDate()))
                 .collect(Collectors.toList()));
