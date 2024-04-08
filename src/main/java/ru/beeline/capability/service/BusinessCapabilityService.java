@@ -9,7 +9,7 @@ import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.BusinessCapabilityChildrenDTO;
-import ru.beeline.capability.dto.BusinessCapabilityParentDTO;
+import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
@@ -41,7 +41,7 @@ public class BusinessCapabilityService {
         return BusinessCapabilityChildrenDTO.convert(techCapabilities, businessCapabilitiesKids);
     }
 
-    public BusinessCapabilityParentDTO getParents(Long id) {
+    public CapabilityParentDTO getParents(Long id) {
         ArrayList<Long> result = new ArrayList<>();
         while (true) {
             id = businessCapabilityRepository.findById(id)
@@ -49,7 +49,7 @@ public class BusinessCapabilityService {
                     .getParentId();
 
             if (Objects.isNull(id)) {
-                return new BusinessCapabilityParentDTO(result);
+                return new CapabilityParentDTO(result);
             } else {
                 result.add(id);
             }

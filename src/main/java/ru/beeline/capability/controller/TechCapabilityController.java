@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.service.TechCapabilityService;
 
@@ -36,4 +37,11 @@ public class TechCapabilityController {
     public TechCapabilityDTO getAllTech(@PathVariable Long id) {
         return techCapabilityService.getCapabilityById(id);
     }
+
+    @GetMapping("/{id}/parents")
+    @ApiOperation(value = "Получение всех родительских технических возможностей", response = CapabilityParentDTO.class)
+    public CapabilityParentDTO getParentsById(@PathVariable Long id) {
+        return techCapabilityService.getParents(id);
+    }
+
 }

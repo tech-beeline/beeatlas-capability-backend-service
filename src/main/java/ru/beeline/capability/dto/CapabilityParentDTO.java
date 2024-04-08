@@ -5,10 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.beeline.capability.domain.BusinessCapability;
-import ru.beeline.capability.domain.TechCapability;
-import ru.beeline.capability.mapper.BusinessCapabilityMapper;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityDTO;
 
 import java.util.List;
 
@@ -17,6 +13,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BusinessCapabilityParentDTO {
+public class CapabilityParentDTO {
     private List<Long> parents;
 }
