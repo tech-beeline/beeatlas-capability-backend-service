@@ -26,7 +26,7 @@ public class TechCapabilityDTO {
     @JsonProperty("updatedDate")
     private Date lastModifiedDate;
     private Date deletedDate;
-    private Long owner;
+    private String owner;
     private List<BCParentDTO> parents;
 
     public static List<TechCapabilityDTO> convert(List<TechCapability> techCapabilities) {

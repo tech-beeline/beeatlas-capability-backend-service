@@ -22,7 +22,7 @@ public class BusinessCapability {
     private String code;
     private String name;
     private String description;
-    private Long owner;
+    private String owner;
     @Column(name = "created_date")
     private Date createdDate;
     @Column(name = "last_modified_date")
