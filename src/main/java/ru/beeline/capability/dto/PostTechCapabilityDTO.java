@@ -15,6 +15,6 @@ public class PostTechCapabilityDTO {
     private String description;
     private String author;
     private String link;
-    private Long owner;
+    private String owner;
     private List<String> parents;
 }
