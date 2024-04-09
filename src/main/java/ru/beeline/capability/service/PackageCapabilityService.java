@@ -1,6 +1,7 @@
 package ru.beeline.capability.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -12,12 +13,17 @@ import ru.beeline.capability.dto.RegisteredCapabilityPackageDTO;
 import java.util.List;
 
 import static ru.beeline.capability.utils.Constants.UPDATE_TECH_CAPABILITIES_OPERATION;
-import static ru.beeline.capability.utils.Constants.PACK_LOADER_SERVICE_URL;
 import static ru.beeline.capability.utils.RestHelper.getRestTemplate;
 
 @Slf4j
 @Service
 public class PackageCapabilityService {
+
+    private final String packLoaderServerUrl;
+
+    public PackageCapabilityService(@Value("${integration.packloader-server-url}") String packLoaderServerUrl) {
+        this.packLoaderServerUrl = packLoaderServerUrl;
+    }
 
     public RegisteredCapabilityPackageDTO registerTechCapabilitiesPackage(List<PostTechCapabilityDTO> techCapabilities) {
         try {
@@ -32,7 +38,7 @@ public class PackageCapabilityService {
             HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(bodyParamMap, headers);
             final RestTemplate restTemplate = getRestTemplate();
 
-            return restTemplate.exchange(PACK_LOADER_SERVICE_URL + "/api/v1/package",
+            return restTemplate.exchange(packLoaderServerUrl + "/api/v1/package",
                     HttpMethod.POST, entity, RegisteredCapabilityPackageDTO.class).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());
