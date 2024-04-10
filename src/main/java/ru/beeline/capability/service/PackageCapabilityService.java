@@ -13,12 +13,14 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.capability.dto.PackageRegistrationRequestDTO;
+import ru.beeline.capability.dto.PostBusinessCapabilityDTO;
 import ru.beeline.capability.dto.PostTechCapabilityDTO;
 import ru.beeline.capability.dto.PackageRegistrationResponseDTO;
 import ru.beeline.capability.exception.PackageRegistrationException;
 
 import java.util.List;
 
+import static ru.beeline.capability.utils.Constants.UPDATE_BUSINESS_CAPABILITIES_OPERATION;
 import static ru.beeline.capability.utils.Constants.UPDATE_TECH_CAPABILITIES_OPERATION;
 import static ru.beeline.capability.utils.RestHelper.getRestTemplate;
 
@@ -39,7 +41,9 @@ public class PackageCapabilityService {
     }
 
     public PackageRegistrationResponseDTO registerTechCapabilitiesPackage(List<PostTechCapabilityDTO> techCapabilities) {
-        PackageRegistrationResponseDTO packageRegistrationResponseDTO = registerPackage(techCapabilities);
+        PackageRegistrationResponseDTO packageRegistrationResponseDTO = registerPackage(
+                UPDATE_TECH_CAPABILITIES_OPERATION,
+                techCapabilities.size());
         if(packageRegistrationResponseDTO != null) {
             try {
                 sendMessageToQueue(packageRegistrationResponseDTO, techCapabilities);
@@ -51,12 +55,28 @@ public class PackageCapabilityService {
         return null;
     }
 
-    private void sendMessageToQueue(PackageRegistrationResponseDTO packageRegistrationResponseDTO, List<PostTechCapabilityDTO> techCapabilities) throws JsonProcessingException {
+    public PackageRegistrationResponseDTO registerBusinessCapabilitiesPackage(List<PostBusinessCapabilityDTO> businessCapabilities) {
+        PackageRegistrationResponseDTO packageRegistrationResponseDTO = registerPackage(
+                UPDATE_BUSINESS_CAPABILITIES_OPERATION,
+                businessCapabilities.size());
+        if(packageRegistrationResponseDTO != null) {
+            try {
+                sendMessageToQueue(packageRegistrationResponseDTO, businessCapabilities);
+                return packageRegistrationResponseDTO;
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
+        } else throw new PackageRegistrationException("Business capability package was not be registered");
+        return null;
+    }
+
+
+    private void sendMessageToQueue(PackageRegistrationResponseDTO packageRegistrationResponseDTO, List<?> capabilities) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         ObjectNode messagePayload = objectMapper.createObjectNode();
         messagePayload.put("packageId", packageRegistrationResponseDTO.getPackageId());
-        messagePayload.set("payload", objectMapper.valueToTree(techCapabilities));
+        messagePayload.set("payload", objectMapper.valueToTree(capabilities));
 
         String message = objectMapper.writeValueAsString(messagePayload);
         sendMessageToTechCapabilityQueue(queueName, message);
@@ -69,15 +89,15 @@ public class PackageCapabilityService {
         });
     }
 
-    private PackageRegistrationResponseDTO registerPackage(List<PostTechCapabilityDTO> techCapabilities) {
+    private PackageRegistrationResponseDTO registerPackage(String operation, int dataSize) {
         try {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<PackageRegistrationRequestDTO> entity = new HttpEntity<>(PackageRegistrationRequestDTO.builder()
-                    .operation(UPDATE_TECH_CAPABILITIES_OPERATION)
-                    .count(techCapabilities.size())
+                    .operation(operation)
+                    .count(dataSize)
                     .build(),
                     headers);
             final RestTemplate restTemplate = getRestTemplate();
@@ -89,4 +109,5 @@ public class PackageCapabilityService {
         }
         return null;
     }
+
 }
