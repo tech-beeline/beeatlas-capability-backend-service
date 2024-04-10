@@ -29,7 +29,7 @@ public class PackageCapabilityController {
         return new ResponseEntity<>(registeredCapabilityPackageInfo, HttpStatus.OK);
     }
 
-    @PostMapping("/package-tech-capabilities")
+    @PostMapping("/package-business-capabilities")
     @ApiOperation(value = "Пакетная загрузка бизнес возможностей")
     public ResponseEntity<PackageRegistrationResponseDTO> packLoadBusinessCapabilities(@RequestBody List<PostBusinessCapabilityDTO> businessCapabilities) {
         PackageRegistrationResponseDTO registeredCapabilityPackageInfo = packageCapabilityService.registerBusinessCapabilitiesPackage(businessCapabilities);
