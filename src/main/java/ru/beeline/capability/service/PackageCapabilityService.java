@@ -21,7 +21,7 @@ public class PackageCapabilityService {
 
     private final String packLoaderServerUrl;
 
-    public PackageCapabilityService(@Value("${integration.packloader-server-url}") String packLoaderServerUrl) {
+    public PackageCapabilityService(@Value("${integration.pack-loader-server-url}") String packLoaderServerUrl) {
         this.packLoaderServerUrl = packLoaderServerUrl;
     }
 
