@@ -6,7 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.dto.PostTechCapabilityDTO;
-import ru.beeline.capability.dto.RegisteredCapabilityPackageDTO;
+import ru.beeline.capability.dto.PackageRegistrationResponseDTO;
+import ru.beeline.capability.exception.PackageRegistrationException;
 import ru.beeline.capability.service.PackageCapabilityService;
 
 import java.util.List;
@@ -21,9 +22,9 @@ public class PackageCapabilityController {
 
     @PostMapping("/package-tech-capabilities")
     @ApiOperation(value = "Изменение бизнес возможности")
-    public ResponseEntity<RegisteredCapabilityPackageDTO> packLoadTechCapabilities(@RequestBody List<PostTechCapabilityDTO> techCapabilities) {
-        RegisteredCapabilityPackageDTO registeredCapabilityPackageInfo = packageCapabilityService.registerTechCapabilitiesPackage(techCapabilities);
-
+    public ResponseEntity<PackageRegistrationResponseDTO> packLoadTechCapabilities(@RequestBody List<PostTechCapabilityDTO> techCapabilities) {
+        PackageRegistrationResponseDTO registeredCapabilityPackageInfo = packageCapabilityService.registerTechCapabilitiesPackage(techCapabilities);
+        if(registeredCapabilityPackageInfo == null) throw new PackageRegistrationException("Tech capability package was not be registered");
         return new ResponseEntity<>(registeredCapabilityPackageInfo, HttpStatus.OK);
     }
 }
