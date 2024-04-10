@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.dto.CapabilityParentDTO;
+import ru.beeline.capability.dto.PutTechCapabilityDTO;
+import ru.beeline.capability.dto.RegisteredCapabilityPackageDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.service.TechCapabilityService;
 
@@ -28,7 +30,8 @@ public class TechCapabilityController {
 
     @PutMapping
     @ApiOperation(value = "Изменение технической возможности")
-    public ResponseEntity getTechCapabilities(@RequestBody String capability) {
+    public ResponseEntity getTechCapability(@RequestBody PutTechCapabilityDTO capability) {
+        techCapabilityService.putCapability(capability);
         return new ResponseEntity(HttpStatus.OK);
     }
 

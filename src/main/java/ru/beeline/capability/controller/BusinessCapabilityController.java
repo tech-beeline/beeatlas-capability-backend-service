@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.dto.BusinessCapabilityChildrenDTO;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
+import ru.beeline.capability.dto.PutBusinessCapabilityDTO;
 import ru.beeline.capability.service.BusinessCapabilityService;
 
 import java.util.List;
@@ -49,7 +50,8 @@ public class BusinessCapabilityController {
 
     @PutMapping
     @ApiOperation(value = "Изменение бизнес возможности")
-    public ResponseEntity getBusinessCapabilities(@RequestBody String capability) {
+    public ResponseEntity getBusinessCapabilities(@RequestBody PutBusinessCapabilityDTO capability) {
+        businessCapabilityService.putCapability(capability);
         return new ResponseEntity(HttpStatus.OK);
     }
 }

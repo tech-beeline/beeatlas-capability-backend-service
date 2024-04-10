@@ -109,3 +109,12 @@ ALTER TABLE capability.tech_capability_relations ADD CONSTRAINT fk_tech_capabili
 ALTER TABLE capability.tech_capability_relations ADD CONSTRAINT fk_tech_capability_relations_tech_capability
     FOREIGN KEY (id_child) REFERENCES capability.tech_capability (id) ON DELETE No Action ON UPDATE No Action
 ;
+
+DROP SEQUENCE  IF EXISTS  tc_id_seq  CASCADE;
+CREATE SEQUENCE tc_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 START 1 CACHE 1;
+
+DROP SEQUENCE  IF EXISTS  tcr_id_seq  CASCADE;
+CREATE SEQUENCE tcr_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 START 1 CACHE 1;
+
+DROP SEQUENCE  IF EXISTS  capability.bc_id_seq  CASCADE;
+CREATE SEQUENCE capability.bc_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 START 1 CACHE 1;
