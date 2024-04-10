@@ -7,6 +7,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RegisteredCapabilityPackageDTO {
-    private Long packageId;
+public class PackageRegistrationResponseDTO {
+    private int packageId;
 }
