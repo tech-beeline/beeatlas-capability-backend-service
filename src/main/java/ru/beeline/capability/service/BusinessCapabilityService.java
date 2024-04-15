@@ -30,8 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ru.beeline.capability.utils.Constants.CREATE;
-import static ru.beeline.capability.utils.Constants.UPDATE;
+import static ru.beeline.capability.utils.Constants.*;
 
 @Service
 @Transactional
@@ -44,10 +43,14 @@ public class BusinessCapabilityService {
     private TechCapabilityRelationsRepository techCapabilityRelationsRepository;
 
     @Autowired
+    private FindNameSortTableService findNameSortTableService;
+
+    @Autowired
     private RabbitTemplate rabbitTemplate;
 
     @Value("${queue.change-business-capability.name}")
     private String changeBusinessCapabilityQueueName;
+
 
     public BusinessCapabilityChildrenDTO getChildren(Long id) {
         List<TechCapability> techCapabilities = businessCapabilityRepository.findById(id)
@@ -116,26 +119,32 @@ public class BusinessCapabilityService {
         return BusinessCapabilityShortDTO.convert(businessCapabilities.toList());
     }
 
-    public void putCapability(PutBusinessCapabilityDTO capability) {
-        Optional<BusinessCapability> businessCapabilityOptional = businessCapabilityRepository.findByCode(capability.getCode());
+    public void putCapability(PutBusinessCapabilityDTO capabilityDTO) {
+        Optional<BusinessCapability> businessCapabilityOptional = businessCapabilityRepository.findByCode(capabilityDTO.getCode());
+        BusinessCapability businessCapability;
         if (businessCapabilityOptional.isPresent()) {
-            BusinessCapability businessCapability = businessCapabilityOptional.get();
-            if (!capability.equals(businessCapability)) {
-                businessCapability.setName(capability.getName());
-                businessCapability.setDescription(capability.getDescription());
-                businessCapability.setStatus(capability.getStatus());
-                businessCapability.setAuthor(capability.getAuthor());
-                businessCapability.setCreatedDate(new Date());
-                businessCapability.setLastModifiedDate(new Date());
-                businessCapability.setLink(capability.getLink());
-                businessCapability.setOwner(capability.getOwner());
-                businessCapability.setParentId(Long.parseLong(capability.getParent()));
-                BusinessCapability result = businessCapabilityRepository.save(businessCapability);
-                sendNotify(result.getId(), UPDATE, changeBusinessCapabilityQueueName);
+            businessCapability = businessCapabilityOptional.get();
+            if (!capabilityDTO.equals(businessCapability)) {
+                businessCapability = updateCapability(businessCapability, capabilityDTO);
+                sendNotify(businessCapability.getId(), UPDATE, changeBusinessCapabilityQueueName);
             }
         } else {
-            createCapabilities(capability);
+            businessCapability = createCapabilities(capabilityDTO);
         }
+        findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
+    }
+
+    private BusinessCapability updateCapability(BusinessCapability businessCapability, PutBusinessCapabilityDTO capabilityDTO) {
+        businessCapability.setName(capabilityDTO.getName());
+        businessCapability.setDescription(capabilityDTO.getDescription());
+        businessCapability.setStatus(capabilityDTO.getStatus());
+        businessCapability.setAuthor(capabilityDTO.getAuthor());
+        businessCapability.setCreatedDate(new Date());
+        businessCapability.setLastModifiedDate(new Date());
+        businessCapability.setLink(capabilityDTO.getLink());
+        businessCapability.setOwner(capabilityDTO.getOwner());
+        businessCapability.setParentId(Long.parseLong(capabilityDTO.getParent()));
+        return businessCapabilityRepository.save(businessCapability);
     }
 
     private BusinessCapability createCapabilities(PutBusinessCapabilityDTO capability) {
