@@ -6,8 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.dto.CapabilityParentDTO;
+import ru.beeline.capability.dto.PutTechCapabilityDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
-import ru.beeline.capability.dto.UpdateTechCapabilityDTO;
 import ru.beeline.capability.service.TechCapabilityService;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public class TechCapabilityController {
                                                        @RequestParam(value = "offset", required = false) Integer offset) {
         return techCapabilityService.getCapabilities(limit, offset);
     }
-
+    
     @GetMapping("/{id}")
     @ApiOperation(value = "получение технической возможности", response = TechCapabilityDTO.class)
     public TechCapabilityDTO getAllTech(@PathVariable Long id) {
@@ -41,7 +41,7 @@ public class TechCapabilityController {
 
     @PutMapping
     @ApiOperation(value = "Создание/Обновление технической возможности")
-    public ResponseEntity putTechCapability(@RequestBody UpdateTechCapabilityDTO techCapability) {
+    public ResponseEntity putTechCapability(@RequestBody PutTechCapabilityDTO techCapability) {
         techCapabilityService.createOrUpdate(techCapability);
         return new ResponseEntity<>(HttpStatus.OK);
     }

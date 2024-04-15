@@ -6,8 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.beeline.capability.domain.BusinessCapability;
-
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapability, Long> {
@@ -23,4 +23,8 @@ public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapa
     Page<BusinessCapability> findCapabilitiesWithoutParent(Pageable pageable);
 
     List<BusinessCapability> findAllByCodeIn(List<String> codes);
+    Optional<BusinessCapability> findByCode(String code);
+
+    List<BusinessCapability> findAllByIdIn(List<Long> ids);
+
 }
