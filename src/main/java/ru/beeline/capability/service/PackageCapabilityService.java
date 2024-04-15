@@ -72,23 +72,15 @@ public class PackageCapabilityService {
     }
 
 
-    private void sendMessageToQueue(PackageRegistrationResponseDTO packageRegistrationResponseDTO, List<?> capabilities) {
+    private void sendMessageToQueue(PackageRegistrationResponseDTO packageRegistrationResponseDTO, List<?> capabilities)
+            throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         ObjectNode messagePayload = objectMapper.createObjectNode();
-        capabilities.forEach(c -> {
-            messagePayload.put("packageId", packageRegistrationResponseDTO.getPackageId());
-            messagePayload.set("payload", objectMapper.convertValue(c, JsonNode.class));
-
-            try {
-                String message = objectMapper.writeValueAsString(messagePayload);
-                sendMessageToTechCapabilityQueue(queueName, message);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-
-        });
-
+        messagePayload.put("packageId", packageRegistrationResponseDTO.getPackageId());
+        messagePayload.set("payload", objectMapper.valueToTree(capabilities));
+        String message = objectMapper.writeValueAsString(messagePayload);
+        sendMessageToTechCapabilityQueue(queueName, message);
     }
 
     private void sendMessageToTechCapabilityQueue(String queue, String message) {
