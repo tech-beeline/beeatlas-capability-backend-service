@@ -20,14 +20,14 @@ public class FindNameSortTableService {
     @Autowired
     private EntityTypeRepository entityTypeRepository;
 
-    public void updateVector(Long id, String name, String description, String code) {
+    public void updateVector(Long id, String name, String description, String code, String enType) {
         if(description == null) description = name;
         String vector = String.join("<!!!>", new String[] {
                 name,
                 description,
                 code
         });
-        EntityType entityType = entityTypeRepository.findByName(ENTITY_TYPE_TECH_CAPABILITY);
+        EntityType entityType = entityTypeRepository.findByName(enType);
         FindNameSortTable findNameSortTableItem = findNameSortTableRepository.findByRefIdAndType(id, entityType);
         if(findNameSortTableItem == null) {
             findNameSortTableItem = FindNameSortTable.builder()

@@ -134,7 +134,7 @@ public class TechCapabilityService {
                 }
                 sendNotify(currentTechCapability.getId(), UPDATE, changeTechCapabilityQueueName);
             }
-            findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode());
+            findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode(), ENTITY_TYPE_TECH_CAPABILITY);
         }
     }
 

@@ -30,8 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ru.beeline.capability.utils.Constants.CREATE;
-import static ru.beeline.capability.utils.Constants.UPDATE;
+import static ru.beeline.capability.utils.Constants.*;
 
 @Service
 @Transactional
@@ -132,7 +131,7 @@ public class BusinessCapabilityService {
         } else {
             businessCapability = createCapabilities(capabilityDTO);
         }
-        findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode());
+        findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
     }
 
     private BusinessCapability updateCapability(BusinessCapability businessCapability, PutBusinessCapabilityDTO capabilityDTO) {
