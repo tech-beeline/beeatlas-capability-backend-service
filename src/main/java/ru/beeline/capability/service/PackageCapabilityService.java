@@ -2,6 +2,7 @@ package ru.beeline.capability.service;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
@@ -71,15 +72,23 @@ public class PackageCapabilityService {
     }
 
 
-    private void sendMessageToQueue(PackageRegistrationResponseDTO packageRegistrationResponseDTO, List<?> capabilities) throws JsonProcessingException {
+    private void sendMessageToQueue(PackageRegistrationResponseDTO packageRegistrationResponseDTO, List<?> capabilities) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         ObjectNode messagePayload = objectMapper.createObjectNode();
-        messagePayload.put("packageId", packageRegistrationResponseDTO.getPackageId());
-        messagePayload.set("payload", objectMapper.valueToTree(capabilities));
+        capabilities.forEach(c -> {
+            messagePayload.put("packageId", packageRegistrationResponseDTO.getPackageId());
+            messagePayload.set("payload", objectMapper.convertValue(c, JsonNode.class));
 
-        String message = objectMapper.writeValueAsString(messagePayload);
-        sendMessageToTechCapabilityQueue(queueName, message);
+            try {
+                String message = objectMapper.writeValueAsString(messagePayload);
+                sendMessageToTechCapabilityQueue(queueName, message);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+
+        });
+
     }
 
     private void sendMessageToTechCapabilityQueue(String queue, String message) {
