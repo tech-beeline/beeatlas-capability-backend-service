@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 
 import static ru.beeline.capability.utils.Constants.ENTITY_TYPE_TECH_CAPABILITY;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -48,14 +47,12 @@ public class TechCapabilityService {
 
     @Autowired
     private TechCapabilityRelationsRepository techCapabilityRelationsRepository;
+
     @Autowired
     private BusinessCapabilityRepository businessCapabilityRepository;
 
     @Autowired
-    private FindNameSortTableRepository findNameSortTableRepository;
-
-    @Autowired
-    private EntityTypeRepository entityTypeRepository;
+    private FindNameSortTableService findNameSortTableService;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -137,28 +134,8 @@ public class TechCapabilityService {
                 }
                 sendNotify(currentTechCapability.getId(), UPDATE, changeTechCapabilityQueueName);
             }
-            updateVector(currentTechCapability);
+            findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode());
         }
-    }
-
-    private void updateVector(TechCapability techCapability) {
-        String vector = String.join("<!!!>", new String[] {
-                                                                    techCapability.getName(),
-                                                                    techCapability.getDescription(),
-                                                                    techCapability.getCode()
-        });
-        EntityType entityType = entityTypeRepository.findByName(ENTITY_TYPE_TECH_CAPABILITY);
-        FindNameSortTable findNameSortTableItem = findNameSortTableRepository.findByRefIdAndType(techCapability.getId(), entityType);
-        if(findNameSortTableItem == null) {
-            findNameSortTableItem = FindNameSortTable.builder()
-                    .vector(vector)
-                    .type(entityType)
-                    .refId(techCapability.getId())
-                    .build();
-        } else {
-            findNameSortTableItem.setVector(vector);
-        }
-        findNameSortTableRepository.save(findNameSortTableItem);
     }
 
     private void deleteAllRelationsByTCAndBC(TechCapability currentTechCapability, List<BusinessCapability> businessCapabilities) {
