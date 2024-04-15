@@ -21,4 +21,6 @@ public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapa
 
     @Query("SELECT c FROM BusinessCapability c WHERE c.deletedDate is NULL and c.parentId is null and c.isDomain is true ORDER BY c.name")
     Page<BusinessCapability> findCapabilitiesWithoutParent(Pageable pageable);
+
+    List<BusinessCapability> findAllByCodeIn(List<String> codes);
 }

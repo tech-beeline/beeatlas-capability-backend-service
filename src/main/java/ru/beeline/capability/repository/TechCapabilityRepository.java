@@ -12,4 +12,6 @@ public interface TechCapabilityRepository extends JpaRepository<TechCapability, 
 
     @Query("SELECT c FROM TechCapability c WHERE c.deletedDate is NULL ORDER BY c.name")
     Page<TechCapability> findCapabilities(Pageable pageable);
+
+    TechCapability findByCode(String code);
 }
