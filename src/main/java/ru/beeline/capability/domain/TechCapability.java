@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tech_capability")
+@Table(name = "tech_capability", schema = "capability")
 public class TechCapability {
 
     @Id
