@@ -120,6 +120,10 @@ public class BusinessCapabilityService {
     }
 
     public void putCapability(PutBusinessCapabilityDTO capabilityDTO) {
+        if(!validateBusinessCapability(capabilityDTO)){
+            throw new IllegalArgumentException("Invalid business capability parent: value is not a number");
+        }
+
         Optional<BusinessCapability> businessCapabilityOptional = businessCapabilityRepository.findByCode(capabilityDTO.getCode());
         BusinessCapability businessCapability;
         if (businessCapabilityOptional.isPresent()) {
@@ -132,6 +136,15 @@ public class BusinessCapabilityService {
             businessCapability = createCapabilities(capabilityDTO);
         }
         findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
+    }
+
+    private boolean validateBusinessCapability(PutBusinessCapabilityDTO capabilityDTO) {
+        try {
+            double d = Double.parseDouble(capabilityDTO.getParent());
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
     }
 
     private BusinessCapability updateCapability(BusinessCapability businessCapability, PutBusinessCapabilityDTO capabilityDTO) {
