@@ -10,29 +10,29 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import ru.beeline.capability.domain.*;
-import ru.beeline.capability.dto.CapabilityParentDTO;
 import org.springframework.transaction.annotation.Transactional;
 import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
+import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.dto.PutTechCapabilityDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
-import ru.beeline.capability.repository.*;
+import ru.beeline.capability.repository.BusinessCapabilityRepository;
+import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
+import ru.beeline.capability.repository.TechCapabilityRepository;
 
-import java.util.stream.Collectors;
-
-import static ru.beeline.capability.utils.Constants.ENTITY_TYPE_TECH_CAPABILITY;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ru.beeline.capability.utils.Constants.CREATE;
+import static ru.beeline.capability.utils.Constants.ENTITY_TYPE_TECH_CAPABILITY;
 import static ru.beeline.capability.utils.Constants.UPDATE;
 
 @Service
@@ -67,6 +67,12 @@ public class TechCapabilityService {
         Pageable pageable = new OffsetBasedPageRequest(offset, limit == null || limit == 0 ? Integer.MAX_VALUE : limit, Sort.by(Sort.Direction.ASC, "name"));
         Page<TechCapability> techCapabilities = techCapabilityRepository.findCapabilities(pageable);
         return TechCapabilityDTO.convert(techCapabilities.toList());
+    }
+
+    public List<TechCapability> getByIdIn(List<Long> ids) {
+        return techCapabilityRepository.findAllByIdIn(ids).stream()
+                .filter(tech -> tech.getDeletedDate() == null)
+                .collect(Collectors.toList());
     }
 
     public TechCapabilityDTO getCapabilityById(Long id) {
@@ -113,15 +119,14 @@ public class TechCapabilityService {
         return result;
     }
 
-    @Transactional
     public void createOrUpdate(PutTechCapabilityDTO techCapability) {
-        if(techCapability.getParents() != null && !techCapability.getParents().isEmpty()) {
+        if (techCapability.getParents() != null && !techCapability.getParents().isEmpty()) {
             List<BusinessCapability> businessCapabilities = businessCapabilityRepository.findAllByCodeIn(techCapability.getParents());
             Optional<TechCapability> currentTechCapabilityOpt = techCapabilityRepository.findByCode(techCapability.getCode());
             TechCapability currentTechCapability;
             if (!currentTechCapabilityOpt.isPresent()) {
                 currentTechCapability = createTechCapability(techCapability);
-                if(!businessCapabilities.isEmpty()) {
+                if (!businessCapabilities.isEmpty()) {
                     createRelations(currentTechCapability, businessCapabilities);
                 }
                 sendNotify(currentTechCapability.getId(), CREATE, changeTechCapabilityQueueName);
@@ -129,7 +134,7 @@ public class TechCapabilityService {
                 currentTechCapability = currentTechCapabilityOpt.get();
                 updateTechCapability(currentTechCapability, techCapability);
                 deleteAllRelationsByTCAndBC(currentTechCapability, businessCapabilities);
-                if(!businessCapabilities.isEmpty()) {
+                if (!businessCapabilities.isEmpty()) {
                     createRelations(currentTechCapability, businessCapabilities);
                 }
                 sendNotify(currentTechCapability.getId(), UPDATE, changeTechCapabilityQueueName);

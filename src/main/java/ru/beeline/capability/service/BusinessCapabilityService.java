@@ -20,6 +20,7 @@ import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.dto.PutBusinessCapabilityDTO;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
+import ru.beeline.capability.mapper.BusinessCapabilityMapper;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
 
@@ -30,7 +31,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ru.beeline.capability.utils.Constants.*;
+import static ru.beeline.capability.utils.Constants.CREATE;
+import static ru.beeline.capability.utils.Constants.ENTITY_TYPE_BUSINESS_CAPABILITY;
+import static ru.beeline.capability.utils.Constants.UPDATE;
 
 @Service
 @Transactional
@@ -48,6 +51,9 @@ public class BusinessCapabilityService {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
+    @Autowired
+    private BusinessCapabilityMapper businessCapabilityMapper;
+
     @Value("${queue.change-business-capability.name}")
     private String changeBusinessCapabilityQueueName;
 
@@ -60,7 +66,7 @@ public class BusinessCapabilityService {
                 .filter(techCapability -> Objects.isNull(techCapability.getDeletedDate()))
                 .collect(Collectors.toList());
         List<BusinessCapability> businessCapabilitiesKids = businessCapabilityRepository.findAllByParentIdAndDeletedDateIsNull(id);
-        return BusinessCapabilityChildrenDTO.convert(techCapabilities, businessCapabilitiesKids);
+        return businessCapabilityMapper.convert(techCapabilities, businessCapabilitiesKids);
     }
 
     public CapabilityParentDTO getParents(Long id) {
@@ -89,7 +95,9 @@ public class BusinessCapabilityService {
     }
 
     public List<BusinessCapability> getByIdIn(List<Long> ids) {
-        return businessCapabilityRepository.findAllByIdIn(ids);
+        return businessCapabilityRepository.findAllByIdIn(ids).stream()
+                .filter(bc -> bc.getDeletedDate() == null)
+                .collect(Collectors.toList());
     }
 
     private boolean checkHasKids(BusinessCapability businessCapability) {
