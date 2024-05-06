@@ -21,16 +21,17 @@ public class BusinessCapabilityMapper {
 
     }
 
-    public BusinessCapabilityDTO convert(BusinessCapability techCapability) {
+    public BusinessCapabilityDTO convert(BusinessCapability businessCapability) {
         return BusinessCapabilityDTO.builder()
-                .id(techCapability.getId())
-                .code(techCapability.getCode())
-                .name(techCapability.getName())
-                .description(techCapability.getDescription())
-                .author(techCapability.getAuthor())
-                .link(techCapability.getLink())
-                .createdDate(techCapability.getCreatedDate())
-                .hasChildren(!techCapability.getChildren().isEmpty())
+                .id(businessCapability.getId())
+                .code(businessCapability.getCode())
+                .name(businessCapability.getName())
+                .description(businessCapability.getDescription())
+                .isDomain(businessCapability.isDomain())
+                .author(businessCapability.getAuthor())
+                .link(businessCapability.getLink())
+                .createdDate(businessCapability.getCreatedDate())
+                .hasChildren(!businessCapability.getChildren().isEmpty())
                 .build();
     }
 
