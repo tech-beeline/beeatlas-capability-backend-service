@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.PackageRegistrationException;
+import ru.beeline.capability.exception.ForbiddenException;
 
 @ControllerAdvice
 @Slf4j
