@@ -26,10 +26,7 @@ public class HeaderInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         try {
-            if (request.getRequestURI().contains("/actuator/prometheus")
-                    || request.getRequestURI().contains("/swagger")
-                    || request.getRequestURI().contains("/error")
-                    || request.getRequestURI().contains("/api-docs")) {
+            if (!request.getRequestURI().contains("/capabilities-subscribed")) {
                 return true;
             }
             Map<String, Object> headers = new HashMap<>();
@@ -51,8 +48,9 @@ public class HeaderInterceptor implements HandlerInterceptor {
             logger.info("Set headers complete");
             return true;
         } catch (Exception e) {
-            logger.info("403 Forbidden.");
-            throw new ForbiddenException("403 Forbidden.");
+            String eMessage = "Отсутсвуют необходимые хэдеры. " + e.getMessage();
+            logger.error(eMessage);
+            throw new ForbiddenException(eMessage);
         }
     }
 
