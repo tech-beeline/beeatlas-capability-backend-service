@@ -39,6 +39,10 @@ public class CustomExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body("409 CONFLICT : " + e.getMessage());
     }
 
-
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Object> handleException(ForbiddenException e) {
+        log.error(e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("403 FORBIDDEN : " + e.getMessage());
+    }
 
 }
