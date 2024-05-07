@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import ru.beeline.capability.exception.ForbiddenException;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.PackageRegistrationException;
 
@@ -33,6 +34,10 @@ public class CustomExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body("409 CONFLICT : " + e.getMessage());
     }
 
-
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Object> handleException(ForbiddenException e) {
+        log.error(e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("403 FORBIDDEN : " + e.getMessage());
+    }
 
 }
