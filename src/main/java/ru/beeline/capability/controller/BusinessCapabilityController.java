@@ -11,7 +11,6 @@ import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.capability.dto.PutBusinessCapabilityDTO;
 import ru.beeline.capability.service.BusinessCapabilityService;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
