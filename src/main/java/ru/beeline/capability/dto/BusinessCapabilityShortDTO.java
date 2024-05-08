@@ -26,6 +26,7 @@ public class BusinessCapabilityShortDTO {
     private Date lastModifiedDate;
     private Date deletedDate;
     private String owner;
+    @JsonProperty("isDomain")
     private boolean isDomain;
     private boolean hasChildren;
 
