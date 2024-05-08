@@ -24,6 +24,7 @@ public class BCParentDTO {
     private Date createdDate;
     @JsonProperty("updatedDate")
     private Date lastModifiedDate;
+    @JsonProperty("isDomain")
     private boolean isDomain;
     private boolean hasChildren;
 
