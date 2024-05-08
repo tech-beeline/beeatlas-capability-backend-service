@@ -23,12 +23,7 @@ import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
 import ru.beeline.capability.repository.TechCapabilityRepository;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.beeline.capability.utils.Constants.CREATE;
@@ -174,6 +169,8 @@ public class TechCapabilityService {
         TechCapability newTechCapability = TechCapability.builder()
                 .code(techCapability.getCode())
                 .name(techCapability.getName())
+                .createdDate(new Date())
+                .lastModifiedDate(new Date())
                 .description(techCapability.getDescription())
                 .author(techCapability.getAuthor())
                 .owner(techCapability.getOwner())
