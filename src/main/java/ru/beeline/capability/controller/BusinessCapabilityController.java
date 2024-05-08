@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.dto.BusinessCapabilityChildrenDTO;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
-import ru.beeline.capability.dto.PutBusinessCapabilityDTO;
+import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
 import ru.beeline.capability.service.BusinessCapabilityService;
 
 import java.util.Collections;
@@ -53,8 +53,8 @@ public class BusinessCapabilityController {
 
     @PutMapping
     @ApiOperation(value = "Создание/Обновление бизнес возможности")
-    public ResponseEntity putBusinessCapability(@RequestBody PutBusinessCapabilityDTO capability) {
+    public ResponseEntity<String> putBusinessCapability(@RequestBody PutBusinessCapabilityDTO capability) {
         businessCapabilityService.putCapability(capability);
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 }

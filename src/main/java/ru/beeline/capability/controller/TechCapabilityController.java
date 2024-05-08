@@ -6,10 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.dto.CapabilityParentDTO;
-import ru.beeline.capability.dto.PutTechCapabilityDTO;
+import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.service.TechCapabilityService;
-
 import java.util.List;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -41,8 +40,8 @@ public class TechCapabilityController {
 
     @PutMapping
     @ApiOperation(value = "Создание/Обновление технической возможности")
-    public ResponseEntity putTechCapability(@RequestBody PutTechCapabilityDTO techCapability) {
+    public ResponseEntity<String> putTechCapability(@RequestBody PutTechCapabilityDTO techCapability) {
         techCapabilityService.createOrUpdate(techCapability);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 }

@@ -17,7 +17,7 @@ import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.BusinessCapabilityChildrenDTO;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.capability.dto.CapabilityParentDTO;
-import ru.beeline.capability.dto.PutBusinessCapabilityDTO;
+import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
 import ru.beeline.capability.mapper.BusinessCapabilityMapper;
