@@ -11,6 +11,8 @@ import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.capability.dto.PutBusinessCapabilityDTO;
 import ru.beeline.capability.service.BusinessCapabilityService;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -30,7 +32,9 @@ public class BusinessCapabilityController {
     @GetMapping("/{id}/parents")
     @ApiOperation(value = "Получение всех родительских бизнес возможностей", response = CapabilityParentDTO.class)
     public CapabilityParentDTO getParentsById(@PathVariable Long id) {
-        return businessCapabilityService.getParents(id);
+        CapabilityParentDTO capabilityParentDTO = businessCapabilityService.getParents(id);
+        Collections.sort(capabilityParentDTO.getParents());
+        return capabilityParentDTO;
     }
 
     @GetMapping("/{id}")
