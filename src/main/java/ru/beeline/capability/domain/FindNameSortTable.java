@@ -24,6 +24,6 @@ public class FindNameSortTable {
     @JoinColumn(name = "type_id")
     private EntityType type;
 
-    @Column(name = "ref_id")
+    @Column(name = "id_ref")
     private Long refId;
 }
