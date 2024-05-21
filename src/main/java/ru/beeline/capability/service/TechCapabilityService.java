@@ -15,6 +15,7 @@ import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.CapabilityParentDTO;
+import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.exception.NotFoundException;
@@ -203,5 +204,25 @@ public class TechCapabilityService {
             return messagePostProcessor;
         });
 
+    }
+
+    public void validateTechCapabilityDTO(PutTechCapabilityDTO techCapability) {
+        StringBuilder errMsg = new StringBuilder();
+        if(techCapability.getCode() == null) {
+            errMsg.append("Отсутсвует обязательное поле code\n");
+        }
+        if(techCapability.getName() == null) {
+            errMsg.append("Отсутсвует обязательное поле name\n");
+        }
+        if(techCapability.getAuthor() == null) {
+            errMsg.append("Отсутсвует обязательное поле author\n");
+        }
+
+        if(techCapability.getDescription() == null) {
+            errMsg.append("Отсутсвует обязательное поле description\n");
+        }
+        if (!errMsg.toString().isEmpty()) {
+            throw new ValidationException(errMsg.toString());
+        };
     }
 }
