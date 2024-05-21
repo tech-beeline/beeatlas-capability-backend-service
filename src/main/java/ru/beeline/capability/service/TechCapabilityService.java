@@ -163,6 +163,7 @@ public class TechCapabilityService {
         currentTechCapability.setOwner(techCapability.getOwner());
         currentTechCapability.setLink(techCapability.getLink());
         currentTechCapability.setStatus(techCapability.getStatus());
+        currentTechCapability.setLastModifiedDate(new Date());
         techCapabilityRepository.save(currentTechCapability);
     }
 
