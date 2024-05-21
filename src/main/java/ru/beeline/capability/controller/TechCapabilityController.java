@@ -41,6 +41,7 @@ public class TechCapabilityController {
     @PutMapping
     @ApiOperation(value = "Создание/Обновление технической возможности")
     public ResponseEntity putTechCapability(@RequestBody PutTechCapabilityDTO techCapability) {
+        techCapabilityService.validateTechCapabilityDTO(techCapability);
         techCapabilityService.createOrUpdate(techCapability);
         return new ResponseEntity<>(HttpStatus.OK);
     }
