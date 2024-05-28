@@ -179,7 +179,7 @@ public class BusinessCapabilityService {
                 .lastModifiedDate(new Date())
                 .link(capability.getLink())
                 .owner(capability.getOwner())
-                .parentId(businessCapabilityRepository.findByCode(capabilityDTO.getCode()).get().getId())
+                .parentId(businessCapabilityRepository.findByCode(capability.getCode()).get().getId())
                 .isDomain(capability.getIsDomain())
                 .build()
         );
