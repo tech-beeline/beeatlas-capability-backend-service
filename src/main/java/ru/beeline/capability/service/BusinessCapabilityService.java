@@ -17,6 +17,7 @@ import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.BusinessCapabilityChildrenDTO;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.capability.dto.CapabilityParentDTO;
+import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
@@ -128,9 +129,6 @@ public class BusinessCapabilityService {
     }
 
     public void putCapability(PutBusinessCapabilityDTO capabilityDTO) {
-        if(!validateBusinessCapability(capabilityDTO)){
-            throw new IllegalArgumentException("Invalid business capability parent: value is not a number");
-        }
 
         Optional<BusinessCapability> businessCapabilityOptional = businessCapabilityRepository.findByCode(capabilityDTO.getCode());
         BusinessCapability businessCapability;
@@ -164,7 +162,8 @@ public class BusinessCapabilityService {
         businessCapability.setLastModifiedDate(new Date());
         businessCapability.setLink(capabilityDTO.getLink());
         businessCapability.setOwner(capabilityDTO.getOwner());
-        businessCapability.setParentId(Long.parseLong(capabilityDTO.getParent()));
+        businessCapability.setParentId(businessCapabilityRepository.findByCode(capabilityDTO.getCode()).get().getId());
+        businessCapability.setDomain(capabilityDTO.getIsDomain());
         return businessCapabilityRepository.save(businessCapability);
     }
 
@@ -180,7 +179,8 @@ public class BusinessCapabilityService {
                 .lastModifiedDate(new Date())
                 .link(capability.getLink())
                 .owner(capability.getOwner())
-                .parentId(Long.parseLong(capability.getParent()))
+                .parentId(businessCapabilityRepository.findByCode(capabilityDTO.getCode()).get().getId())
+                .isDomain(capability.getIsDomain())
                 .build()
         );
         sendNotify(result.getId(), CREATE, changeBusinessCapabilityQueueName);
@@ -213,6 +213,31 @@ public class BusinessCapabilityService {
     enum FindBy {
         ALL,
         CORE
+    }
+
+    public void validateBusinessCapabilityDTO(PutBusinessCapabilityDTO capabilityDTO){
+        StringBuilder errMsg = new StringBuilder();
+        if(capabilityDTO.getCode() == null) {
+            errMsg.append("Отсутсвует обязательное поле code\n");
+        }
+        if(capabilityDTO.getName() == null) {
+            errMsg.append("Отсутсвует обязательное поле name\n");
+        }
+        if(capabilityDTO.getAuthor() == null) {
+            errMsg.append("Отсутсвует обязательное поле author\n");
+        }
+
+        if(capabilityDTO.getDescription() == null) {
+            errMsg.append("Отсутсвует обязательное поле description\n");
+        }
+
+        if(capabilityDTO.getCode() == capabilityDTO.getParent()) {
+            errMsg.append("Возможность не может быть собственным родителем\n");
+        }
+
+        if (!errMsg.toString().isEmpty()) {
+            throw new ValidationException(errMsg.toString());
+        };
     }
 
 }
