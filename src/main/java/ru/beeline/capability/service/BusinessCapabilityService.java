@@ -162,7 +162,7 @@ public class BusinessCapabilityService {
         businessCapability.setLastModifiedDate(new Date());
         businessCapability.setLink(capabilityDTO.getLink());
         businessCapability.setOwner(capabilityDTO.getOwner());
-        businessCapability.setParentId(businessCapabilityRepository.findByCode(capabilityDTO.getCode()).get().getId());
+        businessCapability.setParentId(businessCapabilityRepository.findByCode(capabilityDTO.getParent()).get().getId());
         businessCapability.setDomain(capabilityDTO.getIsDomain());
         return businessCapabilityRepository.save(businessCapability);
     }
@@ -179,7 +179,7 @@ public class BusinessCapabilityService {
                 .lastModifiedDate(new Date())
                 .link(capability.getLink())
                 .owner(capability.getOwner())
-                .parentId(businessCapabilityRepository.findByCode(capability.getCode()).get().getId())
+                .parentId(businessCapabilityRepository.findByCode(capability.getParent()).get().getId())
                 .isDomain(capability.getIsDomain())
                 .build()
         );
@@ -233,6 +233,10 @@ public class BusinessCapabilityService {
 
         if(capabilityDTO.getCode() == capabilityDTO.getParent()) {
             errMsg.append("Возможность не может быть собственным родителем\n");
+        }
+
+        if (!businessCapabilityRepository.findByCode(capability.getParent()).isPresent()) {
+            errMsg.append("указанной родительской возможности не существует\n");
         }
 
         if (!errMsg.toString().isEmpty()) {
