@@ -129,7 +129,7 @@ public class TechCapabilityService {
             } else {
                 currentTechCapability = currentTechCapabilityOpt.get();
                 updateTechCapability(currentTechCapability, techCapability);
-                deleteAllRelationsByTCAndBC(currentTechCapability, businessCapabilities);
+                techCapabilityRelationsRepository.deleteAllByTechCapability(currentTechCapability);
                 if (!businessCapabilities.isEmpty()) {
                     createRelations(currentTechCapability, businessCapabilities);
                 }
