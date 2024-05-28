@@ -235,7 +235,7 @@ public class BusinessCapabilityService {
             errMsg.append("Возможность не может быть собственным родителем\n");
         }
 
-        if (!businessCapabilityRepository.findByCode(capability.getParent()).isPresent()) {
+        if (!businessCapabilityRepository.findByCode(capabilityDTO.getParent()).isPresent()) {
             errMsg.append("указанной родительской возможности не существует\n");
         }
 
