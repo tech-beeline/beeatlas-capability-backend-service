@@ -158,7 +158,6 @@ public class BusinessCapabilityService {
         businessCapability.setDescription(capabilityDTO.getDescription());
         businessCapability.setStatus(capabilityDTO.getStatus());
         businessCapability.setAuthor(capabilityDTO.getAuthor());
-        businessCapability.setCreatedDate(new Date());
         businessCapability.setLastModifiedDate(new Date());
         businessCapability.setLink(capabilityDTO.getLink());
         businessCapability.setOwner(capabilityDTO.getOwner());
