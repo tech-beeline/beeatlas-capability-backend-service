@@ -15,15 +15,22 @@ import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.CapabilityParentDTO;
-import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
 import ru.beeline.capability.repository.TechCapabilityRepository;
+import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ru.beeline.capability.utils.Constants.CREATE;
@@ -127,6 +134,9 @@ public class TechCapabilityService {
                 sendNotify(currentTechCapability.getId(), CREATE, changeTechCapabilityQueueName);
             } else {
                 currentTechCapability = currentTechCapabilityOpt.get();
+                if (isSame(currentTechCapability, techCapability)) {
+                    return;
+                }
                 updateTechCapability(currentTechCapability, techCapability);
                 deleteAllRelationsByTCAndBC(currentTechCapability, businessCapabilities);
                 if (!businessCapabilities.isEmpty()) {
@@ -136,6 +146,49 @@ public class TechCapabilityService {
             }
             findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode(), ENTITY_TYPE_TECH_CAPABILITY);
         }
+    }
+
+    private boolean isSame(TechCapability currentTechCapability, PutTechCapabilityDTO techCapability) {
+        boolean isSame = true;
+        if (!techCapability.getCode().equals(currentTechCapability.getCode())) {
+            isSame = false;
+        }
+        if (!techCapability.getName().equals(currentTechCapability.getName())) {
+            isSame = false;
+        }
+        if (!techCapability.getDescription().equals(currentTechCapability.getDescription())) {
+            isSame = false;
+        }
+        if (!techCapability.getStatus().equals(currentTechCapability.getStatus())) {
+            isSame = false;
+        }
+        if (!techCapability.getAuthor().equals(currentTechCapability.getAuthor())) {
+            isSame = false;
+        }
+        if (!techCapability.getLink().equals(currentTechCapability.getLink())) {
+            isSame = false;
+        }
+        if (!techCapability.getOwner().equals(currentTechCapability.getOwner())) {
+            isSame = false;
+        }
+        if (!isSameParents(techCapability.getParents(), currentTechCapability.getParents())) {
+            isSame = false;
+        }
+
+        return isSame;
+
+    }
+
+    private boolean isSameParents(List<String> parentsOld, List<TechCapabilityRelations> techCapabilityRelationsList) {
+        List<String> parentsNew = techCapabilityRelationsList.stream()
+                .map(TechCapabilityRelations::getBusinessCapability)
+                .map(BusinessCapability::getId)
+                .map(Objects::toString)
+                .collect(Collectors.toList());
+        Collections.sort(parentsOld);
+        Collections.sort(parentsNew);
+        return parentsOld.equals(parentsNew);
+
     }
 
     private void deleteAllRelationsByTCAndBC(TechCapability currentTechCapability, List<BusinessCapability> businessCapabilities) {
