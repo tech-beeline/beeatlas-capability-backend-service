@@ -54,6 +54,7 @@ public class BusinessCapabilityController {
     @PutMapping
     @ApiOperation(value = "Создание/Обновление бизнес возможности")
     public ResponseEntity putBusinessCapability(@RequestBody PutBusinessCapabilityDTO capability) {
+        businessCapabilityService.validateBusinessCapabilityDTO(capability);
         businessCapabilityService.putCapability(capability);
         return new ResponseEntity<>(HttpStatus.OK);
     }
