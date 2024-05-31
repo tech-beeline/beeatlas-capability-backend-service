@@ -4,6 +4,7 @@ package ru.beeline.capability.mapper;
 import org.springframework.stereotype.Component;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
+import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 
 import java.util.List;
 import java.util.stream.Collectors;
