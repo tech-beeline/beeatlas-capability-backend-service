@@ -208,6 +208,27 @@ public class TechCapabilityService {
         }
     }
 
+    public void validateTechCapabilityDTO(PutTechCapabilityDTO techCapability) {
+        StringBuilder errMsg = new StringBuilder();
+        if(techCapability.getCode() == null) {
+            errMsg.append("Отсутсвует обязательное поле code\n");
+        }
+        if(techCapability.getName() == null) {
+            errMsg.append("Отсутсвует обязательное поле name\n");
+        }
+        if(techCapability.getAuthor() == null) {
+            errMsg.append("Отсутсвует обязательное поле author\n");
+        }
+
+        if(techCapability.getDescription() == null) {
+            errMsg.append("Отсутсвует обязательное поле description\n");
+        }
+        if (!errMsg.toString().isEmpty()) {
+            throw new ValidationException(errMsg.toString());
+        };
+    }
+
+
     public void sendMessageToTechCapabilityQueue(String queue, String message) {
         rabbitTemplate.convertAndSend(queue, message, messagePostProcessor -> {
             messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
