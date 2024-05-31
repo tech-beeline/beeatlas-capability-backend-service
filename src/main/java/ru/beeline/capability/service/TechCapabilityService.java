@@ -126,7 +126,7 @@ public class TechCapabilityService {
         if (!currentTechCapabilityOpt.isPresent()) {
             currentTechCapability = createTechCapability(techCapability);
             if (techCapabilityHaveParents) {
-                createRelations(currentTechCapability, businessCapabilityRepository.findAllByCodeIn(techCapability.getParents());
+                createRelations(currentTechCapability, businessCapabilityRepository.findAllByCodeIn(techCapability.getParents()));
             }
             sendNotify(currentTechCapability.getId(), CREATE, changeTechCapabilityQueueName);
             findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode(), ENTITY_TYPE_TECH_CAPABILITY);
