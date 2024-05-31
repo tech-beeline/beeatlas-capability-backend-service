@@ -16,6 +16,7 @@ import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.exception.ValidationException;
+import ru.beeline.capability.mapper.TechCapabilityMapper;
 import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.exception.NotFoundException;
@@ -34,6 +35,9 @@ import static ru.beeline.capability.utils.Constants.UPDATE;
 @Service
 @Transactional
 public class TechCapabilityService {
+
+    @Autowired
+    private TechCapabilityMapper techCapabilityMapper;
 
     @Autowired
     private BusinessCapabilityService businessCapabilityService;
@@ -116,27 +120,33 @@ public class TechCapabilityService {
     }
 
     public void createOrUpdate(PutTechCapabilityDTO techCapability) {
-        if (techCapability.getParents() != null && !techCapability.getParents().isEmpty()) {
-            List<BusinessCapability> businessCapabilities = businessCapabilityRepository.findAllByCodeIn(techCapability.getParents());
-            Optional<TechCapability> currentTechCapabilityOpt = techCapabilityRepository.findByCode(techCapability.getCode());
-            TechCapability currentTechCapability;
-            if (!currentTechCapabilityOpt.isPresent()) {
-                currentTechCapability = createTechCapability(techCapability);
-                if (!businessCapabilities.isEmpty()) {
-                    createRelations(currentTechCapability, businessCapabilities);
-                }
-                sendNotify(currentTechCapability.getId(), CREATE, changeTechCapabilityQueueName);
-            } else {
-                currentTechCapability = currentTechCapabilityOpt.get();
-                updateTechCapability(currentTechCapability, techCapability);
-                techCapabilityRelationsRepository.deleteAllByTechCapability(currentTechCapability);
-                if (!businessCapabilities.isEmpty()) {
-                    createRelations(currentTechCapability, businessCapabilities);
-                }
-                sendNotify(currentTechCapability.getId(), UPDATE, changeTechCapabilityQueueName);
+        Optional<TechCapability> currentTechCapabilityOpt = techCapabilityRepository.findByCode(techCapability.getCode());
+        boolean techCapabilityHaveParents = techCapability.getParents() != null && !techCapability.getParents().isEmpty();
+        TechCapability currentTechCapability;
+        if (!currentTechCapabilityOpt.isPresent()) {
+            currentTechCapability = createTechCapability(techCapability);
+            if (techCapabilityHaveParents) {
+                createRelations(currentTechCapability, businessCapabilityRepository.findAllByCodeIn(techCapability.getParents());
             }
+            sendNotify(currentTechCapability.getId(), CREATE, changeTechCapabilityQueueName);
             findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode(), ENTITY_TYPE_TECH_CAPABILITY);
+        } else {
+            currentTechCapability = currentTechCapabilityOpt.get();
+            PutTechCapabilityDTO currentTechCapabilityDTO = techCapabilityMapper.convert(currentTechCapability);
+            if (!techCapability.equals(currentTechCapabilityDTO)) {
+                updateTechCapability(currentTechCapability, techCapability);
+                findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode(), ENTITY_TYPE_TECH_CAPABILITY);
+            }
+            if (techCapabilityHaveParents) {
+                Collections.sort(currentTechCapabilityDTO.getParents());
+                Collections.sort(techCapability.getParents());
+                if (!techCapability.equals(currentTechCapabilityDTO)) {
+                    createRelations(currentTechCapability, businessCapabilityRepository.findAllByCodeIn(techCapability.getParents()));
+                }
+            }
+            sendNotify(currentTechCapability.getId(), UPDATE, changeTechCapabilityQueueName);
         }
+
     }
 
     private void deleteAllRelationsByTCAndBC(TechCapability currentTechCapability, List<BusinessCapability> businessCapabilities) {
