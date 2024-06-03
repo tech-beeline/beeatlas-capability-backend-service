@@ -134,14 +134,15 @@ public class BusinessCapabilityService {
         BusinessCapability businessCapability;
         if (businessCapabilityOptional.isPresent()) {
             businessCapability = businessCapabilityOptional.get();
-            if (!capabilityDTO.equals(businessCapability)) {
+            if (!capabilityDTO.equals(businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability))) {
                 businessCapability = updateCapability(businessCapability, capabilityDTO);
                 sendNotify(businessCapability.getId(), UPDATE, changeBusinessCapabilityQueueName);
+                findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
             }
         } else {
             businessCapability = createCapabilities(capabilityDTO);
+            findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
         }
-        findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
     }
 
     private boolean validateBusinessCapability(PutBusinessCapabilityDTO capabilityDTO) {
