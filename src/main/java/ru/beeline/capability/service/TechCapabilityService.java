@@ -149,12 +149,6 @@ public class TechCapabilityService {
 
     }
 
-    private void deleteAllRelationsByTCAndBC(TechCapability currentTechCapability, List<BusinessCapability> businessCapabilities) {
-        for (BusinessCapability businessCapability : businessCapabilities) {
-            techCapabilityRelationsRepository.deleteByBusinessCapabilityAndTechCapability(businessCapability, currentTechCapability);
-        }
-    }
-
     private void createRelations(TechCapability currentTechCapability, List<BusinessCapability> businessCapabilities) {
         List<TechCapabilityRelations> techCapabilityRelations = new ArrayList<>();
         for (BusinessCapability businessCapability : businessCapabilities) {
@@ -171,6 +165,7 @@ public class TechCapabilityService {
         currentTechCapability.setDescription(techCapability.getDescription());
         currentTechCapability.setAuthor(techCapability.getAuthor());
         currentTechCapability.setOwner(techCapability.getOwner());
+        currentTechCapability.setLastModifiedDate(new Date());
         currentTechCapability.setLink(techCapability.getLink());
         currentTechCapability.setStatus(techCapability.getStatus());
         techCapabilityRepository.save(currentTechCapability);

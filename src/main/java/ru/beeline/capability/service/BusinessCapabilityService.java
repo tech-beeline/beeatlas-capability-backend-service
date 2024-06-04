@@ -145,15 +145,6 @@ public class BusinessCapabilityService {
         }
     }
 
-    private boolean validateBusinessCapability(PutBusinessCapabilityDTO capabilityDTO) {
-        try {
-            double d = Double.parseDouble(capabilityDTO.getParent());
-        } catch (NumberFormatException nfe) {
-            return false;
-        }
-        return true;
-    }
-
     private BusinessCapability updateCapability(BusinessCapability businessCapability, PutBusinessCapabilityDTO capabilityDTO) {
         businessCapability.setName(capabilityDTO.getName());
         businessCapability.setDescription(capabilityDTO.getDescription());
