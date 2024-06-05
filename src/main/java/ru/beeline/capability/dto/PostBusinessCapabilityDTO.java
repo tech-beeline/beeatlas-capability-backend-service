@@ -14,5 +14,6 @@ public class PostBusinessCapabilityDTO {
     private String author;
     private String link;
     private String owner;
+    private String status;
     private String parent;
 }
