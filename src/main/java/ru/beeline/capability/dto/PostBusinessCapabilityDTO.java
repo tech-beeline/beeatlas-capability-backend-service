@@ -16,4 +16,5 @@ public class PostBusinessCapabilityDTO {
     private String owner;
     private String status;
     private String parent;
+    private Boolean isDomain;
 }
