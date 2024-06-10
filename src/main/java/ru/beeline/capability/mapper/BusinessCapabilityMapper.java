@@ -13,6 +13,7 @@ import ru.beeline.capability.repository.BusinessCapabilityRepository;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -52,10 +53,16 @@ public class BusinessCapabilityMapper {
                 .link(businessCapability.getLink())
                 .owner(businessCapability.getOwner())
                 .isDomain(businessCapability.isDomain())
-                .parent(businessCapabilityRepository.findById(businessCapability.getParentId()).get().getCode())
+                .parent(getParentCode(businessCapability))
                 .build();
     }
-
+    private String getParentCode(BusinessCapability capability) {
+        if (capability == null || capability.getParentId() == null)
+            return null;
+        return businessCapabilityRepository.findById(capability.getParentId())
+                .map(BusinessCapability::getCode)
+                .orElse(null);
+    }
     public BusinessCapabilityChildrenDTO convert(List<TechCapability> children, List<BusinessCapability> businessCapabilities) {
         BusinessCapabilityChildrenDTO businessCapabilityChildrenDTO = new BusinessCapabilityChildrenDTO();
         businessCapabilityChildrenDTO.setTechCapabilities(TechCapabilityShortDTO.convert(children));
