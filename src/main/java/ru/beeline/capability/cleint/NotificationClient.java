@@ -30,7 +30,7 @@ public class NotificationClient {
         this.notificationServerUrl = notificationServerUrl;
     }
 
-    public List<Long> getAllEntitySubscribe(String userId, EntityType entityType) {
+    public List<Long> getSubscribes(EntityType entityType) {
         try {
             final RestTemplate restTemplate = getRestTemplate();
             HttpHeaders headers = new HttpHeaders();
@@ -39,8 +39,7 @@ public class NotificationClient {
             headers.set(USER_PRODUCTS_IDS_HEADER, RequestContext.getUserProducts().toString());
             headers.set(USER_ROLES_HEADER, RequestContext.getRoles().toString());
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            String url = notificationServerUrl + "/api/v1/all-entity-subscribe/" + userId
-                    + "?entity-type=" + entityType.name();
+            String url = notificationServerUrl + "/api/v1/subscribes/" + entityType.name();
 
             ResponseEntity<List<Long>> response = restTemplate.exchange(
                     url,

@@ -30,7 +30,7 @@ public class SubscribeService {
     private BusinessCapabilityMapper businessCapabilityMapper;
 
     public List<CapabilitySubscribedDTO> getCapabilitiesSubscribed(EntityType entityType) {
-        List<Long> subscribes = notificationClient.getAllEntitySubscribe(RequestContext.getUserId(), entityType);
+        List<Long> subscribes = notificationClient.getSubscribes(entityType);
         if (subscribes.isEmpty()) {
             return new ArrayList<>();
         }
