@@ -15,17 +15,24 @@ import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.CapabilityParentDTO;
-import ru.beeline.capability.exception.ValidationException;
-import ru.beeline.capability.mapper.TechCapabilityMapper;
-import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.exception.NotFoundException;
+import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
+import ru.beeline.capability.mapper.TechCapabilityMapper;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
 import ru.beeline.capability.repository.TechCapabilityRepository;
+import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ru.beeline.capability.utils.Constants.CREATE;
@@ -136,15 +143,15 @@ public class TechCapabilityService {
             if (!techCapability.equals(currentTechCapabilityDTO)) {
                 updateTechCapability(currentTechCapability, techCapability);
                 findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode(), ENTITY_TYPE_TECH_CAPABILITY);
-            }
-            if (techCapabilityHaveParents) {
-                Collections.sort(currentTechCapabilityDTO.getParents());
-                Collections.sort(techCapability.getParents());
-                if (!techCapability.equals(currentTechCapabilityDTO)) {
-                    createRelations(currentTechCapability, businessCapabilityRepository.findAllByCodeIn(techCapability.getParents()));
+                if (techCapabilityHaveParents) {
+                    Collections.sort(currentTechCapabilityDTO.getParents());
+                    Collections.sort(techCapability.getParents());
+                    if (!techCapability.equals(currentTechCapabilityDTO)) {
+                        createRelations(currentTechCapability, businessCapabilityRepository.findAllByCodeIn(techCapability.getParents()));
+                    }
                 }
+                sendNotify(currentTechCapability.getId(), UPDATE, changeTechCapabilityQueueName);
             }
-            sendNotify(currentTechCapability.getId(), UPDATE, changeTechCapabilityQueueName);
         }
 
     }
@@ -205,22 +212,23 @@ public class TechCapabilityService {
 
     public void validateTechCapabilityDTO(PutTechCapabilityDTO techCapability) {
         StringBuilder errMsg = new StringBuilder();
-        if(techCapability.getCode() == null) {
+        if (techCapability.getCode() == null) {
             errMsg.append("Отсутсвует обязательное поле code\n");
         }
-        if(techCapability.getName() == null) {
+        if (techCapability.getName() == null) {
             errMsg.append("Отсутсвует обязательное поле name\n");
         }
-        if(techCapability.getAuthor() == null) {
+        if (techCapability.getAuthor() == null) {
             errMsg.append("Отсутсвует обязательное поле author\n");
         }
 
-        if(techCapability.getDescription() == null) {
+        if (techCapability.getDescription() == null) {
             errMsg.append("Отсутсвует обязательное поле description\n");
         }
         if (!errMsg.toString().isEmpty()) {
             throw new ValidationException(errMsg.toString());
-        };
+        }
+        ;
     }
 
 
