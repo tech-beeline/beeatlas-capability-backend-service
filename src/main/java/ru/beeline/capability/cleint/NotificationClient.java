@@ -39,7 +39,7 @@ public class NotificationClient {
             headers.set(USER_PRODUCTS_IDS_HEADER, RequestContext.getUserProducts().toString());
             headers.set(USER_ROLES_HEADER, RequestContext.getRoles().toString());
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            String url = notificationServerUrl + "/api/v1/subscribes/" + entityType.name();
+            String url = notificationServerUrl + "/api/v1/subscribe/" + entityType.name();
 
             ResponseEntity<List<Long>> response = restTemplate.exchange(
                     url,
