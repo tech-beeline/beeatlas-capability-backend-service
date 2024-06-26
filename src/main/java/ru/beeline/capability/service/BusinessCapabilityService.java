@@ -136,7 +136,7 @@ public class BusinessCapabilityService {
             businessCapability = businessCapabilityOptional.get();
             if (!capabilityDTO.equals(businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability))) {
                 businessCapability = updateCapability(businessCapability, capabilityDTO);
-                sendNotify(businessCapability.getId(), UPDATE, changeBusinessCapabilityQueueName);
+                sendNotify(businessCapability.getId(), UPDATE, changeBusinessCapabilityQueueName, capabilityDTO.getName());
                 findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
             }
         } else {
@@ -174,7 +174,7 @@ public class BusinessCapabilityService {
                 .isDomain(capability.getIsDomain())
                 .build()
         );
-        sendNotify(result.getId(), CREATE, changeBusinessCapabilityQueueName);
+        sendNotify(result.getId(), CREATE, changeBusinessCapabilityQueueName, capability.getName());
         return result;
     }
 
@@ -186,12 +186,13 @@ public class BusinessCapabilityService {
                 .orElse(null);
     }
 
-    private void sendNotify(Long id, String changeType, String queueName) {
+    private void sendNotify(Long id, String changeType, String queueName, String name) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
 
             ObjectNode messagePayload = objectMapper.createObjectNode();
             messagePayload.put("entity_id", id);
+            messagePayload.put("name", name);
             messagePayload.put("change_type", changeType);
 
             String message = objectMapper.writeValueAsString(messagePayload);

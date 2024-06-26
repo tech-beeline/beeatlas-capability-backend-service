@@ -135,7 +135,7 @@ public class TechCapabilityService {
             if (techCapabilityHaveParents) {
                 createRelations(currentTechCapability, businessCapabilityRepository.findAllByCodeIn(techCapability.getParents()));
             }
-            sendNotify(currentTechCapability.getId(), CREATE, changeTechCapabilityQueueName);
+            sendNotify(currentTechCapability.getId(), CREATE, changeTechCapabilityQueueName, techCapability.getName());
             findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode(), ENTITY_TYPE_TECH_CAPABILITY);
         } else {
             currentTechCapability = currentTechCapabilityOpt.get();
@@ -150,7 +150,7 @@ public class TechCapabilityService {
                         createRelations(currentTechCapability, businessCapabilityRepository.findAllByCodeIn(techCapability.getParents()));
                     }
                 }
-                sendNotify(currentTechCapability.getId(), UPDATE, changeTechCapabilityQueueName);
+                sendNotify(currentTechCapability.getId(), UPDATE, changeTechCapabilityQueueName, techCapability.getName());
             }
         }
 
@@ -194,12 +194,13 @@ public class TechCapabilityService {
         return newTechCapability;
     }
 
-    private void sendNotify(Long id, String changeType, String queueName) {
+    private void sendNotify(Long id, String changeType, String queueName, String name) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
 
             ObjectNode messagePayload = objectMapper.createObjectNode();
             messagePayload.put("entity_id", id);
+            messagePayload.put("name", name);
             messagePayload.put("change_type", changeType);
 
             String message = objectMapper.writeValueAsString(messagePayload);
