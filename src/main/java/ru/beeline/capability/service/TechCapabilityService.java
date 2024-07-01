@@ -222,14 +222,9 @@ public class TechCapabilityService {
         if (techCapability.getAuthor() == null) {
             errMsg.append("Отсутсвует обязательное поле author\n");
         }
-
-        if (techCapability.getDescription() == null) {
-            errMsg.append("Отсутсвует обязательное поле description\n");
-        }
         if (!errMsg.toString().isEmpty()) {
             throw new ValidationException(errMsg.toString());
         }
-        ;
     }
 
 
@@ -238,6 +233,5 @@ public class TechCapabilityService {
             messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
             return messagePostProcessor;
         });
-
     }
 }
