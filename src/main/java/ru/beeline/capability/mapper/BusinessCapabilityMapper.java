@@ -4,16 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.TechCapability;
-import ru.beeline.capability.dto.BusinessCapabilityChildrenDTO;
 import ru.beeline.capability.dto.CapabilitySubscribedDTO;
-import ru.beeline.capability.dto.TechCapabilityShortDTO;
+import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityDTO;
 import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -65,7 +63,7 @@ public class BusinessCapabilityMapper {
     }
     public BusinessCapabilityChildrenDTO convert(List<TechCapability> children, List<BusinessCapability> businessCapabilities) {
         BusinessCapabilityChildrenDTO businessCapabilityChildrenDTO = new BusinessCapabilityChildrenDTO();
-        businessCapabilityChildrenDTO.setTechCapabilities(TechCapabilityShortDTO.convert(children));
+        businessCapabilityChildrenDTO.setTechCapabilities(TechCapabilityMapper.convertToTechCapabilityShortDTOList(children));
         businessCapabilityChildrenDTO.setBusinessCapabilities(convert(businessCapabilities));
         return businessCapabilityChildrenDTO;
     }

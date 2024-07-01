@@ -139,7 +139,7 @@ public class TechCapabilityService {
             findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode(), ENTITY_TYPE_TECH_CAPABILITY);
         } else {
             currentTechCapability = currentTechCapabilityOpt.get();
-            PutTechCapabilityDTO currentTechCapabilityDTO = techCapabilityMapper.convert(currentTechCapability);
+            PutTechCapabilityDTO currentTechCapabilityDTO = techCapabilityMapper.convertToPutTechCapabilityDTO(currentTechCapability);
             if (!techCapability.equals(currentTechCapabilityDTO)) {
                 updateTechCapability(currentTechCapability, techCapability);
                 findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode(), ENTITY_TYPE_TECH_CAPABILITY);
