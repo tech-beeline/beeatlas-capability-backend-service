@@ -39,10 +39,11 @@ public class FindNameSortTableService {
         findNameSortTableRepository.save(findNameSortTableItem);
     }
 
-    private static void concatStr(String field, String vector) {
-        if (field != null && !field.isEmpty())
+    private static String concatStr(String field, String vector) {
+        if (field != null && !field.isBlank())
         {
-            vector.concat("!!!" + field);
+            return vector.concat("!!!" + field);
         }
+        return vector;
     }
 }
