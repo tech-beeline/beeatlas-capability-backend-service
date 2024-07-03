@@ -8,8 +8,6 @@ import ru.beeline.capability.domain.FindNameSortTable;
 import ru.beeline.capability.repository.EntityTypeRepository;
 import ru.beeline.capability.repository.FindNameSortTableRepository;
 
-import static ru.beeline.capability.utils.Constants.ENTITY_TYPE_TECH_CAPABILITY;
-
 @Service
 @Transactional
 public class FindNameSortTableService {
@@ -21,15 +19,15 @@ public class FindNameSortTableService {
     private EntityTypeRepository entityTypeRepository;
 
     public void updateVector(Long id, String name, String description, String code, String enType) {
-        if(description == null) description = name;
-        String vector = String.join("<!!!>", new String[] {
-                name,
-                description,
-                code
-        });
+        if (description == null) description = name;
+        String vector = "";
+        concatStr(name, vector);
+        concatStr(description, vector);
+        concatStr(code, vector);
+
         EntityType entityType = entityTypeRepository.findByName(enType);
         FindNameSortTable findNameSortTableItem = findNameSortTableRepository.findByRefIdAndType(id, entityType);
-        if(findNameSortTableItem == null) {
+        if (findNameSortTableItem == null) {
             findNameSortTableItem = FindNameSortTable.builder()
                     .vector(vector)
                     .type(entityType)
@@ -39,5 +37,12 @@ public class FindNameSortTableService {
             findNameSortTableItem.setVector(vector);
         }
         findNameSortTableRepository.save(findNameSortTableItem);
+    }
+
+    private static void concatStr(String field, String vector) {
+        if (field != null && !field.isEmpty())
+        {
+            vector.concat("!!!" + field);
+        }
     }
 }
