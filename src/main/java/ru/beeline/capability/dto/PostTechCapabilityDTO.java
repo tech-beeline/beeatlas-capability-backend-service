@@ -8,6 +8,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 @Builder
 public class PostTechCapabilityDTO {
     private String code;
