@@ -21,9 +21,9 @@ public class FindNameSortTableService {
     public void updateVector(Long id, String name, String description, String code, String enType) {
         if (description == null) description = name;
         String vector = "";
-        concatStr(name, vector);
-        concatStr(description, vector);
-        concatStr(code, vector);
+        vector = concatStr(name, vector);
+        vector = concatStr(description, vector);
+        vector = concatStr(code, vector);
 
         EntityType entityType = entityTypeRepository.findByName(enType);
         FindNameSortTable findNameSortTableItem = findNameSortTableRepository.findByRefIdAndType(id, entityType);
