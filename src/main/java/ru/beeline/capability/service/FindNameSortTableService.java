@@ -19,7 +19,6 @@ public class FindNameSortTableService {
     private EntityTypeRepository entityTypeRepository;
 
     public void updateVector(Long id, String name, String description, String code, String enType) {
-        if (description == null) description = name;
         String vector = "";
         vector = concatStr(name, vector);
         vector = concatStr(description, vector);
@@ -40,10 +39,10 @@ public class FindNameSortTableService {
     }
 
     private static String concatStr(String field, String vector) {
+        if (!vector.isBlank()) {
+            vector = vector.concat("<!!!>");
+        }
         if (field != null && !field.isBlank()) {
-            if (!vector.isBlank()) {
-                vector = vector.concat("!!!" + field);
-            }
             vector = vector.concat(field);
         }
         return vector;
