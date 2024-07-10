@@ -40,9 +40,11 @@ public class FindNameSortTableService {
     }
 
     private static String concatStr(String field, String vector) {
-        if (field != null && !field.isBlank())
-        {
-            return vector.concat("!!!" + field);
+        if (field != null && !field.isBlank()) {
+            if (!vector.isBlank()) {
+                vector = vector.concat("!!!" + field);
+            }
+            vector = vector.concat(field);
         }
         return vector;
     }
