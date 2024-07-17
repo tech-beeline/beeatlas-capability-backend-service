@@ -11,20 +11,14 @@ import java.util.Optional;
 
 @Repository
 public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapability, Long> {
-
     List<BusinessCapability> findAllByParentIdAndDeletedDateIsNull(Long parentId);
-
     Boolean existsByParentId(Long parentId);
-
     @Query("SELECT c FROM BusinessCapability c WHERE c.deletedDate is NULL ORDER BY c.name")
     Page<BusinessCapability> findCapabilities(Pageable pageable);
-
     @Query("SELECT c FROM BusinessCapability c WHERE c.deletedDate is NULL and c.parentId is null and c.isDomain is true ORDER BY c.name")
     Page<BusinessCapability> findCapabilitiesWithoutParent(Pageable pageable);
-
     List<BusinessCapability> findAllByCodeIn(List<String> codes);
     Optional<BusinessCapability> findByCode(String code);
-
     List<BusinessCapability> findAllByIdIn(List<Long> ids);
 
 }

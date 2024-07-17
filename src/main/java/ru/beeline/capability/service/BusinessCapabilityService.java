@@ -92,7 +92,7 @@ public class BusinessCapabilityService {
         if (businessCapability.getParentEntity() != null && businessCapability.getParentEntity().getDeletedDate() != null)
             businessCapability.setParentEntity(null);
 
-        return BusinessCapabilityShortDTO.convert(businessCapability, checkHasKids(businessCapability));
+        return businessCapabilityMapper.convert(businessCapability, checkHasKids(businessCapability));
     }
 
     public List<BusinessCapability> getByIdIn(List<Long> ids) {
@@ -125,7 +125,7 @@ public class BusinessCapabilityService {
                 throw new IllegalArgumentException("Invalid value for findBy: " + findBy);
         }
 
-        return BusinessCapabilityShortDTO.convert(businessCapabilities.toList());
+        return businessCapabilityMapper.convertToBusinessCapabilityShortDTOList(businessCapabilities.toList());
     }
 
     public void putCapability(PutBusinessCapabilityDTO capabilityDTO) {
