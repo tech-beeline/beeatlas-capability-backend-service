@@ -21,7 +21,7 @@ public class SearchCapabilityService {
     public List<SearchCapabilityDTO> searchCapability(String search, String findBy) {
         List<String> functionResult = findNameSortTableRepository.callFuzzySearchCapability(search);
         List<FuzzySearchCapabilityResult> searchResult = functionResult.stream().map(this::getFuzzySearchCapabilityResult).collect(Collectors.toList());
-        if (findBy != null) {
+        if (findBy != null && !findBy.equalsIgnoreCase("all")) {
             searchResult = searchResult.stream().filter(row -> row.getEntityName().equals(findBy)).collect(Collectors.toList());
         }
         List<SearchCapabilityDTO> result = new ArrayList<>();
