@@ -25,6 +25,8 @@ import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
 import ru.beeline.capability.repository.TechCapabilityRepository;
 import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -42,6 +44,8 @@ import static ru.beeline.capability.utils.Constants.UPDATE;
 @Service
 @Transactional
 public class TechCapabilityService {
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Autowired
     private TechCapabilityMapper techCapabilityMapper;
@@ -85,6 +89,8 @@ public class TechCapabilityService {
     public TechCapabilityDTO getCapabilityById(Long id) {
         TechCapability techCapability = techCapabilityRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Tech Capability не найдено"));
+        techCapability.getParents().get(0);
+        entityManager.detach(techCapability);
         techCapability.setParents(techCapability.getParents().stream()
                 .filter(businessCapability -> Objects.isNull(businessCapability.getBusinessCapability().getDeletedDate()))
                 .collect(Collectors.toList()));
