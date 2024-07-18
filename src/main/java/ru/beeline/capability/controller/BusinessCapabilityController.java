@@ -32,7 +32,7 @@ public class BusinessCapabilityController {
     @ApiOperation(value = "Получение всех родительских бизнес возможностей", response = CapabilityParentDTO.class)
     public CapabilityParentDTO getParentsById(@PathVariable Long id) {
         CapabilityParentDTO capabilityParentDTO = businessCapabilityService.getParents(id);
-        Collections.sort(capabilityParentDTO.getParents());
+        Collections.reverse(capabilityParentDTO.getParents());
         return capabilityParentDTO;
     }
 
