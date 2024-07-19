@@ -16,12 +16,4 @@ public interface TechCapabilityRelationsRepository extends JpaRepository<TechCap
 
     List<TechCapabilityRelations> findByTechCapability(TechCapability techCapability);
 
-    void deleteByBusinessCapabilityAndTechCapability(BusinessCapability businessCapability, TechCapability techCapability);
-
-    @Query(value = "SELECT * FROM capability.tech_capability_relations " +
-            "WHERE capability.tech_capability_relations.id_child IN (:ids)", nativeQuery = true)
-    List<TechCapabilityRelations> findByTechCapabilityIn(@Param("ids") List<Long> ids);
-
-    void deleteAllByTechCapability(TechCapability techCapability);
-    
 }

@@ -7,6 +7,7 @@ import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.dto.BCParentDTO;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.capability.dto.CapabilitySubscribedDTO;
+import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityDTO;
 import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
@@ -22,6 +23,9 @@ public class BusinessCapabilityMapper {
 
     @Autowired
     private BusinessCapabilityRepository businessCapabilityRepository;
+
+    @Autowired
+    private TechCapabilityRelationsRepository techCapabilityRelationsRepository;
 
     public List<BusinessCapabilityDTO> convert(List<BusinessCapability> businessCapabilities) {
         List<BusinessCapabilityDTO> result = businessCapabilities.stream().map(this::convert).collect(Collectors.toList());
@@ -90,7 +94,9 @@ public class BusinessCapabilityMapper {
     public List<BusinessCapabilityShortDTO> convertToBusinessCapabilityShortDTOList(List<BusinessCapability> businessCapabilities) {
         List<BusinessCapabilityShortDTO> techCapabilityDTOS = new ArrayList<>();
         for (BusinessCapability businessCapability : businessCapabilities) {
-            BusinessCapabilityShortDTO techCapabilityDTO = convert(businessCapability, businessCapabilityRepository.existsByParentId(businessCapability.getId()));
+            BusinessCapabilityShortDTO techCapabilityDTO = convert(businessCapability,
+                    businessCapabilityRepository.existsByParentId(businessCapability.getId())
+                            || techCapabilityRelationsRepository.existsByBusinessCapability(businessCapability));
             techCapabilityDTOS.add(techCapabilityDTO);
         }
         return techCapabilityDTOS;
