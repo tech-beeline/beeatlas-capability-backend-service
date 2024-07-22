@@ -19,8 +19,8 @@ public class SearchCapabilityService {
     private FindNameSortTableRepository findNameSortTableRepository;
 
     public List<SearchCapabilityDTO> searchCapability(String search, String findBy) {
-        List<String> functionResult = findNameSortTableRepository.callFuzzySearchCapability(search);
-        List<FuzzySearchCapabilityResult> searchResult = functionResult.stream().map(this::getFuzzySearchCapabilityResult).collect(Collectors.toList());
+        List<Object> functionResult = findNameSortTableRepository.callFuzzySearchCapability(search);
+        List<FuzzySearchCapabilityResult> searchResult = functionResult.stream().map(this::getRowData).collect(Collectors.toList());
         if (findBy != null && !findBy.equalsIgnoreCase("all")) {
             searchResult = searchResult.stream().filter(row -> row.getEntityName().equals(findBy)).collect(Collectors.toList());
         }
@@ -38,12 +38,10 @@ public class SearchCapabilityService {
 
         });
         return result;
-
     }
 
-    private FuzzySearchCapabilityResult getFuzzySearchCapabilityResult(String str) {
-        if (str == null) return null;
-        String[] row = str.split(",");
-        return new FuzzySearchCapabilityResult(Integer.parseInt(row[0]), row[1], row[2]);
+    private FuzzySearchCapabilityResult getRowData(Object object) {
+        Object[] row = (Object[]) object;
+        return new FuzzySearchCapabilityResult((Integer) row[0], row[1].toString(), row[2].toString());
     }
 }

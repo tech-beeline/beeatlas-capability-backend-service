@@ -11,5 +11,4 @@ public class FuzzySearchCapabilityResult {
     private int id;
     private String vector;
     private String entityName;
-
 }

@@ -23,7 +23,7 @@ public class SearchCapabilityController {
 
     @GetMapping("/find")
     @ApiOperation(value = "Поиск по сущностям", response = SearchCapabilityDTO.class)
-    public List<SearchCapabilityDTO> getAllTech(@RequestParam(value = "findBy", required = false) String findBy,
+    public List<SearchCapabilityDTO> getAllTech(@RequestParam(value = "findBy", required = false, defaultValue = "ALL") String findBy,
                                                 @RequestParam(value = "search") String search) {
         return searchCapabilityService.searchCapability(search, findBy);
     }

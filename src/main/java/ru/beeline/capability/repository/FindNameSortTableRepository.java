@@ -15,6 +15,5 @@ public interface FindNameSortTableRepository extends JpaRepository<FindNameSortT
     FindNameSortTable findByRefIdAndType(Long refId, EntityType entityType);
 
     @Query(nativeQuery = true, value = "SELECT * FROM capability.fuzzy_search_capability(:text)")
-    List<String> callFuzzySearchCapability(@Param("text") String text);
-
+    List<Object> callFuzzySearchCapability(@Param("text") String text);
 }
