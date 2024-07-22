@@ -44,10 +44,10 @@ public class BusinessCapabilityMapper {
                 .author(businessCapability.getAuthor())
                 .link(businessCapability.getLink())
                 .createdDate(businessCapability.getCreatedDate())
-                .hasChildren(businessCapabilityRepository.existsByParentId(businessCapability.getId()))
+                .hasChildren(businessCapabilityRepository.existsByParentId(businessCapability.getId())
+                        || techCapabilityRelationsRepository.existsByBusinessCapability(businessCapability))
                 .build();
     }
-
     public PutBusinessCapabilityDTO convertToPutCapabilityDTO(BusinessCapability businessCapability) {
         return PutBusinessCapabilityDTO.builder()
                 .code(businessCapability.getCode())
