@@ -168,7 +168,9 @@ public class TechCapabilityService {
             TechCapabilityRelations techCapabilityRelation = new TechCapabilityRelations();
             techCapabilityRelation.setBusinessCapability(businessCapability);
             techCapabilityRelation.setTechCapability(currentTechCapability);
-            techCapabilityRelations.add(techCapabilityRelation);
+            if(!techCapabilityRelationsRepository.existsByBusinessCapabilityAndTechCapability(businessCapability, currentTechCapability)) {
+                techCapabilityRelations.add(techCapabilityRelation);
+            }
         }
         techCapabilityRelationsRepository.saveAll(techCapabilityRelations);
     }
