@@ -138,6 +138,7 @@ public class TechCapabilityService {
         TechCapability currentTechCapability;
         if (!currentTechCapabilityOpt.isPresent()) {
             currentTechCapability = createTechCapability(techCapability);
+            techCapabilityRelationsRepository.deleteAllByTechCapability(currentTechCapability);
             if (techCapabilityHaveParents) {
                 createRelations(currentTechCapability, businessCapabilityRepository.findAllByCodeIn(techCapability.getParents()));
             }
@@ -148,6 +149,7 @@ public class TechCapabilityService {
             PutTechCapabilityDTO currentTechCapabilityDTO = techCapabilityMapper.convertToPutTechCapabilityDTO(currentTechCapability);
             if (!techCapability.equals(currentTechCapabilityDTO)) {
                 updateTechCapability(currentTechCapability, techCapability);
+                techCapabilityRelationsRepository.deleteAllByTechCapability(currentTechCapability);
                 findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode(), ENTITY_TYPE_TECH_CAPABILITY);
                 if (techCapabilityHaveParents) {
                     Collections.sort(currentTechCapabilityDTO.getParents());
