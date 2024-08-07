@@ -15,6 +15,7 @@ import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
+import ru.beeline.capability.dto.BusinessCapabilityTreeDTO;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
@@ -208,6 +209,38 @@ public class BusinessCapabilityService {
             messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
             return messagePostProcessor;
         });
+    }
+
+    public List<BusinessCapabilityTreeDTO> getBusinessCapabilityTree(Long id) {
+        List<BusinessCapabilityTreeDTO> result;
+        if (id == null) {
+            List<BusinessCapability> businessCapabilities = businessCapabilityRepository.findAllByParentIdIsNullAndDeletedDateIsNullAndIsDomainIsTrue();
+            List<BusinessCapability> filteredBusinessCapabilities = filterChildrenWithDomainIsTrue(businessCapabilities);
+            result = businessCapabilityMapper.mapToTree(filteredBusinessCapabilities);
+        } else {
+            Optional<BusinessCapability> businessCapabilitiesOptional = businessCapabilityRepository.findById(id);
+            if (businessCapabilitiesOptional.isPresent()) {
+                List<BusinessCapability> filteredBusinessCapabilities = filterChildren(List.of(businessCapabilitiesOptional.get()), businessCapabilitiesOptional.get().isDomain());
+                result = businessCapabilityMapper.mapToTree(filteredBusinessCapabilities);
+            } else {
+                result = new ArrayList<>();
+            }
+        }
+        return result;
+    }
+
+    private List<BusinessCapability> filterChildren(List<BusinessCapability> children, boolean isDomain) {
+        return children.stream()
+                .filter(businessCapability -> businessCapability.getDeletedDate() == null && businessCapability.isDomain() == isDomain)
+                .peek(businessCapability -> businessCapability.setChildrenOfTree(filterChildren(businessCapability.getChildrenOfTree(), isDomain)))
+                .collect(Collectors.toList());
+    }
+
+    private List<BusinessCapability> filterChildrenWithDomainIsTrue(List<BusinessCapability> children) {
+        return children.stream()
+                .filter(businessCapability -> businessCapability.getDeletedDate() == null && businessCapability.isDomain())
+                .peek(businessCapability -> businessCapability.setChildrenOfTree(filterChildrenWithDomainIsTrue(businessCapability.getChildrenOfTree())))
+                .collect(Collectors.toList());
     }
 
     enum FindBy {

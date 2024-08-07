@@ -45,4 +45,10 @@ public class BusinessCapability {
     @OneToMany
     @JoinColumn(name = "id_parent")
     private List<TechCapabilityRelations> children;
+
+    @OneToMany(mappedBy = "bcId")
+    private List<BusinessCapabilityCriteria> criteria;
+
+    @OneToMany(mappedBy = "parentId", fetch = FetchType.LAZY)
+    private List<BusinessCapability> childrenOfTree;
 }

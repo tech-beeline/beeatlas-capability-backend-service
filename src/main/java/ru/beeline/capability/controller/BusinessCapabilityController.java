@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.beeline.capability.dto.BusinessCapabilityTreeDTO;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
@@ -40,6 +41,12 @@ public class BusinessCapabilityController {
     @ApiOperation(value = "Получение бизнес возможности по идентификатору", response = BusinessCapabilityShortDTO.class)
     public BusinessCapabilityShortDTO getById(@PathVariable Long id) {
         return businessCapabilityService.getById(id);
+    }
+
+    @GetMapping("/tree")
+    @ApiOperation(value = "Построение дерева", response = List.class)
+    public List<BusinessCapabilityTreeDTO> getBusinessCapabilityTree(@RequestParam(value = "id", required = false) Long id) {
+        return businessCapabilityService.getBusinessCapabilityTree(id);
     }
 
     @GetMapping
