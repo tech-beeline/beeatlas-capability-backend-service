@@ -31,6 +31,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static ru.beeline.capability.utils.Constants.CREATE;
@@ -148,7 +150,7 @@ public class BusinessCapabilityService {
 
     private BusinessCapability updateCapability(BusinessCapability businessCapability, PutBusinessCapabilityDTO capabilityDTO) {
         businessCapability.setName(capabilityDTO.getName());
-        businessCapability.setDescription(capabilityDTO.getDescription());
+        businessCapability.setDescription(proxyUrl(capabilityDTO.getDescription()));
         businessCapability.setStatus(capabilityDTO.getStatus());
         businessCapability.setAuthor(capabilityDTO.getAuthor());
         businessCapability.setLastModifiedDate(new Date());
@@ -157,6 +159,26 @@ public class BusinessCapabilityService {
         businessCapability.setParentId(getParentId(capabilityDTO));
         businessCapability.setDomain(capabilityDTO.getIsDomain());
         return businessCapabilityRepository.save(businessCapability);
+    }
+
+    public String proxyUrl(String description) {
+            String urlPattern = "\\b(https?://\\S+)\\b";
+            Pattern pattern = Pattern.compile(urlPattern);
+            Matcher matcher = pattern.matcher(description);
+
+            StringBuffer result = new StringBuffer();
+            while (matcher.find()) {
+                String url = matcher.group(1);
+                if (!description.contains("<a href=\"" + url)
+                && !description.contains(">" + url)
+                ) {
+                    String replacement = "<a href=\"" + url + "\">" + url + "</a>";
+                    matcher.appendReplacement(result, replacement);
+                }
+            }
+            matcher.appendTail(result);
+
+            return result.toString();
     }
 
     private BusinessCapability createCapabilities(PutBusinessCapabilityDTO capability) {
