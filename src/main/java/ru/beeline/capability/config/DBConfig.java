@@ -20,9 +20,9 @@ import javax.sql.DataSource;
 @EnableTransactionManagement
 @EnableJpaRepositories(
         entityManagerFactoryRef = "entityManagerFactory",
-        basePackages = { "ru.beeline.capability.repository" }
+        basePackages = {"ru.beeline.capability.repository"}
 )
-public class CapabilityDBConfig {
+public class DBConfig {
 
     @Primary
     @Bean(name = "dataSourceProperties")

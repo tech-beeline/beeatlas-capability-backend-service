@@ -1,29 +1,12 @@
-/* Drop Tables */
-
-DROP TABLE IF EXISTS capability.entity_type CASCADE
-;
-
-DROP TABLE IF EXISTS capability.find_name_sort_table CASCADE
-;
-
-DROP TABLE IF EXISTS capability.tech_capability CASCADE
-;
-
-DROP TABLE IF EXISTS capability.tech_capability_relations CASCADE
-;
-
-DROP TABLE IF EXISTS capability.business_capability CASCADE
-;
-
 /* Create Tables */
 
 CREATE TABLE capability.business_capability
 (
-    id INTEGER PRIMARY KEY,
+    id integer NOT NULL,
     code varchar(50) NULL,
     name varchar(255) NOT NULL,
-    description varchar(255) NOT NULL,
-    owner integer NULL,
+    description varchar(255) NULL,
+    owner varchar(255) NULL,
     created_date timestamp without time zone NOT NULL,
     last_modified_date timestamp without time zone NOT NULL,
     deleted_date timestamp without time zone NULL,
@@ -31,33 +14,33 @@ CREATE TABLE capability.business_capability
     parent_id integer NULL,
     author varchar(255) NOT NULL,
     link varchar(255) NULL,
-    "isDomain" boolean NOT NULL
+    is_domain boolean NOT NULL
 )
 ;
 
 CREATE TABLE capability.entity_type
 (
-    id INTEGER PRIMARY KEY,
+    id integer NOT NULL,
     name varchar(20) NOT NULL
 )
 ;
 
 CREATE TABLE capability.find_name_sort_table
 (
-    id INTEGER PRIMARY KEY,
-    name varchar(255) NOT NULL,
-    "typeId" integer NOT NULL,
-    "idRef" integer NOT NULL
+    id integer NOT NULL,
+    vector text NOT NULL,
+    type_id integer NOT NULL,
+    id_ref integer NOT NULL
 )
 ;
 
 CREATE TABLE capability.tech_capability
 (
-    id INTEGER PRIMARY KEY,
+    id integer NOT NULL,
     code varchar(50) NULL,
     name varchar(255) NOT NULL,
-    description varchar(255) NOT NULL,
-    owner integer NULL,
+    description varchar(255) NULL,
+    owner varchar(255) NULL,
     created_date timestamp without time zone NOT NULL,
     last_modified_date timestamp without time zone NOT NULL,
     deleted_date timestamp without time zone NULL,
@@ -69,55 +52,60 @@ CREATE TABLE capability.tech_capability
 
 CREATE TABLE capability.tech_capability_relations
 (
-    "idRel" INTEGER PRIMARY KEY,
-    "idParent" integer NOT NULL,
-    "idChild" integer NOT NULL
+    id_rel integer NOT NULL,
+    id_parent integer NOT NULL,
+    id_child integer NOT NULL
 )
 ;
 
 /* Create Primary Keys, Indexes, Uniques, Checks */
 
-CREATE INDEX "IXFK_Capability_UserProfile" ON capability.business_capability(owner ASC)
+ALTER TABLE capability.business_capability ADD CONSTRAINT pk_business_capability
+    PRIMARY KEY (id)
 ;
 
-CREATE INDEX "IXFK_findNameSortTable_Domain" ON capability.find_name_sort_table ("idRef" ASC)
+ALTER TABLE capability.entity_type ADD CONSTRAINT pk_entity_type
+    PRIMARY KEY (id)
 ;
 
-CREATE INDEX "IXFK_findNameSortTable_entityType" ON capability.find_name_sort_table ("typeId" ASC)
+ALTER TABLE capability.find_name_sort_table ADD CONSTRAINT pk_find_name_sort_table
+    PRIMARY KEY (id)
 ;
 
-CREATE INDEX "nameIndex" ON capability.find_name_sort_table (name ASC)
+ALTER TABLE capability.tech_capability ADD CONSTRAINT pk_tech_capability
+    PRIMARY KEY (id)
 ;
 
-
-CREATE INDEX "IXFK_TechCapability_UserProfile" ON capability.tech_capability (owner ASC)
+ALTER TABLE capability.tech_capability_relations ADD CONSTRAINT pk_tech_capability_relations
+    PRIMARY KEY (id_rel)
 ;
 
-CREATE INDEX "IXFK_TechCapabilityRelations_BusinesCapability" ON capability.tech_capability_relations ("idParent" ASC)
+CREATE INDEX ixfk_business_capability ON capability.business_capability (parent_id ASC)
 ;
 
-CREATE INDEX "IXFK_TechCapabilityRelations_TechCapability" ON capability.tech_capability_relations ("idChild" ASC)
+CREATE INDEX ixfk_find_name_sort_table_entity_type ON capability.find_name_sort_table (type_id ASC)
+;
+
+CREATE INDEX ixfk_tech_capability_relations_business_capability ON capability.tech_capability_relations (id_parent ASC)
+;
+
+CREATE INDEX ixfk_tech_capability_relations_tech_capability ON capability.tech_capability_relations (id_child ASC)
 ;
 
 /* Create Foreign Key Constraints */
 
-ALTER TABLE capability.find_name_sort_table ADD CONSTRAINT "FK_findNameSortTable_BusinesCapability"
-    FOREIGN KEY ("idRef") REFERENCES capability.business_capability (id) ON DELETE Cascade ON UPDATE No Action
+ALTER TABLE capability.business_capability ADD CONSTRAINT fk_business_capability
+    FOREIGN KEY (parent_id) REFERENCES capability.business_capability (id) ON DELETE No Action ON UPDATE No Action
 ;
 
-ALTER TABLE capability.find_name_sort_table ADD CONSTRAINT "FK_findNameSortTable_entityType"
-    FOREIGN KEY ("typeId") REFERENCES entity_type (id) ON DELETE No Action ON UPDATE No Action
+ALTER TABLE capability.find_name_sort_table ADD CONSTRAINT fk_find_name_sort_table_entity_type
+    FOREIGN KEY (type_id) REFERENCES capability.entity_type (id) ON DELETE No Action ON UPDATE No Action
 ;
 
-ALTER TABLE capability.find_name_sort_table ADD CONSTRAINT "FK_findNameSortTable_TechCapability"
-    FOREIGN KEY ("idRef") REFERENCES capability.tech_capability (id) ON DELETE Cascade ON UPDATE No Action
+ALTER TABLE capability.tech_capability_relations ADD CONSTRAINT fk_tech_capability_relations_business_capability
+    FOREIGN KEY (id_parent) REFERENCES capability.business_capability (id) ON DELETE No Action ON UPDATE No Action
 ;
 
-
-ALTER TABLE capability.tech_capability_relations ADD CONSTRAINT "FK_TechCapabilityRelations_BusinesCapability"
-    FOREIGN KEY ("idParent") REFERENCES capability.business_capability (id) ON DELETE No Action ON UPDATE No Action
-;
-
-ALTER TABLE capability.tech_capability_relations ADD CONSTRAINT "FK_TechCapabilityRelations_TechCapability"
-    FOREIGN KEY ("idChild") REFERENCES capability.tech_capability (id) ON DELETE No Action ON UPDATE No Action
+ALTER TABLE capability.tech_capability_relations ADD CONSTRAINT fk_tech_capability_relations_tech_capability
+    FOREIGN KEY (id_child) REFERENCES capability.tech_capability (id) ON DELETE No Action ON UPDATE No Action
 ;

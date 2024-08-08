@@ -1,9 +1,9 @@
 package ru.beeline.capability.domain;
 
 import lombok.*;
-
 import javax.persistence.*;
-import java.sql.Date;
+import java.util.Date;
+import java.util.List;
 
 @Builder
 @Getter
@@ -11,18 +11,18 @@ import java.sql.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tech_capability")
+@Table(name = "tech_capability", schema = "capability")
 public class TechCapability {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "buisness_iteraction_id_generator")
-    @SequenceGenerator(name = "buisness_iteraction_id_generator", sequenceName = "BI_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tech_capability_id_generator")
+    @SequenceGenerator(name = "tech_capability_id_generator", sequenceName = "TC_id_seq", allocationSize = 1)
     private Long id;
 
     private String code;
     private String name;
     private String description;
-    private Long owner;
+    private String owner;
 
     @Column(name = "created_date")
     private Date createdDate;
@@ -39,4 +39,7 @@ public class TechCapability {
 
     private String link;
 
+    @OneToMany
+    @JoinColumn(name = "id_child")
+    private List<TechCapabilityRelations> parents;
 }
