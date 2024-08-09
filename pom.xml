@@ -33,7 +33,7 @@
         <dependency>
             <groupId>ru.beeline</groupId>
             <artifactId>fdm-lib</artifactId>
-            <version>0.0.10</version>
+            <version>0.0.12</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -153,6 +153,14 @@
                         <delimiter>@</delimiter>
                     </delimiters>
                     <useDefaultDelimiters>false</useDefaultDelimiters>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
         </plugins>

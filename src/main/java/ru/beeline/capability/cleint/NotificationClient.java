@@ -19,20 +19,21 @@ import static ru.beeline.capability.utils.Constants.USER_ID_HEADER;
 import static ru.beeline.capability.utils.Constants.USER_PERMISSION_HEADER;
 import static ru.beeline.capability.utils.Constants.USER_PRODUCTS_IDS_HEADER;
 import static ru.beeline.capability.utils.Constants.USER_ROLES_HEADER;
-import static ru.beeline.capability.utils.RestHelper.getRestTemplate;
 
 @Slf4j
 @Service
 public class NotificationClient {
+    RestTemplate restTemplate;
     private final String notificationServerUrl;
 
-    public NotificationClient(@Value("${integration.notification-server-url}") String notificationServerUrl) {
+    public NotificationClient(@Value("${integration.notification-server-url}") String notificationServerUrl,
+                              RestTemplate restTemplate) {
         this.notificationServerUrl = notificationServerUrl;
+        this.restTemplate = restTemplate;
     }
 
     public List<Long> getSubscribes(EntityType entityType) {
         try {
-            final RestTemplate restTemplate = getRestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.set(USER_ID_HEADER, RequestContext.getUserId());
             headers.set(USER_PERMISSION_HEADER, RequestContext.getUserPermissions().toString());

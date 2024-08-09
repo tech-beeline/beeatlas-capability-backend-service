@@ -21,5 +21,6 @@ public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapa
     List<BusinessCapability> findAllByCodeIn(List<String> codes);
     Optional<BusinessCapability> findByCode(String code);
     List<BusinessCapability> findAllByIdIn(List<Long> ids);
+    BusinessCapability findFirstByOrderByIdDesc();
 
 }

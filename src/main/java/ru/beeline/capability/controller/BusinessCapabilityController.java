@@ -15,6 +15,11 @@ import ru.beeline.capability.service.BusinessCapabilityService;
 import java.util.Collections;
 import java.util.List;
 
+import static ru.beeline.capability.utils.Constants.USER_ID_HEADER;
+import static ru.beeline.capability.utils.Constants.USER_PERMISSION_HEADER;
+import static ru.beeline.capability.utils.Constants.USER_PRODUCTS_IDS_HEADER;
+import static ru.beeline.capability.utils.Constants.USER_ROLES_HEADER;
+
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/v1/business-capability")
@@ -60,9 +65,14 @@ public class BusinessCapabilityController {
 
     @PutMapping
     @ApiOperation(value = "Создание/Обновление бизнес возможности")
-    public ResponseEntity putBusinessCapability(@RequestBody PutBusinessCapabilityDTO capability) {
-        businessCapabilityService.validateBusinessCapabilityDTO(capability);
-        businessCapabilityService.putCapability(capability);
+    public ResponseEntity putBusinessCapability(@RequestBody PutBusinessCapabilityDTO capability,
+                                                @RequestHeader(value = USER_ID_HEADER) String userId,
+                                                @RequestHeader(value = USER_PRODUCTS_IDS_HEADER) String productIds,
+                                                @RequestHeader(value = USER_ROLES_HEADER) String roles,
+                                                @RequestHeader(value = USER_PERMISSION_HEADER) String permissions
+                                                ) {
+        businessCapabilityService.validateBusinessCapabilityDTO(capability, userId, productIds, roles, permissions);
+        businessCapabilityService.putCapability(capability, userId, productIds, roles, permissions);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
