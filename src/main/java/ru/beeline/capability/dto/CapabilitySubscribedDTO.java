@@ -1,6 +1,7 @@
 package ru.beeline.capability.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,4 +22,6 @@ public class CapabilitySubscribedDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean isDomain;
     private String owner;
+    @JsonProperty("parent_id")
+    private Long parentId;
 }

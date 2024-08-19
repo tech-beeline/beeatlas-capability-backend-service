@@ -91,6 +91,7 @@ public class BusinessCapabilityMapper {
                 .description(businessCapabilities.getDescription())
                 .isDomain(businessCapabilities.isDomain())
                 .owner(businessCapabilities.getOwner())
+                .parentId(businessCapabilities.getParentId())
                 .build();
     }
 
