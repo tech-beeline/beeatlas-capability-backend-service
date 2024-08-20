@@ -194,7 +194,19 @@ public class BusinessCapabilityService {
 
     private BusinessCapability createCapabilities(PutBusinessCapabilityDTO capability) {
 
-        BusinessCapability result = businessCapabilityRepository.save(BusinessCapability.builder().code(capability.getCode()).name(capability.getName()).description(capability.getDescription()).status(capability.getStatus()).author(capability.getAuthor()).createdDate(new Date()).lastModifiedDate(new Date()).link(capability.getLink()).owner(capability.getOwner()).parentId(getParentId(capability)).isDomain(capability.getIsDomain()).build());
+        BusinessCapability result = businessCapabilityRepository.save(
+                BusinessCapability.builder()
+                        .code(capability.getCode())
+                        .name(capability.getName())
+                        .description(proxyUrl(capability.getDescription()))
+                        .status(capability.getStatus())
+                        .author(capability.getAuthor())
+                        .createdDate(new Date())
+                        .lastModifiedDate(new Date())
+                        .link(capability.getLink())
+                        .owner(capability.getOwner())
+                        .parentId(getParentId(capability))
+                        .isDomain(capability.getIsDomain()).build());
         sendNotify(result.getId(), CREATE, changeBusinessCapabilityQueueName, capability.getName());
         return result;
     }
