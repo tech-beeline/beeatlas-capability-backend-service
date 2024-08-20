@@ -22,6 +22,4 @@ public class CapabilitySubscribedDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean isDomain;
     private String owner;
-    @JsonProperty("parent_id")
-    private Long parentId;
 }
