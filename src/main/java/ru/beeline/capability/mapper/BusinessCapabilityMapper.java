@@ -6,9 +6,7 @@ import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.dto.BCParentDTO;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
-import ru.beeline.capability.dto.BusinessCapabilitySubscribedDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeDTO;
-import ru.beeline.capability.dto.CapabilitySubscribedDTO;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
@@ -82,23 +80,6 @@ public class BusinessCapabilityMapper {
         businessCapabilityChildrenDTO.setBusinessCapabilities(convert(businessCapabilities));
         return businessCapabilityChildrenDTO;
     }
-
-    public List<CapabilitySubscribedDTO> convertToCapabilitySubscribedDTOs(List<BusinessCapability> businessCapabilities) {
-        return businessCapabilities.stream().map(this::convertToCapabilitySubscribedDTO).collect(Collectors.toList());
-    }
-
-    public BusinessCapabilitySubscribedDTO convertToCapabilitySubscribedDTO(BusinessCapability businessCapabilities) {
-        return new BusinessCapabilitySubscribedDTO(
-                businessCapabilities.getParentId(),
-                businessCapabilities.getId(),
-                businessCapabilities.getCode(),
-                businessCapabilities.getName(),
-                businessCapabilities.getDescription(),
-                businessCapabilities.isDomain(),
-                businessCapabilities.getOwner()
-        );
-    }
-
 
     public List<BusinessCapabilityShortDTO> convertToBusinessCapabilityShortDTOList(List<BusinessCapability> businessCapabilities) {
         List<BusinessCapabilityShortDTO> techCapabilityDTOS = new ArrayList<>();

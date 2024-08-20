@@ -4,9 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.beeline.capability.EntityType.EntityType;
 import ru.beeline.capability.cleint.NotificationClient;
-import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.dto.CapabilitySubscribedDTO;
-import ru.beeline.capability.mapper.BusinessCapabilityMapper;
 import ru.beeline.capability.mapper.SubscribeCapabilityMapper;
 
 import java.util.ArrayList;
@@ -26,8 +24,6 @@ public class SubscribeService {
     @Autowired
     private SubscribeCapabilityMapper subscribeCapabilityMapper;
 
-    @Autowired
-    private BusinessCapabilityMapper businessCapabilityMapper;
 
     public List<CapabilitySubscribedDTO> getCapabilitiesSubscribed(EntityType entityType) {
         List<Long> subscribes = notificationClient.getSubscribes(entityType);
@@ -37,7 +33,7 @@ public class SubscribeService {
         if (EntityType.TECH_CAPABILITY.equals(entityType)) {
             return subscribeCapabilityMapper.convert(techCapabilityService.getByIdIn(subscribes));
         } else {
-            return businessCapabilityMapper.convertToCapabilitySubscribedDTOs(businessCapabilityService.getByIdIn(subscribes));
+            return subscribeCapabilityMapper.convertToCapabilitySubscribedDTOs(businessCapabilityService.getByIdIn(subscribes));
         }
     }
 }
