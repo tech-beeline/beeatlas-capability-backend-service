@@ -163,7 +163,6 @@ public class BusinessCapabilityService {
 
     private BusinessCapability updateCapability(BusinessCapability businessCapability, PutBusinessCapabilityDTO capabilityDTO) {
         businessCapability.setName(capabilityDTO.getName());
-        businessCapability.setCode();
         businessCapability.setDescription(proxyUrl(capabilityDTO.getDescription()));
         businessCapability.setStatus(capabilityDTO.getStatus());
         businessCapability.setAuthor(capabilityDTO.getAuthor());
