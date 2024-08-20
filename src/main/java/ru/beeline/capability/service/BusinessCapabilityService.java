@@ -163,6 +163,7 @@ public class BusinessCapabilityService {
 
     private BusinessCapability updateCapability(BusinessCapability businessCapability, PutBusinessCapabilityDTO capabilityDTO) {
         businessCapability.setName(capabilityDTO.getName());
+        businessCapability.setCode();
         businessCapability.setDescription(proxyUrl(capabilityDTO.getDescription()));
         businessCapability.setStatus(capabilityDTO.getStatus());
         businessCapability.setAuthor(capabilityDTO.getAuthor());
@@ -274,7 +275,7 @@ public class BusinessCapabilityService {
         StringBuilder errMsg = new StringBuilder();
         if (capabilityDTO.getCode() == null) {
             if (Objects.nonNull(userId) && Objects.nonNull(productIds) && Objects.nonNull(roles) && Objects.nonNull(permissions)) {
-                capabilityDTO.setCode(Long.toString(businessCapabilityRepository.findFirstByOrderByIdDesc().getId() + 1));
+                capabilityDTO.setCode("BC" + Long.toString(businessCapabilityRepository.findFirstByOrderByIdDesc().getId() + 1));
             } else {
                 errMsg.append("Отсутсвует обязательное поле code\n");
             }
