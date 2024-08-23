@@ -248,10 +248,9 @@ public class BusinessCapabilityService {
         } else {
             Optional<BusinessCapability> businessCapabilitiesOptional = businessCapabilityRepository.findById(id);
             if (businessCapabilitiesOptional.isPresent()) {
-                List<BusinessCapability> filteredBusinessCapabilities = businessCapabilitiesOptional.get().getChildrenOfTree().stream()
-                        .map(businessCapability -> filterChildren(businessCapability.getChildrenOfTree(), businessCapability.isDomain()))
-                        .flatMap(List::stream)
-                        .collect(Collectors.toList());
+                List<BusinessCapability> filteredBusinessCapabilities = businessCapabilitiesOptional.get().getChildrenOfTree();
+                filteredBusinessCapabilities.forEach(businessCapability ->
+                        businessCapability.setChildrenOfTree(filterChildren(businessCapability.getChildrenOfTree(), businessCapability.isDomain())));
                 result = businessCapabilityMapper.mapToTree(filteredBusinessCapabilities);
             } else {
                 result = new ArrayList<>();
