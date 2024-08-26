@@ -66,10 +66,10 @@ public class BusinessCapabilityController {
     @PutMapping
     @ApiOperation(value = "Создание/Обновление бизнес возможности")
     public ResponseEntity putBusinessCapability(@RequestBody PutBusinessCapabilityDTO capability,
-                                                @RequestHeader(value = USER_ID_HEADER) String userId,
-                                                @RequestHeader(value = USER_PRODUCTS_IDS_HEADER) String productIds,
-                                                @RequestHeader(value = USER_ROLES_HEADER) String roles,
-                                                @RequestHeader(value = USER_PERMISSION_HEADER) String permissions
+                                                @RequestHeader(value = USER_ID_HEADER, required = false)  String userId,
+                                                @RequestHeader(value = USER_PRODUCTS_IDS_HEADER, required = false) String productIds,
+                                                @RequestHeader(value = USER_ROLES_HEADER, required = false) String roles,
+                                                @RequestHeader(value = USER_PERMISSION_HEADER, required = false) String permissions
                                                 ) {
         businessCapabilityService.validateBusinessCapabilityDTO(capability, userId, productIds, roles, permissions);
         businessCapabilityService.putCapability(capability, userId, productIds, roles, permissions);

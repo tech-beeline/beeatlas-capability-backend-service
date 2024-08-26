@@ -281,10 +281,13 @@ public class BusinessCapabilityService {
         StringBuilder errMsg = new StringBuilder();
         if (capabilityDTO.getCode() == null) {
             if (Objects.nonNull(userId) && Objects.nonNull(productIds) && Objects.nonNull(roles) && Objects.nonNull(permissions)) {
-                capabilityDTO.setCode("BC" + Long.toString(businessCapabilityRepository.findFirstByOrderByIdDesc().getId() + 1));
+                capabilityDTO.setCode(getPrefix(capabilityDTO) + Long.toString(businessCapabilityRepository.findFirstByOrderByIdDesc().getId() + 1));
             } else {
                 errMsg.append("Отсутсвует обязательное поле code\n");
             }
+        }
+        if (!capabilityDTO.getIsDomain() && (capabilityDTO.getParent() == null || capabilityDTO.getParent().isEmpty())) {
+            errMsg.append("Отсутсвует обязательное поле parent\n");
         }
         if (capabilityDTO.getName() == null) {
             errMsg.append("Отсутсвует обязательное поле name\n");
@@ -299,6 +302,20 @@ public class BusinessCapabilityService {
         if (!errMsg.toString().isEmpty()) {
             throw new ValidationException(errMsg.toString());
         }
+    }
+
+    private String getPrefix(PutBusinessCapabilityDTO businessCapability) {
+        String prefix;
+        if (!businessCapability.getIsDomain()) {
+            prefix = "BC.";
+        } else {
+            if (businessCapability.getParent() == null) {
+                prefix = "DMN.";
+            } else {
+                prefix = "GRP.";
+            }
+        }
+        return prefix;
     }
 
 }
