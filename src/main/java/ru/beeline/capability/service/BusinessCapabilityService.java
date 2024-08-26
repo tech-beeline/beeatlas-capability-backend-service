@@ -174,6 +174,9 @@ public class BusinessCapabilityService {
     }
 
     public String proxyUrl(String description) {
+        if (description == null) {
+            return "";
+        }
         String urlPattern = "\\b(https?://\\S+)\\b";
         Pattern pattern = Pattern.compile(urlPattern);
         Matcher matcher = pattern.matcher(description);
@@ -279,7 +282,7 @@ public class BusinessCapabilityService {
 
     public void validateBusinessCapabilityDTO(PutBusinessCapabilityDTO capabilityDTO, String userId, String productIds, String roles, String permissions) {
         StringBuilder errMsg = new StringBuilder();
-        if (capabilityDTO.getCode() == null) {
+        if (capabilityDTO.getCode() == null || capabilityDTO.getCode().isEmpty()) {
             if (Objects.nonNull(userId) && Objects.nonNull(productIds) && Objects.nonNull(roles) && Objects.nonNull(permissions)) {
                 capabilityDTO.setCode(getPrefix(capabilityDTO) + Long.toString(businessCapabilityRepository.findFirstByOrderByIdDesc().getId() + 1));
             } else {
@@ -309,7 +312,7 @@ public class BusinessCapabilityService {
         if (!businessCapability.getIsDomain()) {
             prefix = "BC.";
         } else {
-            if (businessCapability.getParent() == null) {
+            if (businessCapability.getParent() == null || businessCapability.getParent().isEmpty()) {
                 prefix = "DMN.";
             } else {
                 prefix = "GRP.";
