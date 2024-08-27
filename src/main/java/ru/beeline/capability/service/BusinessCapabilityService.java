@@ -128,7 +128,6 @@ public class BusinessCapabilityService {
     }
 
     public void putCapability(PutBusinessCapabilityDTO capabilityDTO, String userId, String productIds, String roles, String permissions) {
-
         Optional<BusinessCapability> businessCapabilityOptional = businessCapabilityRepository.findByCode(capabilityDTO.getCode());
         BusinessCapability businessCapability;
         if (businessCapabilityOptional.isPresent()) {
@@ -153,7 +152,6 @@ public class BusinessCapabilityService {
             }
             dashboardClient.putCapability(capabilityDTO);
         }
-
     }
 
     private void fillAuthor(PutBusinessCapabilityDTO capabilityDTO, String userId) {
@@ -313,9 +311,9 @@ public class BusinessCapabilityService {
             prefix = "BC.";
         } else {
             if (businessCapability.getParent() == null || businessCapability.getParent().isEmpty()) {
-                prefix = "DMN.";
-            } else {
                 prefix = "GRP.";
+            } else {
+                prefix = "DMN.";
             }
         }
         return prefix;
