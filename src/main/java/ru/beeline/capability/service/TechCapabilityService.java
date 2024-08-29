@@ -224,13 +224,13 @@ public class TechCapabilityService {
     public void validateTechCapabilityDTO(PutTechCapabilityDTO techCapability) {
         StringBuilder errMsg = new StringBuilder();
         if (techCapability.getCode() == null) {
-            errMsg.append("Отсутсвует обязательное поле code\n");
+            errMsg.append("Отсутствует обязательное поле code\n");
         }
         if (techCapability.getName() == null) {
-            errMsg.append("Отсутсвует обязательное поле name\n");
+            errMsg.append("Отсутствует обязательное поле name\n");
         }
         if (techCapability.getAuthor() == null) {
-            errMsg.append("Отсутсвует обязательное поле author\n");
+            errMsg.append("Отсутствует обязательное поле author\n");
         }
         if (!errMsg.toString().isEmpty()) {
             throw new ValidationException(errMsg.toString());

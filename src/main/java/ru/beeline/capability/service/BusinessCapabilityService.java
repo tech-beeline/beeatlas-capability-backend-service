@@ -284,17 +284,17 @@ public class BusinessCapabilityService {
             if (Objects.nonNull(userId) && Objects.nonNull(productIds) && Objects.nonNull(roles) && Objects.nonNull(permissions)) {
                 capabilityDTO.setCode(getPrefix(capabilityDTO) + Long.toString(businessCapabilityRepository.findFirstByOrderByIdDesc().getId() + 1));
             } else {
-                errMsg.append("Отсутсвует обязательное поле code\n");
+                errMsg.append("Отсутствует обязательное поле code\n");
             }
         }
         if (!capabilityDTO.getIsDomain() && (capabilityDTO.getParent() == null || capabilityDTO.getParent().isEmpty())) {
-            errMsg.append("Отсутсвует обязательное поле parent\n");
+            errMsg.append("Отсутствует обязательное поле parent\n");
         }
         if (capabilityDTO.getName() == null) {
-            errMsg.append("Отсутсвует обязательное поле name\n");
+            errMsg.append("Отсутствует обязательное поле name\n");
         }
         if (capabilityDTO.getAuthor() == null) {
-            errMsg.append("Отсутсвует обязательное поле author\n");
+            errMsg.append("Отсутствует обязательное поле author\n");
         }
         if (capabilityDTO.getCode().equals(capabilityDTO.getParent())) {
             errMsg.append("Возможность не может быть собственным родителем\n");
