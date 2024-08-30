@@ -183,7 +183,7 @@ public class BusinessCapabilityService {
         while (matcher.find()) {
             String url = matcher.group(1);
             if (!description.contains("<a href=\"" + url) && !description.contains(">" + url)) {
-                String replacement = "<a href=\"" + url + "\">" + url + "</a>";
+                String replacement = "<a href=\"" + url + "\"><font color=\"#0000ff\">" + url + "</font></a>";
                 matcher.appendReplacement(result, replacement);
             }
         }
