@@ -12,8 +12,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.beeline.capability.domain.BusinessCapability;
+import ru.beeline.capability.domain.CriteriasBc;
+import ru.beeline.capability.domain.EnumCriteria;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
+import ru.beeline.capability.dto.BusinessCapabilityTreeDTO;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.exception.NotFoundException;
@@ -21,6 +24,8 @@ import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
 import ru.beeline.capability.mapper.TechCapabilityMapper;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
+import ru.beeline.capability.repository.CriteriaBcRepository;
+import ru.beeline.capability.repository.EnumCriteriaRepository;
 import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
 import ru.beeline.capability.repository.TechCapabilityRepository;
 import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
@@ -35,6 +40,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static ru.beeline.capability.utils.Constants.CREATE;
@@ -68,6 +74,12 @@ public class TechCapabilityService {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
+    @Autowired
+    private EnumCriteriaRepository enumCriteriaRepository;
+
+    @Autowired
+    private CriteriaBcRepository criteriaBcRepository;
+
     @Value("${queue.change-tech-capability.name}")
     private String changeTechCapabilityQueueName;
 
@@ -81,36 +93,23 @@ public class TechCapabilityService {
     }
 
     public List<TechCapability> getByIdIn(List<Long> ids) {
-        return techCapabilityRepository.findAllByIdIn(ids).stream()
-                .filter(tech -> tech.getDeletedDate() == null)
-                .collect(Collectors.toList());
+        return techCapabilityRepository.findAllByIdIn(ids).stream().filter(tech -> tech.getDeletedDate() == null).collect(Collectors.toList());
     }
 
     public TechCapabilityDTO getCapabilityById(Long id) {
-        TechCapability techCapability = techCapabilityRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Tech Capability не найдено"));
+        TechCapability techCapability = techCapabilityRepository.findById(id).orElseThrow(() -> new NotFoundException("Tech Capability не найдено"));
         techCapability.getParents().get(0);
         entityManager.detach(techCapability);
-        techCapability.setParents(techCapability.getParents().stream()
-                .filter(businessCapability -> Objects.isNull(businessCapability.getBusinessCapability().getDeletedDate()))
-                .collect(Collectors.toList()));
+        techCapability.setParents(techCapability.getParents().stream().filter(businessCapability -> Objects.isNull(businessCapability.getBusinessCapability().getDeletedDate())).collect(Collectors.toList()));
         return TechCapabilityDTO.convert(techCapability);
     }
 
     public CapabilityParentDTO getParents(Long id) {
         ArrayList<CapabilityParentDTO> parents = new ArrayList<>();
-        TechCapability techCapability = techCapabilityRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Tech Capability не найдено"));
+        TechCapability techCapability = techCapabilityRepository.findById(id).orElseThrow(() -> new NotFoundException("Tech Capability не найдено"));
         List<TechCapabilityRelations> techCapabilityRelations = techCapabilityRelationsRepository.findByTechCapability(techCapability);
         if (!techCapabilityRelations.isEmpty()) {
-            parents.add(
-                    new CapabilityParentDTO(
-                            techCapabilityRelations.stream()
-                                    .map(TechCapabilityRelations::getBusinessCapability)
-                                    .map(BusinessCapability::getId)
-                                    .collect(Collectors.toList())
-                    )
-            );
+            parents.add(new CapabilityParentDTO(techCapabilityRelations.stream().map(TechCapabilityRelations::getBusinessCapability).map(BusinessCapability::getId).collect(Collectors.toList())));
             techCapabilityRelations.forEach(relation -> {
                 parents.add(businessCapabilityService.getParents(relation.getBusinessCapability().getId()));
             });
@@ -170,7 +169,7 @@ public class TechCapabilityService {
             TechCapabilityRelations techCapabilityRelation = new TechCapabilityRelations();
             techCapabilityRelation.setBusinessCapability(businessCapability);
             techCapabilityRelation.setTechCapability(currentTechCapability);
-            if(!techCapabilityRelationsRepository.existsByBusinessCapabilityAndTechCapability(businessCapability, currentTechCapability)) {
+            if (!techCapabilityRelationsRepository.existsByBusinessCapabilityAndTechCapability(businessCapability, currentTechCapability)) {
                 techCapabilityRelations.add(techCapabilityRelation);
             }
         }
@@ -189,17 +188,7 @@ public class TechCapabilityService {
     }
 
     private TechCapability createTechCapability(PutTechCapabilityDTO techCapability) {
-        TechCapability newTechCapability = TechCapability.builder()
-                .code(techCapability.getCode())
-                .name(techCapability.getName())
-                .createdDate(new Date())
-                .lastModifiedDate(new Date())
-                .description(techCapability.getDescription())
-                .author(techCapability.getAuthor())
-                .owner(techCapability.getOwner())
-                .link(techCapability.getLink())
-                .status(techCapability.getStatus())
-                .build();
+        TechCapability newTechCapability = TechCapability.builder().code(techCapability.getCode()).name(techCapability.getName()).createdDate(new Date()).lastModifiedDate(new Date()).description(techCapability.getDescription()).author(techCapability.getAuthor()).owner(techCapability.getOwner()).link(techCapability.getLink()).status(techCapability.getStatus()).build();
         newTechCapability = techCapabilityRepository.save(newTechCapability);
         return newTechCapability;
     }
@@ -242,6 +231,86 @@ public class TechCapabilityService {
         rabbitTemplate.convertAndSend(queue, message, messagePostProcessor -> {
             messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
             return messagePostProcessor;
+        });
+    }
+
+    public void сalculatePrivateTechCapabiltiesCount(Long entityId) {
+        List<TechCapabilityRelations> techCapabilityRelationsList = techCapabilityRelationsRepository.findByTechCapability(
+                techCapabilityRepository.findById(entityId).get());
+        List<BusinessCapability> parentList = techCapabilityRelationsList.stream()
+                .map(TechCapabilityRelations::getBusinessCapability)
+                .collect(Collectors.toList());
+        EnumCriteria quantityTc = enumCriteriaRepository.findByName("quantity_tc");
+        parentList.forEach(businessCapability -> {
+            CriteriasBc criteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(businessCapability.getId(), quantityTc.getId());
+            extracted(businessCapability.getId(), quantityTc, criteriasBc, criteriasBc.getValue() + 1, 1, 2);
+
+            List<BusinessCapabilityTreeDTO> businessCapabilityTree =
+                    businessCapabilityService.getBusinessCapabilityTree(businessCapability.getId());
+            businessCapabilityTree.forEach(bc -> iterateChildrenCriteriaBc(bc, quantityTc));
+        });
+    }
+
+    private void iterateChildrenCriteriaBc(BusinessCapabilityTreeDTO bc, EnumCriteria quantityTc) {
+        bc.getChildren().forEach(childBc -> {
+            CriteriasBc criteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(bc.getId(), childBc.getId());
+            AtomicInteger criteriaIterator = new AtomicInteger();
+            AtomicInteger valueSummary = new AtomicInteger();
+            childBc.getChildren().forEach(childChildBc -> {
+                CriteriasBc childCriteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(childChildBc.getId(), quantityTc.getId());
+                if (childCriteriasBc != null && childCriteriasBc.getGrade() == 2) {
+                    criteriaIterator.getAndIncrement();
+                    valueSummary.addAndGet(childCriteriasBc.getValue());
+                }
+            });
+            if (childBc.getChildren().size() == criteriaIterator.get()) {
+                extracted(bc.getId(), quantityTc, criteriasBc, criteriasBc.getValue(), criteriasBc.getValue(), 2);
+
+            } else {
+                extracted(bc.getId(), quantityTc, criteriasBc, criteriasBc.getValue(), criteriasBc.getValue(), 1);
+            }
+        });
+
+    }
+
+    private void extracted(Long bcId, EnumCriteria quantityTc, CriteriasBc criteriasBc, Integer value1, Integer value2, int grade) {
+        if (criteriasBc != null) {
+            criteriasBc.setValue(value1);
+            criteriaBcRepository.save(criteriasBc);
+        } else {
+            criteriaBcRepository.save(CriteriasBc.builder()
+                    .criterionId(quantityTc.getId())
+                    .value(value2)
+                    .grade(grade)
+                    .bcId(bcId)
+                    .build());
+        }
+    }
+
+    public void сalculateTotalTechCapabiltiesCount() {
+
+        List<TechCapabilityRelations> techCapabilityRelationsList = techCapabilityRelationsRepository.findAll();
+        List<BusinessCapability> parentList = techCapabilityRelationsList.stream()
+                .map(TechCapabilityRelations::getBusinessCapability)
+                .distinct()
+                .collect(Collectors.toList());
+        EnumCriteria quantityTc = enumCriteriaRepository.findByName("quantity_tc");
+        parentList.forEach(businessCapability -> {
+            CriteriasBc criteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(businessCapability.getId(), quantityTc.getId());
+            if (criteriasBc != null) {
+                criteriasBc.setValue(businessCapabilityRepository.findAllByParentId(businessCapability.getId()).size());
+                criteriaBcRepository.save(criteriasBc);
+            } else {
+                criteriaBcRepository.save(CriteriasBc.builder()
+                        .criterionId(quantityTc.getId())
+                        .value(1)
+                        .grade(2)
+                        .bcId(businessCapability.getId())
+                        .build());
+            }
+            List<BusinessCapabilityTreeDTO> businessCapabilityTree =
+                    businessCapabilityService.getBusinessCapabilityTree(businessCapability.getId());
+            businessCapabilityTree.forEach(bc -> iterateChildrenCriteriaBc(bc, quantityTc));
         });
     }
 }
