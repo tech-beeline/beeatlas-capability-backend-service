@@ -243,7 +243,7 @@ public class TechCapabilityService {
         EnumCriteria quantityTc = enumCriteriaRepository.findByName("quantity_tc");
         parentList.forEach(businessCapability -> {
             CriteriasBc criteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(businessCapability.getId(), quantityTc.getId());
-            extracted(businessCapability.getId(), quantityTc, criteriasBc, criteriasBc.getValue() + 1, 1, 2);
+            extracted(businessCapability.getId(), quantityTc, criteriasBc, 1, 1, 2);
 
             List<BusinessCapabilityTreeDTO> businessCapabilityTree =
                     businessCapabilityService.getBusinessCapabilityTree(businessCapability.getId());
@@ -264,10 +264,10 @@ public class TechCapabilityService {
                 }
             });
             if (childBc.getChildren().size() == criteriaIterator.get()) {
-                extracted(bc.getId(), quantityTc, criteriasBc, criteriasBc.getValue(), criteriasBc.getValue(), 2);
+                extracted(bc.getId(), quantityTc, criteriasBc, criteriasBc.getValue(), 0, 2);
 
             } else {
-                extracted(bc.getId(), quantityTc, criteriasBc, criteriasBc.getValue(), criteriasBc.getValue(), 1);
+                extracted(bc.getId(), quantityTc, criteriasBc, criteriasBc.getValue(), 0, 1);
             }
         });
 
@@ -275,7 +275,7 @@ public class TechCapabilityService {
 
     private void extracted(Long bcId, EnumCriteria quantityTc, CriteriasBc criteriasBc, Integer value1, Integer value2, int grade) {
         if (criteriasBc != null) {
-            criteriasBc.setValue(value1);
+            criteriasBc.setValue(criteriasBc.getValue() + value1);
             criteriaBcRepository.save(criteriasBc);
         } else {
             criteriaBcRepository.save(CriteriasBc.builder()
