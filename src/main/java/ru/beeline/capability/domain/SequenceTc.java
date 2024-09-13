@@ -20,7 +20,7 @@ import javax.persistence.Table;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "sequence_tc", schema = "your_schema")
+@Table(name = "sequence_tc", schema = "capability")
 public class SequenceTc {
 
     @Id
