@@ -4,13 +4,22 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
+import ru.beeline.capability.dto.BusinessCapabilityTreeCustomDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeDTO;
 import ru.beeline.capability.dto.CapabilityParentDTO;
-import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
+import ru.beeline.capability.service.BusinessCapabilityService;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
 import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
-import ru.beeline.capability.service.BusinessCapabilityService;
 
 import java.util.Collections;
 import java.util.List;
@@ -50,8 +59,14 @@ public class BusinessCapabilityController {
 
     @GetMapping("/tree")
     @ApiOperation(value = "Построение дерева", response = List.class)
-    public List<BusinessCapabilityTreeDTO> getBusinessCapabilityTree(@RequestParam(value = "id", required = false) Long id) {
-        return businessCapabilityService.getBusinessCapabilityTree(id);
+    public List<BusinessCapabilityTreeDTO> getBusinessCapabilityTree() {
+        return businessCapabilityService.getBusinessCapabilityTree(null);
+    }
+
+    @GetMapping("/tree/{id}")
+    @ApiOperation(value = "Построение дерева по идентификатору возможности", response = List.class)
+    public List<BusinessCapabilityTreeCustomDTO> getBusinessCapabilityTreeById(@PathVariable Long id) {
+        return businessCapabilityService.getBusinessCapabilityTreeById(id);
     }
 
     @GetMapping
@@ -66,11 +81,11 @@ public class BusinessCapabilityController {
     @PutMapping
     @ApiOperation(value = "Создание/Обновление бизнес возможности")
     public ResponseEntity putBusinessCapability(@RequestBody PutBusinessCapabilityDTO capability,
-                                                @RequestHeader(value = USER_ID_HEADER, required = false)  String userId,
+                                                @RequestHeader(value = USER_ID_HEADER, required = false) String userId,
                                                 @RequestHeader(value = USER_PRODUCTS_IDS_HEADER, required = false) String productIds,
                                                 @RequestHeader(value = USER_ROLES_HEADER, required = false) String roles,
                                                 @RequestHeader(value = USER_PERMISSION_HEADER, required = false) String permissions
-                                                ) {
+    ) {
         businessCapabilityService.validateBusinessCapabilityDTO(capability, userId, productIds, roles, permissions);
         businessCapabilityService.putCapability(capability, userId, productIds, roles, permissions);
         return new ResponseEntity<>(HttpStatus.OK);

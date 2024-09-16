@@ -17,6 +17,7 @@ import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
+import ru.beeline.capability.dto.BusinessCapabilityTreeCustomDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeDTO;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.exception.NotFoundException;
@@ -240,24 +241,35 @@ public class BusinessCapabilityService {
         });
     }
 
+    public List<BusinessCapabilityTreeCustomDTO> getBusinessCapabilityTreeById(Long id) {
+        return businessCapabilityMapper.mapToCustomTree(getTreeById(id));
+    }
+
     public List<BusinessCapabilityTreeDTO> getBusinessCapabilityTree(Long id) {
-        List<BusinessCapabilityTreeDTO> result;
         if (id == null) {
-            List<BusinessCapability> businessCapabilities = businessCapabilityRepository.findAllByParentIdIsNullAndDeletedDateIsNullAndIsDomainIsTrue();
-            List<BusinessCapability> filteredBusinessCapabilities = filterChildrenWithDomainIsTrue(businessCapabilities);
-            result = businessCapabilityMapper.mapToTree(filteredBusinessCapabilities);
+            return businessCapabilityMapper.mapToTree(getSharedTree());
         } else {
-            Optional<BusinessCapability> businessCapabilitiesOptional = businessCapabilityRepository.findById(id);
-            if (businessCapabilitiesOptional.isPresent()) {
-                List<BusinessCapability> filteredBusinessCapabilities = businessCapabilitiesOptional.get().getChildrenOfTree();
-                filteredBusinessCapabilities.forEach(businessCapability ->
-                        businessCapability.setChildrenOfTree(filterChildren(businessCapability.getChildrenOfTree(), businessCapability.isDomain())));
-                result = businessCapabilityMapper.mapToTree(filteredBusinessCapabilities);
-            } else {
-                result = new ArrayList<>();
-            }
+            return businessCapabilityMapper.mapToTree(getTreeById(id));
         }
-        return result;
+    }
+
+    private List<BusinessCapability> getTreeById(Long id) {
+        Optional<BusinessCapability> businessCapabilitiesOptional = businessCapabilityRepository.findById(id);
+        if (businessCapabilitiesOptional.isPresent()) {
+
+            List<BusinessCapability> filteredBusinessCapabilities = businessCapabilitiesOptional.get().getChildrenOfTree();
+            filteredBusinessCapabilities.forEach(businessCapability ->
+                    businessCapability.setChildrenOfTree(filterChildren(businessCapability.getChildrenOfTree(), businessCapability.isDomain())));
+            return filteredBusinessCapabilities;
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    private List<BusinessCapability> getSharedTree() {
+        List<BusinessCapability> businessCapabilities = businessCapabilityRepository.findAllByParentIdIsNullAndDeletedDateIsNullAndIsDomainIsTrue();
+        List<BusinessCapability> filteredBusinessCapabilities = filterChildrenWithDomainIsTrue(businessCapabilities);
+        return filteredBusinessCapabilities;
     }
 
     private List<BusinessCapability> filterChildren(List<BusinessCapability> children, boolean isDomain) {
