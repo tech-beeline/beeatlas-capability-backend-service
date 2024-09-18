@@ -65,7 +65,7 @@ public class BusinessCapabilityController {
 
     @GetMapping("/tree/{id}")
     @ApiOperation(value = "Построение дерева по идентификатору возможности", response = List.class)
-    public List<BusinessCapabilityTreeCustomDTO> getBusinessCapabilityTreeById(@PathVariable Long id) {
+    public BusinessCapabilityTreeCustomDTO getBusinessCapabilityTreeById(@PathVariable Long id) {
         return businessCapabilityService.getBusinessCapabilityTreeById(id);
     }
 

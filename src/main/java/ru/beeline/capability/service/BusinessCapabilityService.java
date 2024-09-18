@@ -221,8 +221,10 @@ public class BusinessCapabilityService {
         });
     }
 
-    public List<BusinessCapabilityTreeCustomDTO> getBusinessCapabilityTreeById(Long id) {
-        return businessCapabilityMapper.mapToCustomTree(getTreeById(id));
+    public BusinessCapabilityTreeCustomDTO getBusinessCapabilityTreeById(Long id) {
+        Optional<BusinessCapability> businessCapabilitiesOptional = businessCapabilityRepository.findById(id);
+
+        return businessCapabilityMapper.mapToCustomTree(getTreeById(id), businessCapabilitiesOptional.get());
     }
 
     public List<BusinessCapabilityTreeDTO> getBusinessCapabilityTree(Long id) {

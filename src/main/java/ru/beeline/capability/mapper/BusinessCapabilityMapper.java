@@ -149,25 +149,23 @@ public class BusinessCapabilityMapper {
                 .build();
     }
 
-    public List<BusinessCapabilityTreeCustomDTO> mapToCustomTree(List<BusinessCapability> businessCapabilities) {
-        return businessCapabilities.stream().map(businessCapability -> {
-            return BusinessCapabilityTreeCustomDTO.builder()
-                    .id(businessCapability.getId())
-                    .code(businessCapability.getCode())
-                    .name(businessCapability.getName())
-                    .description(businessCapability.getDescription())
-                    .author(businessCapability.getAuthor())
-                    .status(businessCapability.getStatus())
-                    .link(businessCapability.getLink())
-                    .createdDate(businessCapability.getCreatedDate())
-                    .lastModifiedDate(businessCapability.getLastModifiedDate())
-                    .isDomain(businessCapability.isDomain())
-                    .owner(businessCapability.getOwner())
-                    .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
-                    .children(mapToTree(businessCapability.getChildrenOfTree()))
-                    .parent(getParentList(businessCapability, new ArrayList<BusinessCapabilityTreeInfoDTO>()))
-                    .build();
-        }).collect(Collectors.toList());
+    public BusinessCapabilityTreeCustomDTO mapToCustomTree(List<BusinessCapability> businessCapabilities, BusinessCapability businessCapability) {
+        return BusinessCapabilityTreeCustomDTO.builder()
+                .id(businessCapability.getId())
+                .code(businessCapability.getCode())
+                .name(businessCapability.getName())
+                .description(businessCapability.getDescription())
+                .author(businessCapability.getAuthor())
+                .status(businessCapability.getStatus())
+                .link(businessCapability.getLink())
+                .createdDate(businessCapability.getCreatedDate())
+                .lastModifiedDate(businessCapability.getLastModifiedDate())
+                .isDomain(businessCapability.isDomain())
+                .owner(businessCapability.getOwner())
+                .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
+                .children(mapToTree(businessCapabilities))
+                .parent(getParentList(businessCapability, new ArrayList<BusinessCapabilityTreeInfoDTO>()))
+                .build();
     }
 
     private List<BusinessCapabilityTreeInfoDTO> getParentList(BusinessCapability businessCapability, ArrayList<BusinessCapabilityTreeInfoDTO> businessCapabilityTreeInfoDTOS) {
