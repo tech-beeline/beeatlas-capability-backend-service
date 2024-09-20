@@ -26,6 +26,7 @@ import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
 import ru.beeline.capability.mapper.BusinessCapabilityMapper;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
+import ru.beeline.capability.utils.UrlWrapper;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
 import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
 
@@ -34,8 +35,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static ru.beeline.capability.utils.Constants.CREATE;
@@ -161,7 +160,7 @@ public class BusinessCapabilityService {
 
     private BusinessCapability updateCapability(BusinessCapability businessCapability, PutBusinessCapabilityDTO capabilityDTO) {
         businessCapability.setName(capabilityDTO.getName());
-        businessCapability.setDescription(proxyUrl(capabilityDTO.getDescription()));
+        businessCapability.setDescription(UrlWrapper.proxyUrl(capabilityDTO.getDescription()));
         businessCapability.setStatus(capabilityDTO.getStatus());
         businessCapability.setAuthor(capabilityDTO.getAuthor());
         businessCapability.setLastModifiedDate(new Date());
@@ -172,34 +171,13 @@ public class BusinessCapabilityService {
         return businessCapabilityRepository.save(businessCapability);
     }
 
-    public String proxyUrl(String description) {
-        if (description == null) {
-            return "";
-        }
-        String urlPattern = "\\b(https?://\\S+)\\b";
-        Pattern pattern = Pattern.compile(urlPattern);
-        Matcher matcher = pattern.matcher(description);
-
-        StringBuffer result = new StringBuffer();
-        while (matcher.find()) {
-            String url = matcher.group(1);
-            if (!description.contains("<a href=\"" + url) && !description.contains(">" + url)) {
-                String replacement = "<a href=\"" + url + "\"><font color=\"#0000ff\">" + url + "</font></a>";
-                matcher.appendReplacement(result, replacement);
-            }
-        }
-        matcher.appendTail(result);
-
-        return result.toString();
-    }
-
     private BusinessCapability createCapabilities(PutBusinessCapabilityDTO capability) {
 
         BusinessCapability result = businessCapabilityRepository.save(
                 BusinessCapability.builder()
                         .code(capability.getCode())
                         .name(capability.getName())
-                        .description(proxyUrl(capability.getDescription()))
+                        .description(UrlWrapper.proxyUrl(capability.getDescription()))
                         .status(capability.getStatus())
                         .author(capability.getAuthor())
                         .createdDate(new Date())
