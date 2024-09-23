@@ -42,13 +42,14 @@ public class NotificationClient {
             HttpEntity<String> entity = new HttpEntity<>(headers);
             String url = notificationServerUrl + "/api/v1/subscribe/" + entityType.name();
 
+            log.info("request to notificationServerUrl with entityType=", entityType.name());
             ResponseEntity<List<Long>> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     entity,
                     new ParameterizedTypeReference<List<Long>>() {
                     });
-
+            log.info("response from notificationServerUrl:", response.getBody());
             return response.getBody();
         } catch (Exception e) {
             log.error("Error occurred while trying to get all entity subscriptions: ", e);
