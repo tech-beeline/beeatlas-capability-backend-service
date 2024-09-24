@@ -28,6 +28,7 @@ import ru.beeline.capability.repository.CriteriaBcRepository;
 import ru.beeline.capability.repository.EnumCriteriaRepository;
 import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
 import ru.beeline.capability.repository.TechCapabilityRepository;
+import ru.beeline.capability.utils.UrlWrapper;
 import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 
 import javax.persistence.EntityManager;
@@ -178,7 +179,7 @@ public class TechCapabilityService {
 
     private void updateTechCapability(TechCapability currentTechCapability, PutTechCapabilityDTO techCapability) {
         currentTechCapability.setName(techCapability.getName());
-        currentTechCapability.setDescription(proxyUrl(techCapability.getDescription()));
+        currentTechCapability.setDescription(UrlWrapper.proxyUrl(techCapability.getDescription()));
         currentTechCapability.setAuthor(techCapability.getAuthor());
         currentTechCapability.setOwner(techCapability.getOwner());
         currentTechCapability.setLastModifiedDate(new Date());
@@ -193,7 +194,7 @@ public class TechCapabilityService {
                 .name(techCapability.getName())
                 .createdDate(new Date())
                 .lastModifiedDate(new Date())
-                .description(proxyUrl(techCapability.getDescription()))
+                .description(UrlWrapper.proxyUrl(techCapability.getDescription()))
                 .author(techCapability.getAuthor())
                 .owner(techCapability.getOwner())
                 .link(techCapability.getLink())
@@ -244,7 +245,7 @@ public class TechCapabilityService {
         });
     }
 
-    public void сalculatePrivateTechCapabiltiesCount(Long entityId) {
+    public void calculatePrivateTechCapabiltiesCount(Long entityId) {
         List<TechCapabilityRelations> techCapabilityRelationsList = techCapabilityRelationsRepository.findByTechCapability(
                 techCapabilityRepository.findById(entityId).get());
         List<BusinessCapability> parentList = techCapabilityRelationsList.stream()
@@ -297,7 +298,7 @@ public class TechCapabilityService {
         }
     }
 
-    public void сalculateTotalTechCapabiltiesCount() {
+    public void calculateTotalTechCapabiltiesCount() {
 
         List<TechCapabilityRelations> techCapabilityRelationsList = techCapabilityRelationsRepository.findAll();
         List<BusinessCapability> parentList = techCapabilityRelationsList.stream()
@@ -322,89 +323,5 @@ public class TechCapabilityService {
                     businessCapabilityService.getBusinessCapabilityTree(businessCapability.getId());
             businessCapabilityTree.forEach(bc -> iterateChildrenCriteriaBc(bc, quantityTc));
         });
-    }
-
-    public static String proxyUrl(String description) {
-        if (description == null) {
-            return "";
-        }
-        int pos = -1;
-
-        while (pos < description.length() - 1) {
-            pos++;
-            char currentChar = description.charAt(pos);
-            if (currentChar == 'h' && pos + 7 < description.length()) {
-                String subString = description.substring(pos, pos + 8);
-                if (subString.equals("https://")) {
-                    int startIndexUrl = pos;
-                    int endIndexUrl = pos + 8;
-                    while (endIndexUrl < description.length()
-                            && description.charAt(endIndexUrl) != ' '
-                            && description.charAt(endIndexUrl) != '\"'
-                            && description.charAt(endIndexUrl) != '<') {
-                        endIndexUrl++;
-                    }
-                    if (endIndexUrl < description.length() && (description.charAt(endIndexUrl) == '>' || description.charAt(endIndexUrl + 1) == '>')) {
-                        continue;
-                    }
-                    String fullUrl = description.substring(startIndexUrl, endIndexUrl);
-                    String urlWithTags = getWithTags(description, startIndexUrl, endIndexUrl);
-                    description = description.replace(urlWithTags, reduceUrlToTemplate(fullUrl));
-                    System.out.println();
-                }
-            }
-        }
-        return description;
-    }
-
-    private static CharSequence reduceUrlToTemplate(String fullUrl) {
-        return String.format("<a href=\"%s\"><font color=\"#0000ff\">%s</font></a>", fullUrl, fullUrl);
-    }
-
-    private static String getWithTags(String description, Integer startIndexUrl, Integer endIndexUrl) {
-        if (endIndexUrl < description.length() && description.charAt(startIndexUrl - 1) == '>' && description.charAt(endIndexUrl) == '<') {
-            endIndexUrl = getFinishIndex(description, endIndexUrl);
-            startIndexUrl = getStartIndex(description, startIndexUrl);
-        }
-        return description.substring(startIndexUrl, endIndexUrl);
-    }
-
-    private static Integer getFinishIndex(String description, Integer startIndexUrl) {
-        return findFinishIndex(description, startIndexUrl, ">")
-                .orElseGet(() -> findFinishIndex(description, startIndexUrl, ">")
-                        .orElse(description.length()));
-    }
-
-    private static Optional<Integer> findFinishIndex(String description, Integer startIndexUrl, String tag) {
-        int pos = startIndexUrl;
-        while (pos < description.length()) {
-            String subString = description.substring(pos, pos + tag.length());
-            if (subString.equals(tag)) {
-                return Optional.of(pos + tag.length());
-            }
-            pos++;
-        }
-        return Optional.empty();
-    }
-
-    private static Integer getStartIndex(String description, Integer startIndexUrl) {
-        return findStartIndex(description, startIndexUrl, "<a")
-                .orElseGet(() -> findStartIndex(description, startIndexUrl, "<font")
-                        .orElse(startIndexUrl));
-    }
-
-    private static Optional<Integer> findStartIndex(String description, Integer startIndexUrl, String tag) {
-        int pos = startIndexUrl;
-        while (pos >= 0) {
-            char currentChar = description.charAt(pos);
-            if (currentChar == description.charAt(0)) {
-                String subString = description.substring(pos, pos + tag.length());
-                if (subString.equals(tag)) {
-                    return Optional.of(pos);
-                }
-            }
-            pos--;
-        }
-        return Optional.empty();
     }
 }

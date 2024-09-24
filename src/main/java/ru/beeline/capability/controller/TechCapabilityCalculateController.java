@@ -22,14 +22,14 @@ public class TechCapabilityCalculateController {
     @PostMapping("/calculate-private-tech-capabilities/{entity_id}")
     @ApiOperation(value = "Запустить процесс частного расчета критериев для тепловых карт")
     public ResponseEntity сalculatePrivateTechCapabiltiesCount(@PathVariable(name = "entity_id") Long entityId) {
-        techCapabilityService.сalculatePrivateTechCapabiltiesCount(entityId);
+        techCapabilityService.calculatePrivateTechCapabiltiesCount(entityId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/calculate-total-tech-capabilities")
     @ApiOperation(value = "Запустить процесс общего расчета критериев для тепловых карт")
     public ResponseEntity сalculatePrivateTechCapabiltiesCount() {
-        techCapabilityService.сalculateTotalTechCapabiltiesCount();
+        techCapabilityService.calculateTotalTechCapabiltiesCount();
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

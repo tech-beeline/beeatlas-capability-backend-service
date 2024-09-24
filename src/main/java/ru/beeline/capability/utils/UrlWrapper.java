@@ -3,14 +3,16 @@ package ru.beeline.capability.utils;
 import java.util.Optional;
 
 public class UrlWrapper {
+
     public static String proxyUrl(String description) {
         if (description == null) {
             return "";
         }
-        return wrapA(wrapFont(wrapUrl(description)));
+        description = description.replaceAll("\\\\\"", "\"");
+        return wrapTagA(wrapTagFont(wrapCleanUrl(description)));
     }
 
-    private static String wrapUrl(String description) {
+    private static String wrapCleanUrl(String description) {
         boolean tegA = false;
         boolean tegFont = false;
         int pos = -1;
@@ -18,7 +20,7 @@ public class UrlWrapper {
             pos++;
             char currentChar = description.charAt(pos);
             if (tegA) {
-                if (pos + 3 < description.length() && !description.startsWith("<a", pos)) {
+                if (pos + 3 < description.length() && !description.startsWith("/a>", pos)) {
                     continue;
                 }
                 if (pos + 3 < description.length() && description.startsWith("/a>", pos)) {
@@ -52,7 +54,7 @@ public class UrlWrapper {
                         endIndexUrl++;
                     }
                     String fullUrl = description.substring(startIndexUrl, endIndexUrl);
-                    description = description.replace(fullUrl, reduceUrlToTemplate(fullUrl, fullUrl));
+                    description = replaceRange(description, startIndexUrl, endIndexUrl, reduceUrlToTemplate(fullUrl, fullUrl), false);
                     pos = description.indexOf(reduceUrlToTemplate(fullUrl, fullUrl)) + reduceUrlToTemplate(fullUrl, fullUrl).length();
                     System.out.print("");
                 }
@@ -61,14 +63,14 @@ public class UrlWrapper {
         return description;
     }
 
-    private static String wrapFont(String description) {
+    private static String wrapTagFont(String description) {
         boolean tegA = false;
         int pos = -1;
         while (pos < description.length() - 1) {
             pos++;
             char currentChar = description.charAt(pos);
             if (tegA) {
-                if (pos + 3 < description.length() && !description.startsWith("<a", pos)) {
+                if (pos + 3 < description.length() && !description.startsWith("/a>", pos)) {
                     continue;
                 }
                 if (pos + 3 < description.length() && description.startsWith("/a>", pos)) {
@@ -91,8 +93,7 @@ public class UrlWrapper {
                         endIndexUrl++;
                     }
                     String fullUrl = description.substring(startIndexUrl, endIndexUrl);
-                    String urlWithTags = getWithTags(description, startIndexUrl, endIndexUrl);
-                    description = description.replace(urlWithTags, reduceUrlToTemplate(fullUrl, fullUrl));
+                    description = replaceRange(description, startIndexUrl, endIndexUrl, reduceUrlToTemplate(fullUrl, fullUrl), true);
                     pos = description.indexOf(reduceUrlToTemplate(fullUrl, fullUrl)) + reduceUrlToTemplate(fullUrl, fullUrl).length();
                     System.out.print("");
                 }
@@ -102,14 +103,13 @@ public class UrlWrapper {
         return description;
     }
 
-    private static String wrapA(String description) {
+    private static String wrapTagA(String description) {
         int startIndexTag = 0;
         int endIndexTag = 0;
         boolean tagA = false;
         int pos = -1;
         while (pos < description.length() - 1) {
             pos++;
-            char currentChar = description.charAt(pos);
 
             if (tagA) {
                 if (pos + 3 < description.length() && description.startsWith("/a>", pos)) {
@@ -119,7 +119,7 @@ public class UrlWrapper {
                     continue;
                 }
             } else {
-                if (pos + 3 < description.length() && !description.startsWith("<a", pos)) {
+                if (pos + 3 < description.length() && description.startsWith("<a", pos)) {
                     startIndexTag = pos;
                     tagA = true;
                     continue;
@@ -130,26 +130,26 @@ public class UrlWrapper {
             if (description.substring(startIndexTag, endIndexTag).contains("<font")) {
                 continue;
             }
+
             int pos2 = -1;
-            String cutDescription = description.substring(startIndexTag, endIndexTag);
+            String urlWithTags = description.substring(startIndexTag, endIndexTag);
             while (pos2 < endIndexTag - 1) {
                 pos2++;
-                if (cutDescription.charAt(pos2) == 'h' && pos2 + 7 < cutDescription.length()) {
-                    String subString = cutDescription.substring(pos2, pos2 + 8);
+                if (urlWithTags.charAt(pos2) == 'h' && pos2 + 7 < urlWithTags.length()) {
+                    String subString = urlWithTags.substring(pos2, pos2 + 8);
                     if (subString.equals("https://")) {
                         int startIndexUrl = pos2;
                         int endIndexUrl = pos2 + 8;
-                        while (endIndexUrl < cutDescription.length()
-                                && cutDescription.charAt(endIndexUrl) != ' '
-                                && cutDescription.charAt(endIndexUrl) != '\"'
-                                && cutDescription.charAt(endIndexUrl) != '<') {
+                        while (endIndexUrl < urlWithTags.length()
+                                && urlWithTags.charAt(endIndexUrl) != ' '
+                                && urlWithTags.charAt(endIndexUrl) != '\"'
+                                && urlWithTags.charAt(endIndexUrl) != '<') {
                             endIndexUrl++;
                         }
-                        String fullUrl = cutDescription.substring(startIndexUrl, endIndexUrl);
-                        String findLink = findLink(cutDescription, fullUrl);
-                        description = description.replace(cutDescription, reduceUrlToTemplate(fullUrl, findLink));
-                        pos = description.indexOf(reduceUrlToTemplate(fullUrl, findLink)) + reduceUrlToTemplate(fullUrl, findLink).length();
-                        System.out.print("");
+                        String httpUrl = urlWithTags.substring(startIndexUrl, endIndexUrl);
+                        String findLink = findLink(urlWithTags, httpUrl);
+                        description = replaceRange(description, startIndexTag, endIndexTag, reduceUrlToTemplate(httpUrl, findLink), false);
+                        pos = description.indexOf(reduceUrlToTemplate(httpUrl, findLink)) + reduceUrlToTemplate(httpUrl, findLink).length();
                         break;
                     }
                 }
@@ -157,8 +157,16 @@ public class UrlWrapper {
         }
         return description;
     }
-
-    private static String findLink(String urlWithTag, String fullUrl) {
+    static String replaceRange(String description, int startIndex, int endIndex, String replacement, boolean urlWithTags) {
+        if(urlWithTags){
+            if (endIndex < description.length()) {
+                endIndex = getFinishIndex(description, endIndex);
+                startIndex = getStartIndex(description, startIndex);
+            }
+        }
+        return description.substring(0, startIndex) + replacement + description.substring(endIndex);
+    }
+    private static String findLink(String urlWithTag, String httpUrl) {
         Integer endIndex = findFinishIndex(urlWithTag, 1, "</a>").orElse(null);
         if (endIndex != null) {
             int pos = endIndex - 2;
@@ -177,15 +185,7 @@ public class UrlWrapper {
                 }
             }
         }
-        return fullUrl;
-    }
-
-    private static String getWithTags(String description, Integer startIndexUrl, Integer endIndexUrl) {
-        if (endIndexUrl < description.length()) {
-            endIndexUrl = getFinishIndex(description, endIndexUrl);
-            startIndexUrl = getStartIndex(description, startIndexUrl);
-        }
-        return description.substring(startIndexUrl, endIndexUrl);
+        return httpUrl;
     }
 
     private static Integer getFinishIndex(String description, Integer endIndexUrl) {
