@@ -20,10 +20,10 @@ public class UrlWrapper {
             pos++;
             char currentChar = description.charAt(pos);
             if (tegA) {
-                if (pos + 3 < description.length() && !description.startsWith("/a>", pos)) {
+                if (pos + 2 < description.length() && !description.startsWith("/a>", pos)) {
                     continue;
                 }
-                if (pos + 3 < description.length() && description.startsWith("/a>", pos)) {
+                if (pos + 2 < description.length() && description.startsWith("/a>", pos)) {
                     tegA = false;
                 }
             }
@@ -70,14 +70,14 @@ public class UrlWrapper {
             pos++;
             char currentChar = description.charAt(pos);
             if (tegA) {
-                if (pos + 3 < description.length() && !description.startsWith("/a>", pos)) {
+                if (pos + 2 < description.length() && !description.startsWith("/a>", pos)) {
                     continue;
                 }
-                if (pos + 3 < description.length() && description.startsWith("/a>", pos)) {
+                if (pos + 2 < description.length() && description.startsWith("/a>", pos)) {
                     tegA = false;
                 }
             }
-            if (pos + 3 < description.length() && description.startsWith("<a", pos)) {
+            if (pos + 1 < description.length() && description.startsWith("<a", pos)) {
                 tegA = true;
                 continue;
             }
@@ -112,7 +112,7 @@ public class UrlWrapper {
             pos++;
 
             if (tagA) {
-                if (pos + 3 < description.length() && description.startsWith("/a>", pos)) {
+                if (pos + 2 < description.length() && description.startsWith("/a>", pos)) {
                     tagA = false;
                     endIndexTag = pos + 3;
                 } else {
