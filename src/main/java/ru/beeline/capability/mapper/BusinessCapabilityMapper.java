@@ -169,9 +169,11 @@ public class BusinessCapabilityMapper {
     }
 
     private List<BusinessCapabilityTreeInfoDTO> getParentList(BusinessCapability businessCapability, ArrayList<BusinessCapabilityTreeInfoDTO> businessCapabilityTreeInfoDTOS) {
-        businessCapabilityTreeInfoDTOS.add(mapToTreeInfo(businessCapability));
-        if (businessCapability.getParentEntity() != null) {
-            return getParentList(businessCapability.getParentEntity(), businessCapabilityTreeInfoDTOS);
+        if (businessCapability != null) {
+            businessCapabilityTreeInfoDTOS.add(mapToTreeInfo(businessCapability));
+            if (businessCapability.getParentEntity() != null) {
+                return getParentList(businessCapability.getParentEntity(), businessCapabilityTreeInfoDTOS);
+            }
         }
         return businessCapabilityTreeInfoDTOS;
     }
