@@ -28,6 +28,7 @@ import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
 import ru.beeline.capability.utils.UrlWrapper;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
+import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenIdsDTO;
 import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
 
 import java.util.ArrayList;
@@ -70,16 +71,47 @@ public class BusinessCapabilityService {
     private String changeBusinessCapabilityQueueName;
 
 
+    public BusinessCapability findById(Long id) {
+        return businessCapabilityRepository.findById(id).orElseThrow(() ->
+                new NotFoundException("Business Capability не найдено"));
+    }
+
     public BusinessCapabilityChildrenDTO getChildren(Long id) {
-        List<TechCapability> techCapabilities = businessCapabilityRepository.findById(id).orElseThrow(() -> new NotFoundException("Business Capability не найдено")).getChildren().stream().map(TechCapabilityRelations::getTechCapability).filter(techCapability -> Objects.isNull(techCapability.getDeletedDate())).collect(Collectors.toList());
+        List<TechCapability> techCapabilities = findById(id).getChildren().stream()
+                .map(TechCapabilityRelations::getTechCapability)
+                .filter(techCapability -> Objects.isNull(techCapability.getDeletedDate()))
+                .collect(Collectors.toList());
         List<BusinessCapability> businessCapabilitiesKids = businessCapabilityRepository.findAllByParentIdAndDeletedDateIsNull(id);
         return businessCapabilityMapper.convert(techCapabilities, businessCapabilitiesKids);
+    }
+
+    public BusinessCapabilityChildrenIdsDTO getChildrenIds(Long id) {
+        List<Long> bcIds = new ArrayList<>();
+        List<Long> tcIds = new ArrayList<>();
+        BusinessCapability businessCapability = findById(id);
+        tcIds.addAll(
+                businessCapability.getChildren().stream()
+                        .map(TechCapabilityRelations::getTechCapability)
+                        .map(TechCapability::getId)
+                        .collect(Collectors.toList()));
+        businessCapability.getChildrenOfTree().forEach(childBc -> getTechCapabilities(childBc, bcIds, tcIds));
+        return new BusinessCapabilityChildrenIdsDTO(tcIds, bcIds);
+    }
+
+    public void getTechCapabilities(BusinessCapability bc, List<Long> bcIds, List<Long> tcIds) {
+        bcIds.add(bc.getId());
+        tcIds.addAll(
+                bc.getChildren().stream()
+                        .map(TechCapabilityRelations::getTechCapability)
+                        .map(TechCapability::getId)
+                        .collect(Collectors.toList()));
+        bc.getChildrenOfTree().forEach(childBc -> getTechCapabilities(childBc, bcIds, tcIds));
     }
 
     public CapabilityParentDTO getParents(Long id) {
         ArrayList<Long> result = new ArrayList<>();
         while (true) {
-            id = businessCapabilityRepository.findById(id).orElseThrow(() -> new NotFoundException("Business Capability не найдено")).getParentId();
+            id = findById(id).getParentId();
 
             if (Objects.isNull(id)) {
                 return new CapabilityParentDTO(result);
@@ -90,7 +122,7 @@ public class BusinessCapabilityService {
     }
 
     public BusinessCapabilityShortDTO getById(Long id) {
-        BusinessCapability businessCapability = businessCapabilityRepository.findById(id).orElseThrow(() -> new NotFoundException("Business Capability не найдено"));
+        BusinessCapability businessCapability = findById(id);
 
         if (businessCapability.getParentEntity() != null && businessCapability.getParentEntity().getDeletedDate() != null)
             businessCapability.setParentEntity(null);
@@ -220,9 +252,7 @@ public class BusinessCapabilityService {
     }
 
     public BusinessCapabilityTreeCustomDTO getBusinessCapabilityTreeById(Long id) {
-        Optional<BusinessCapability> businessCapabilitiesOptional = businessCapabilityRepository.findById(id);
-
-        return businessCapabilityMapper.mapToCustomTree(getTreeById(id), businessCapabilitiesOptional.get());
+        return businessCapabilityMapper.mapToCustomTree(getTreeById(id), findById(id));
     }
 
     public List<BusinessCapabilityTreeDTO> getBusinessCapabilityTree(Long id) {

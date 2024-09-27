@@ -164,14 +164,16 @@ public class BusinessCapabilityMapper {
                 .owner(businessCapability.getOwner())
                 .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
                 .children(mapToTree(businessCapabilities))
-                .parent(getParentList(businessCapability, new ArrayList<BusinessCapabilityTreeInfoDTO>()))
+                .parent(getParentList(businessCapability.getParentEntity(), new ArrayList<BusinessCapabilityTreeInfoDTO>()))
                 .build();
     }
 
     private List<BusinessCapabilityTreeInfoDTO> getParentList(BusinessCapability businessCapability, ArrayList<BusinessCapabilityTreeInfoDTO> businessCapabilityTreeInfoDTOS) {
-        if (businessCapability.getParentEntity() != null) {
+        if (businessCapability != null) {
             businessCapabilityTreeInfoDTOS.add(mapToTreeInfo(businessCapability));
-            return getParentList(businessCapability.getParentEntity(), businessCapabilityTreeInfoDTOS);
+            if (businessCapability.getParentEntity() != null) {
+                return getParentList(businessCapability.getParentEntity(), businessCapabilityTreeInfoDTOS);
+            }
         }
         return businessCapabilityTreeInfoDTOS;
     }

@@ -19,6 +19,7 @@ import ru.beeline.capability.dto.BusinessCapabilityTreeDTO;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.service.BusinessCapabilityService;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
+import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenIdsDTO;
 import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
 
 import java.util.Collections;
@@ -41,6 +42,12 @@ public class BusinessCapabilityController {
     @ApiOperation(value = "Получение всех дочерних бизнес возможностей", response = BusinessCapabilityChildrenDTO.class)
     public BusinessCapabilityChildrenDTO getKidsById(@PathVariable Long id) {
         return businessCapabilityService.getChildren(id);
+    }
+
+    @GetMapping("/{id}/children/all")
+    @ApiOperation(value = "Получение всех дочерних бизнес возможностей", response = BusinessCapabilityChildrenDTO.class)
+    public BusinessCapabilityChildrenIdsDTO getAllKidsIdById(@PathVariable Long id) {
+        return businessCapabilityService.getChildrenIds(id);
     }
 
     @GetMapping("/{id}/parents")
