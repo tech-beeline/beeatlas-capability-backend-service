@@ -2,14 +2,15 @@ package ru.beeline.capability.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.beeline.capability.domain.CapabilityMap;
 import ru.beeline.capability.domain.EntityType;
-import ru.beeline.capability.domain.Map;
 import ru.beeline.capability.domain.UserMap;
 import ru.beeline.capability.dto.PostCapabilityMapDTO;
+import ru.beeline.capability.exception.ForbiddenException;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
+import ru.beeline.capability.repository.CapabilityMapRepository;
 import ru.beeline.capability.repository.EntityTypeRepository;
-import ru.beeline.capability.repository.MapRepository;
 import ru.beeline.capability.repository.UserMapRepository;
 
 import java.util.Date;
@@ -19,7 +20,7 @@ import java.util.Optional;
 public class CapabilityMapService {
 
     @Autowired
-    MapRepository mapRepository;
+    CapabilityMapRepository capabilityMapRepository;
 
     @Autowired
     UserMapRepository userMapRepository;
@@ -27,10 +28,7 @@ public class CapabilityMapService {
     @Autowired
     EntityTypeRepository entityTypeRepository;
 
-    public void validatePostCapabilityMapDTO(PostCapabilityMapDTO postCapabilityMapDTO, String userId) {
-        if (userId == null || userId.equals("")) {
-            throw new IllegalArgumentException((String.format("Отсутствует хэдер: USER-ID")));
-        }
+    public void validatePostCapabilityMapDTO(PostCapabilityMapDTO postCapabilityMapDTO) {
         StringBuilder errMsg = new StringBuilder();
         if (postCapabilityMapDTO.getName() == null || postCapabilityMapDTO.getName().equals("")) {
             errMsg.append("Отсутствует обязательное поле name");
@@ -43,22 +41,29 @@ public class CapabilityMapService {
         }
     }
 
-    public void createCapabilityMap(PostCapabilityMapDTO postCapabilityMapDTO, String userId) {
-        validatePostCapabilityMapDTO(postCapabilityMapDTO, userId);
+    public void findEntityTypeById(PostCapabilityMapDTO postCapabilityMapDTO) {
         Optional<EntityType> entityType = entityTypeRepository.findById(postCapabilityMapDTO.getTypeId().longValue());
         if (entityType.isEmpty()) {
             throw new NotFoundException((String.format("400: Запись c typeId %s не найдена", postCapabilityMapDTO.getTypeId())));
         }
-        Map map = Map.builder()
+    }
+
+    public void createCapabilityMap(PostCapabilityMapDTO postCapabilityMapDTO, String userId) {
+        if (userId == null || userId.isEmpty()) {
+            throw new ForbiddenException("Отсутствует заголовок USER_ID_HEADER");
+        }
+        validatePostCapabilityMapDTO(postCapabilityMapDTO);
+        findEntityTypeById(postCapabilityMapDTO);
+        CapabilityMap capabilityMap = CapabilityMap.builder()
                 .name(postCapabilityMapDTO.getName())
                 .description(postCapabilityMapDTO.getDescription())
                 .typeId(postCapabilityMapDTO.getTypeId())
                 .createDate(new Date())
                 .build();
-        map = mapRepository.save(map);
-        Integer mapId = map.getId();
+        capabilityMap = capabilityMapRepository.save(capabilityMap);
+        Integer mapId = capabilityMap.getId();
         UserMap userMap = UserMap.builder()
-                .userId(Integer.parseInt(userId))
+                .userId(Integer.valueOf(userId))
                 .mapId(mapId.intValue())
                 .author(true)
                 .build();

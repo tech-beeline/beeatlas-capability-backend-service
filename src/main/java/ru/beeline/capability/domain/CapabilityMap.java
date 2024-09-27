@@ -24,7 +24,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Entity
 @Table(name = "maps", schema = "capability")
-public class Map {
+public class CapabilityMap {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "maps_id_generator")
     @SequenceGenerator(name = "maps_id_generator", sequenceName = "maps_id_seq", allocationSize = 1)

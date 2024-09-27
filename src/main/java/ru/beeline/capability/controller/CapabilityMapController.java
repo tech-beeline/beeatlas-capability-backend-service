@@ -7,11 +7,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.beeline.capability.dto.PostCapabilityMapDTO;
 import ru.beeline.capability.service.CapabilityMapService;
+
+import javax.servlet.http.HttpServletRequest;
 
 import static ru.beeline.capability.utils.Constants.USER_ID_HEADER;
 
@@ -24,10 +25,10 @@ public class CapabilityMapController {
     private CapabilityMapService capabilityMapService;
 
     @PostMapping()
-    @ApiOperation(value = "Создание карты")
-    public ResponseEntity createCapabilityMap(@RequestHeader(value = USER_ID_HEADER, required = false) String userId,
-                                              @RequestBody PostCapabilityMapDTO postCapabilityMapDTO) {
-        capabilityMapService.createCapabilityMap(postCapabilityMapDTO, userId);
+    @ApiOperation(value = "Создание карты возможностей")
+    public ResponseEntity createCapabilityMap(@RequestBody PostCapabilityMapDTO postCapabilityMapDTO,
+                                              HttpServletRequest request) {
+        capabilityMapService.createCapabilityMap(postCapabilityMapDTO, request.getHeader(USER_ID_HEADER));
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

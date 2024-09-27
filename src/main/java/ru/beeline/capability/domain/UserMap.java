@@ -40,5 +40,5 @@ public class UserMap {
 
     @ManyToOne
     @JoinColumn(name = "map_id", insertable = false, updatable = false)
-    private Map map;
+    private CapabilityMap capabilityMap;
 }
