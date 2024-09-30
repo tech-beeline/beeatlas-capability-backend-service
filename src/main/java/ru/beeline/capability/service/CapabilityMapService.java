@@ -44,7 +44,7 @@ public class CapabilityMapService {
     public void findEntityTypeById(PostCapabilityMapDTO postCapabilityMapDTO) {
         Optional<EntityType> entityType = entityTypeRepository.findById(postCapabilityMapDTO.getTypeId().longValue());
         if (entityType.isEmpty()) {
-            throw new NotFoundException((String.format("400: Запись c typeId %s не найдена", postCapabilityMapDTO.getTypeId())));
+            throw new NotFoundException(String.format("400: Запись c typeId %s не найдена", postCapabilityMapDTO.getTypeId()));
         }
     }
 
