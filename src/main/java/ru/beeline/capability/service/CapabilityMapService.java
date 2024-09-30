@@ -14,6 +14,7 @@ import ru.beeline.capability.repository.EntityTypeRepository;
 import ru.beeline.capability.repository.UserMapRepository;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -68,5 +69,16 @@ public class CapabilityMapService {
                 .author(true)
                 .build();
         userMapRepository.save(userMap);
+    }
+
+    public List<EntityType> getCapabilityMapTypes(String userId) {
+        if (userId == null || userId.isEmpty()) {
+            throw new ForbiddenException("Отсутствует заголовок USER_ID_HEADER");
+        }
+        List<EntityType> result = entityTypeRepository.findAll();
+        if (result.isEmpty()) {
+            throw new IllegalArgumentException("Список пуст");
+        }
+        return result;
     }
 }
