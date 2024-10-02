@@ -16,6 +16,7 @@ import ru.beeline.capability.repository.UserMapRepository;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service
 public class CapabilityMapService {
@@ -40,6 +41,23 @@ public class CapabilityMapService {
         if (!errMsg.toString().isEmpty()) {
             throw new ValidationException(errMsg.toString());
         }
+        if (Pattern.matches("^\\d+$", postCapabilityMapDTO.getName())) {
+            throw new ForbiddenException("Поле name: должно быть String");
+        }
+        if (Pattern.matches("^\\d+$", postCapabilityMapDTO.getDescription())) {
+            throw new ForbiddenException("Поле description: должно быть String");
+        }
+    }
+
+    public void validateUserIdHeaders(String userId) {
+        if (userId == null || userId.isEmpty()) {
+            throw new ForbiddenException("Отсутствует заголовок USER_ID_HEADER");
+        }
+        try {
+            Integer.parseInt(userId);
+        } catch (NumberFormatException e) {
+            throw new ForbiddenException("USER_ID_HEADER должен быть числом");
+        }
     }
 
     public void findEntityTypeById(PostCapabilityMapDTO postCapabilityMapDTO) {
@@ -50,9 +68,7 @@ public class CapabilityMapService {
     }
 
     public void createCapabilityMap(PostCapabilityMapDTO postCapabilityMapDTO, String userId) {
-        if (userId == null || userId.isEmpty()) {
-            throw new ForbiddenException("Отсутствует заголовок USER_ID_HEADER");
-        }
+        validateUserIdHeaders(userId);
         validatePostCapabilityMapDTO(postCapabilityMapDTO);
         findEntityTypeById(postCapabilityMapDTO);
         CapabilityMap capabilityMap = CapabilityMap.builder()
