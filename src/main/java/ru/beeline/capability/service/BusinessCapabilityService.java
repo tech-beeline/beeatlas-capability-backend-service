@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.beeline.capability.cleint.DashboardClient;
 import ru.beeline.capability.cleint.UserClient;
 import ru.beeline.capability.domain.BusinessCapability;
+import ru.beeline.capability.domain.EntityType;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
@@ -25,6 +26,8 @@ import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
 import ru.beeline.capability.mapper.BusinessCapabilityMapper;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
+import ru.beeline.capability.repository.EntityTypeRepository;
+import ru.beeline.capability.repository.FindNameSortTableRepository;
 import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
 import ru.beeline.capability.utils.UrlWrapper;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
@@ -45,6 +48,12 @@ import static ru.beeline.capability.utils.Constants.UPDATE;
 @Service
 @Transactional
 public class BusinessCapabilityService {
+
+    @Autowired
+    private FindNameSortTableRepository findNameSortTableRepository;
+
+    @Autowired
+    private EntityTypeRepository entityTypeRepository;
 
     @Autowired
     private BusinessCapabilityRepository businessCapabilityRepository;
@@ -341,4 +350,16 @@ public class BusinessCapabilityService {
         return prefix;
     }
 
+    public void deleteBusinessCapability(String code) {
+        Optional<BusinessCapability> optionalBusinessCapability = businessCapabilityRepository.findByCode(code);
+        if (optionalBusinessCapability.isPresent()) {
+            Long businessCapabilityId = optionalBusinessCapability.get().getId();
+            optionalBusinessCapability.map(businessCapability -> {
+                businessCapability.setDeletedDate(new Date());
+                return businessCapabilityRepository.save(businessCapability);
+            });
+            EntityType entityType = entityTypeRepository.findByName("BUSINESS_CAPABILITY");
+            findNameSortTableRepository.deleteByIdAndType(businessCapabilityId, entityType);
+        }
+    }
 }
