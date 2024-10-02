@@ -15,7 +15,6 @@ import ru.beeline.capability.cleint.DashboardClient;
 import ru.beeline.capability.cleint.UserClient;
 import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.EntityType;
-import ru.beeline.capability.domain.FindNameSortTable;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
@@ -360,10 +359,7 @@ public class BusinessCapabilityService {
                 return businessCapabilityRepository.save(businessCapability);
             });
             EntityType entityType = entityTypeRepository.findByName("BUSINESS_CAPABILITY");
-            FindNameSortTable findNameSortTable = findNameSortTableRepository.findByIdAndType(businessCapabilityId, entityType);
-            if (findNameSortTable != null) {
-                findNameSortTableRepository.delete(findNameSortTable);
-            }
+            findNameSortTableRepository.deleteByIdAndType(businessCapabilityId, entityType);
         }
     }
 }
