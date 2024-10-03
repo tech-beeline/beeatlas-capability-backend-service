@@ -353,13 +353,15 @@ public class BusinessCapabilityService {
     public void deleteBusinessCapability(String code) {
         Optional<BusinessCapability> optionalBusinessCapability = businessCapabilityRepository.findByCode(code);
         if (optionalBusinessCapability.isPresent()) {
-            Long businessCapabilityId = optionalBusinessCapability.get().getId();
-            optionalBusinessCapability.map(businessCapability -> {
-                businessCapability.setDeletedDate(new Date());
-                return businessCapabilityRepository.save(businessCapability);
-            });
-            EntityType entityType = entityTypeRepository.findByName("BUSINESS_CAPABILITY");
-            findNameSortTableRepository.deleteByIdAndType(businessCapabilityId, entityType);
+            if (optionalBusinessCapability.get().getDeletedDate() == null) {
+                Long businessCapabilityId = optionalBusinessCapability.get().getId();
+                optionalBusinessCapability.map(businessCapability -> {
+                    businessCapability.setDeletedDate(new Date());
+                    return businessCapabilityRepository.save(businessCapability);
+                });
+                EntityType entityType = entityTypeRepository.findByName("BUSINESS_CAPABILITY");
+                findNameSortTableRepository.deleteByRefIdAndType(businessCapabilityId, entityType);
+            }
         }
     }
 }
