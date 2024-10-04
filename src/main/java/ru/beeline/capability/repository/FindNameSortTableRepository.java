@@ -18,5 +18,4 @@ public interface FindNameSortTableRepository extends JpaRepository<FindNameSortT
     List<Object> callFuzzySearchCapability(@Param("text") String text);
 
     void deleteByRefIdAndType(Long id_ref, EntityType entityType);
-
 }
