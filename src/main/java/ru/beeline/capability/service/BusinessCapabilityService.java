@@ -81,15 +81,11 @@ public class BusinessCapabilityService {
 
 
     public BusinessCapability findById(Long id) {
-        return businessCapabilityRepository.findById(id).orElseThrow(() ->
-                new NotFoundException("Business Capability не найдено"));
+        return businessCapabilityRepository.findById(id).orElseThrow(() -> new NotFoundException("Business Capability не найдено"));
     }
 
     public BusinessCapabilityChildrenDTO getChildren(Long id) {
-        List<TechCapability> techCapabilities = findById(id).getChildren().stream()
-                .map(TechCapabilityRelations::getTechCapability)
-                .filter(techCapability -> Objects.isNull(techCapability.getDeletedDate()))
-                .collect(Collectors.toList());
+        List<TechCapability> techCapabilities = findById(id).getChildren().stream().map(TechCapabilityRelations::getTechCapability).filter(techCapability -> Objects.isNull(techCapability.getDeletedDate())).collect(Collectors.toList());
         List<BusinessCapability> businessCapabilitiesKids = businessCapabilityRepository.findAllByParentIdAndDeletedDateIsNull(id);
         return businessCapabilityMapper.convert(techCapabilities, businessCapabilitiesKids);
     }
@@ -98,22 +94,16 @@ public class BusinessCapabilityService {
         List<Long> bcIds = new ArrayList<>();
         List<Long> tcIds = new ArrayList<>();
         BusinessCapability businessCapability = findById(id);
-        tcIds.addAll(
-                businessCapability.getChildren().stream()
-                        .map(TechCapabilityRelations::getTechCapability)
-                        .map(TechCapability::getId)
-                        .collect(Collectors.toList()));
+        businessCapability.setChildrenOfTree(getChildrenBC(businessCapability));
+        tcIds.addAll(businessCapability.getChildren().stream().map(TechCapabilityRelations::getTechCapability).map(TechCapability::getId).collect(Collectors.toList()));
         businessCapability.getChildrenOfTree().forEach(childBc -> getTechCapabilities(childBc, bcIds, tcIds));
         return new BusinessCapabilityChildrenIdsDTO(tcIds, bcIds);
     }
 
     public void getTechCapabilities(BusinessCapability bc, List<Long> bcIds, List<Long> tcIds) {
+        bc.setChildrenOfTree(getChildrenBC(bc));
         bcIds.add(bc.getId());
-        tcIds.addAll(
-                bc.getChildren().stream()
-                        .map(TechCapabilityRelations::getTechCapability)
-                        .map(TechCapability::getId)
-                        .collect(Collectors.toList()));
+        tcIds.addAll(bc.getChildren().stream().map(TechCapabilityRelations::getTechCapability).map(TechCapability::getId).collect(Collectors.toList()));
         bc.getChildrenOfTree().forEach(childBc -> getTechCapabilities(childBc, bcIds, tcIds));
     }
 
@@ -126,6 +116,20 @@ public class BusinessCapabilityService {
                 return new CapabilityParentDTO(result);
             } else {
                 result.add(id);
+            }
+        }
+    }
+
+    public List<BusinessCapability> getBusinessCapabilityParentList(Long id) {
+        ArrayList<BusinessCapability> result = new ArrayList<>();
+        while (true) {
+            BusinessCapability parent = findById(id);
+
+            if (Objects.isNull(parent)) {
+                return result;
+            } else {
+                id = parent.getParentId();
+                result.add(parent);
             }
         }
     }
@@ -214,19 +218,7 @@ public class BusinessCapabilityService {
 
     private BusinessCapability createCapabilities(PutBusinessCapabilityDTO capability) {
 
-        BusinessCapability result = businessCapabilityRepository.save(
-                BusinessCapability.builder()
-                        .code(capability.getCode())
-                        .name(capability.getName())
-                        .description(UrlWrapper.proxyUrl(capability.getDescription()))
-                        .status(capability.getStatus())
-                        .author(capability.getAuthor())
-                        .createdDate(new Date())
-                        .lastModifiedDate(new Date())
-                        .link(capability.getLink())
-                        .owner(capability.getOwner())
-                        .parentId(getParentId(capability))
-                        .isDomain(capability.getIsDomain()).build());
+        BusinessCapability result = businessCapabilityRepository.save(BusinessCapability.builder().code(capability.getCode()).name(capability.getName()).description(UrlWrapper.proxyUrl(capability.getDescription())).status(capability.getStatus()).author(capability.getAuthor()).createdDate(new Date()).lastModifiedDate(new Date()).link(capability.getLink()).owner(capability.getOwner()).parentId(getParentId(capability)).isDomain(capability.getIsDomain()).build());
         sendNotify(result.getId(), CREATE, changeBusinessCapabilityQueueName, capability.getName());
         return result;
     }
@@ -275,10 +267,10 @@ public class BusinessCapabilityService {
     private List<BusinessCapability> getTreeById(Long id) {
         Optional<BusinessCapability> businessCapabilitiesOptional = businessCapabilityRepository.findById(id);
         if (businessCapabilitiesOptional.isPresent()) {
-
-            List<BusinessCapability> filteredBusinessCapabilities = businessCapabilitiesOptional.get().getChildrenOfTree();
-            filteredBusinessCapabilities.forEach(businessCapability ->
-                    businessCapability.setChildrenOfTree(filterChildren(businessCapability.getChildrenOfTree(), businessCapability.isDomain())));
+            BusinessCapability bc = businessCapabilitiesOptional.get();
+            bc.setChildrenOfTree(getChildrenBC(bc));
+            List<BusinessCapability> filteredBusinessCapabilities = bc.getChildrenOfTree();
+            filteredBusinessCapabilities.forEach(businessCapability -> businessCapability.setChildrenOfTree(filterChildren(businessCapability.getChildrenOfTree(), businessCapability.isDomain())));
             return filteredBusinessCapabilities;
         } else {
             return new ArrayList<>();
@@ -292,22 +284,15 @@ public class BusinessCapabilityService {
     }
 
     private List<BusinessCapability> filterChildren(List<BusinessCapability> children, boolean isDomain) {
-        return children.stream()
-                .filter(businessCapability -> businessCapability.getDeletedDate() == null && businessCapability.isDomain() == isDomain)
-                .peek(businessCapability -> businessCapability.setChildrenOfTree(filterChildren(businessCapability.getChildrenOfTree(), isDomain)))
-                .collect(Collectors.toList());
+        children.forEach(bc -> bc.setChildrenOfTree(getChildrenBC(bc)));
+        return children.stream().filter(businessCapability -> businessCapability.getDeletedDate() == null && businessCapability.isDomain() == isDomain).peek(businessCapability -> businessCapability.setChildrenOfTree(filterChildren(businessCapability.getChildrenOfTree(), isDomain))).collect(Collectors.toList());
     }
 
     private List<BusinessCapability> filterChildrenWithDomainIsTrue(List<BusinessCapability> children) {
-        return children.stream()
-                .filter(businessCapability -> businessCapability.getDeletedDate() == null && businessCapability.isDomain())
-                .peek(businessCapability -> businessCapability.setChildrenOfTree(filterChildrenWithDomainIsTrue(businessCapability.getChildrenOfTree())))
-                .collect(Collectors.toList());
+        children.forEach(bc -> bc.setChildrenOfTree(getChildrenBC(bc)));
+        return children.stream().filter(businessCapability -> businessCapability.getDeletedDate() == null && businessCapability.isDomain()).peek(businessCapability -> businessCapability.setChildrenOfTree(filterChildrenWithDomainIsTrue(businessCapability.getChildrenOfTree()))).collect(Collectors.toList());
     }
 
-    enum FindBy {
-        ALL, CORE
-    }
 
     public void validateBusinessCapabilityDTO(PutBusinessCapabilityDTO capabilityDTO, String userId, String productIds, String roles, String permissions) {
         StringBuilder errMsg = new StringBuilder();
@@ -350,6 +335,13 @@ public class BusinessCapabilityService {
         return prefix;
     }
 
+    private List<BusinessCapability> getChildrenBC(BusinessCapability businessCapability) {
+        return businessCapabilityRepository.findAllByParentId(businessCapability.getId());
+    }
+
+    enum FindBy {
+        ALL, CORE
+    }
     public void deleteBusinessCapability(String code) {
         Optional<BusinessCapability> optionalBusinessCapability = businessCapabilityRepository.findByCode(code);
         if (optionalBusinessCapability.isPresent()) {

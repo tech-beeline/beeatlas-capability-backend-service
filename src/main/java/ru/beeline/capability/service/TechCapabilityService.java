@@ -17,7 +17,6 @@ import ru.beeline.capability.domain.EntityType;
 import ru.beeline.capability.domain.EnumCriteria;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
-import ru.beeline.capability.dto.BusinessCapabilityTreeDTO;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.exception.NotFoundException;
@@ -246,7 +245,6 @@ public class TechCapabilityService {
         }
     }
 
-
     public void sendMessageToTechCapabilityQueue(String queue, String message) {
         rabbitTemplate.convertAndSend(queue, message, messagePostProcessor -> {
             messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
@@ -254,7 +252,7 @@ public class TechCapabilityService {
         });
     }
 
-    public void calculatePrivateTechCapabiltiesCount(Long entityId) {
+    public void calculatePrivateTechCapabilitiesCount(Long entityId) {
         List<TechCapabilityRelations> techCapabilityRelationsList = techCapabilityRelationsRepository.findByTechCapability(
                 techCapabilityRepository.findById(entityId).get());
         List<BusinessCapability> parentList = techCapabilityRelationsList.stream()
@@ -265,31 +263,29 @@ public class TechCapabilityService {
             CriteriasBc criteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(businessCapability.getId(), quantityTc.getId());
             extracted(businessCapability.getId(), quantityTc, criteriasBc, 1, 1, 2);
 
-            List<BusinessCapabilityTreeDTO> businessCapabilityTree =
-                    businessCapabilityService.getBusinessCapabilityTree(businessCapability.getId());
-            businessCapabilityTree.forEach(bc -> iterateChildrenCriteriaBc(bc, quantityTc));
+            List<BusinessCapability> businessCapabilityParentList =
+                    businessCapabilityService.getBusinessCapabilityParentList(businessCapability.getId());
+            businessCapabilityParentList.forEach(bc -> iterateChildrenCriteriaBc(bc, quantityTc));
         });
     }
 
-    private void iterateChildrenCriteriaBc(BusinessCapabilityTreeDTO bc, EnumCriteria quantityTc) {
-        bc.getChildren().forEach(childBc -> {
-            CriteriasBc criteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(bc.getId(), childBc.getId());
-            AtomicInteger criteriaIterator = new AtomicInteger();
-            AtomicInteger valueSummary = new AtomicInteger();
-            childBc.getChildren().forEach(childChildBc -> {
-                CriteriasBc childCriteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(childChildBc.getId(), quantityTc.getId());
-                if (childCriteriasBc != null && childCriteriasBc.getGrade() == 2) {
-                    criteriaIterator.getAndIncrement();
-                    valueSummary.addAndGet(childCriteriasBc.getValue());
-                }
-            });
-            if (childBc.getChildren().size() == criteriaIterator.get()) {
-                extracted(bc.getId(), quantityTc, criteriasBc, criteriasBc.getValue(), 0, 2);
-
-            } else {
-                extracted(bc.getId(), quantityTc, criteriasBc, criteriasBc.getValue(), 0, 1);
+    private void iterateChildrenCriteriaBc(BusinessCapability bc, EnumCriteria quantityTc) {
+        CriteriasBc criteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(bc.getId(), bc.getId());
+        AtomicInteger criteriaIterator = new AtomicInteger();
+        AtomicInteger valueSummary = new AtomicInteger();
+        bc.getChildren().forEach(childChildBc -> {
+            CriteriasBc childCriteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(childChildBc.getId(), quantityTc.getId());
+            if (childCriteriasBc != null && childCriteriasBc.getGrade() == 2) {
+                criteriaIterator.getAndIncrement();
+                valueSummary.addAndGet(childCriteriasBc.getValue());
             }
         });
+        if (bc.getChildren().size() == criteriaIterator.get()) {
+            extracted(bc.getId(), quantityTc, criteriasBc, valueSummary.get(), 0, 2);
+
+        } else {
+            extracted(bc.getId(), quantityTc, criteriasBc, valueSummary.get(), 0, 1);
+        }
 
     }
 
@@ -307,7 +303,7 @@ public class TechCapabilityService {
         }
     }
 
-    public void calculateTotalTechCapabiltiesCount() {
+    public void calculateTotalTechCapabilitiesCount() {
 
         List<TechCapabilityRelations> techCapabilityRelationsList = techCapabilityRelationsRepository.findAll();
         List<BusinessCapability> parentList = techCapabilityRelationsList.stream()
@@ -328,9 +324,9 @@ public class TechCapabilityService {
                         .bcId(businessCapability.getId())
                         .build());
             }
-            List<BusinessCapabilityTreeDTO> businessCapabilityTree =
-                    businessCapabilityService.getBusinessCapabilityTree(businessCapability.getId());
-            businessCapabilityTree.forEach(bc -> iterateChildrenCriteriaBc(bc, quantityTc));
+            List<BusinessCapability> businessCapabilityParentList =
+                    businessCapabilityService.getBusinessCapabilityParentList(businessCapability.getId());
+            businessCapabilityParentList.forEach(bc -> iterateChildrenCriteriaBc(bc, quantityTc));
         });
     }
 

@@ -49,6 +49,6 @@ public class BusinessCapability {
     @OneToMany(mappedBy = "bcId")
     private List<BusinessCapabilityCriteria> criteria;
 
-    @OneToMany(mappedBy = "parentId", fetch = FetchType.LAZY)
+    @Transient
     private List<BusinessCapability> childrenOfTree;
 }

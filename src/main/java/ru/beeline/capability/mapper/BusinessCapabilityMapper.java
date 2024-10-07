@@ -114,6 +114,7 @@ public class BusinessCapabilityMapper {
 
     public List<BusinessCapabilityTreeDTO> mapToTree(List<BusinessCapability> businessCapabilities) {
         return businessCapabilities.stream().map(businessCapability -> {
+            businessCapability.setChildrenOfTree(getChildrenBC(businessCapability));
             return BusinessCapabilityTreeDTO.builder()
                     .id(businessCapability.getId())
                     .code(businessCapability.getCode())
@@ -130,6 +131,10 @@ public class BusinessCapabilityMapper {
                     .children(mapToTree(businessCapability.getChildrenOfTree()))
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    private List<BusinessCapability> getChildrenBC(BusinessCapability businessCapability) {
+        return businessCapabilityRepository.findAllByParentId(businessCapability.getId());
     }
 
     public BusinessCapabilityTreeInfoDTO mapToTreeInfo(BusinessCapability businessCapability) {
