@@ -45,4 +45,11 @@ public class TechCapabilityController {
         techCapabilityService.createOrUpdate(techCapability);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @DeleteMapping("/{code}")
+    @ApiOperation(value = "Удаление записи из таблицы find_name_sort_table со статусом TC")
+    public ResponseEntity deleteTechCapability(@PathVariable String code) {
+        techCapabilityService.deleteTechCapability(code);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

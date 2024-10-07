@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.CriteriasBc;
+import ru.beeline.capability.domain.EntityType;
 import ru.beeline.capability.domain.EnumCriteria;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
@@ -25,7 +26,9 @@ import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
 import ru.beeline.capability.mapper.TechCapabilityMapper;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.CriteriaBcRepository;
+import ru.beeline.capability.repository.EntityTypeRepository;
 import ru.beeline.capability.repository.EnumCriteriaRepository;
+import ru.beeline.capability.repository.FindNameSortTableRepository;
 import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
 import ru.beeline.capability.repository.TechCapabilityRepository;
 import ru.beeline.capability.utils.UrlWrapper;
@@ -53,6 +56,12 @@ import static ru.beeline.capability.utils.Constants.UPDATE;
 public class TechCapabilityService {
     @PersistenceContext
     private EntityManager entityManager;
+
+    @Autowired
+    EntityTypeRepository entityTypeRepository;
+
+    @Autowired
+    FindNameSortTableRepository findNameSortTableRepository;
 
     @Autowired
     private TechCapabilityMapper techCapabilityMapper;
@@ -323,5 +332,18 @@ public class TechCapabilityService {
                     businessCapabilityService.getBusinessCapabilityTree(businessCapability.getId());
             businessCapabilityTree.forEach(bc -> iterateChildrenCriteriaBc(bc, quantityTc));
         });
+    }
+
+    public void deleteTechCapability(String code) {
+        Optional<TechCapability> optionalTechCapability = techCapabilityRepository.findByCode(code);
+        if (optionalTechCapability.isPresent()) {
+            Long techCapabilityId = optionalTechCapability.get().getId();
+            optionalTechCapability.map(techCapability -> {
+                techCapability.setDeletedDate(new Date());
+                return techCapabilityRepository.save(techCapability);
+            });
+            EntityType entityType = entityTypeRepository.findByName("TECH_CAPABILITY");
+            findNameSortTableRepository.deleteByIdAndType(techCapabilityId, entityType);
+        }
     }
 }
