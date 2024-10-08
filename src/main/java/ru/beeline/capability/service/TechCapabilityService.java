@@ -270,7 +270,7 @@ public class TechCapabilityService {
     }
 
     private void iterateChildrenCriteriaBc(BusinessCapability bc, EnumCriteria quantityTc) {
-        CriteriasBc criteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(bc.getId(), bc.getId());
+        CriteriasBc criteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(bc.getId(), quantityTc.getId());
         AtomicInteger criteriaIterator = new AtomicInteger();
         AtomicInteger valueSummary = new AtomicInteger();
         bc.getChildren().forEach(childChildBc -> {

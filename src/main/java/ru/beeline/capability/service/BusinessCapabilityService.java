@@ -130,6 +130,9 @@ public class BusinessCapabilityService {
             } else {
                 id = parent.getParentId();
                 result.add(parent);
+                if (id == null) {
+                    return result;
+                }
             }
         }
     }
