@@ -256,34 +256,21 @@ public class BusinessCapabilityService {
     }
 
     public BusinessCapabilityTreeCustomDTO getBusinessCapabilityTreeById(Long id) {
-        return businessCapabilityMapper.mapToCustomTree(getTreeById(id), findById(id));
-    }
-
-    public List<BusinessCapabilityTreeDTO> getBusinessCapabilityTree(Long id) {
-        if (id == null) {
-            return businessCapabilityMapper.mapToTree(getSharedTree());
-        } else {
-            return businessCapabilityMapper.mapToTree(getTreeById(id));
+        BusinessCapability bc = findById(id);
+        if (bc.getDeletedDate() != null) {
+            throw new NotFoundException("Business Capability не найдено");
         }
+        bc.setChildrenOfTree(getChildrenBC(bc));
+        List<BusinessCapability> filteredBusinessCapabilities = bc.getChildrenOfTree();
+        filteredBusinessCapabilities.forEach(businessCapability ->
+                businessCapability.setChildrenOfTree(filterChildren(businessCapability.getChildrenOfTree(), businessCapability.isDomain())));
+        return businessCapabilityMapper.mapToCustomTree(filteredBusinessCapabilities, bc);
+
     }
 
-    private List<BusinessCapability> getTreeById(Long id) {
-        Optional<BusinessCapability> businessCapabilitiesOptional = businessCapabilityRepository.findById(id);
-        if (businessCapabilitiesOptional.isPresent()) {
-            BusinessCapability bc = businessCapabilitiesOptional.get();
-            bc.setChildrenOfTree(getChildrenBC(bc));
-            List<BusinessCapability> filteredBusinessCapabilities = bc.getChildrenOfTree();
-            filteredBusinessCapabilities.forEach(businessCapability -> businessCapability.setChildrenOfTree(filterChildren(businessCapability.getChildrenOfTree(), businessCapability.isDomain())));
-            return filteredBusinessCapabilities;
-        } else {
-            return new ArrayList<>();
-        }
-    }
-
-    private List<BusinessCapability> getSharedTree() {
+    public List<BusinessCapabilityTreeDTO> getBusinessCapabilityTree() {
         List<BusinessCapability> businessCapabilities = businessCapabilityRepository.findAllByParentIdIsNullAndDeletedDateIsNullAndIsDomainIsTrue();
-        List<BusinessCapability> filteredBusinessCapabilities = filterChildrenWithDomainIsTrue(businessCapabilities);
-        return filteredBusinessCapabilities;
+        return businessCapabilityMapper.mapToTree(filterChildrenWithDomainIsTrue(businessCapabilities));
     }
 
     private List<BusinessCapability> filterChildren(List<BusinessCapability> children, boolean isDomain) {
@@ -345,6 +332,7 @@ public class BusinessCapabilityService {
     enum FindBy {
         ALL, CORE
     }
+
     public void deleteBusinessCapability(String code) {
         Optional<BusinessCapability> optionalBusinessCapability = businessCapabilityRepository.findByCode(code);
         if (optionalBusinessCapability.isPresent()) {

@@ -68,7 +68,7 @@ public class BusinessCapabilityController {
     @GetMapping("/tree")
     @ApiOperation(value = "Построение дерева", response = List.class)
     public List<BusinessCapabilityTreeDTO> getBusinessCapabilityTree() {
-        return businessCapabilityService.getBusinessCapabilityTree(null);
+        return businessCapabilityService.getBusinessCapabilityTree();
     }
 
     @GetMapping("/tree/{id}")

@@ -127,6 +127,7 @@ public class BusinessCapabilityMapper {
                     .lastModifiedDate(businessCapability.getLastModifiedDate())
                     .isDomain(businessCapability.isDomain())
                     .owner(businessCapability.getOwner())
+                    .parentId(businessCapability.getParentId())
                     .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
                     .children(mapToTree(businessCapability.getChildrenOfTree()))
                     .build();
@@ -150,6 +151,7 @@ public class BusinessCapabilityMapper {
                 .lastModifiedDate(businessCapability.getLastModifiedDate())
                 .isDomain(businessCapability.isDomain())
                 .owner(businessCapability.getOwner())
+                .parentId(businessCapability.getParentId())
                 .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
                 .build();
     }
@@ -166,6 +168,7 @@ public class BusinessCapabilityMapper {
                 .createdDate(businessCapability.getCreatedDate())
                 .lastModifiedDate(businessCapability.getLastModifiedDate())
                 .isDomain(businessCapability.isDomain())
+                .parentId(businessCapability.getParentId())
                 .owner(businessCapability.getOwner())
                 .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
                 .children(mapToTree(businessCapabilities))
@@ -174,9 +177,9 @@ public class BusinessCapabilityMapper {
     }
 
     private List<BusinessCapabilityTreeInfoDTO> getParentList(BusinessCapability businessCapability, ArrayList<BusinessCapabilityTreeInfoDTO> businessCapabilityTreeInfoDTOS) {
-        if (businessCapability != null) {
+        if (businessCapability != null ) {
             businessCapabilityTreeInfoDTOS.add(mapToTreeInfo(businessCapability));
-            if (businessCapability.getParentEntity() != null) {
+            if (businessCapability.getParentEntity() != null && businessCapability.getParentEntity().getDeletedDate() == null) {
                 return getParentList(businessCapability.getParentEntity(), businessCapabilityTreeInfoDTOS);
             }
         }
