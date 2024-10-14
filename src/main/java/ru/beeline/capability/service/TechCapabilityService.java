@@ -2,6 +2,7 @@ package ru.beeline.capability.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,7 @@ import static ru.beeline.capability.utils.Constants.CREATE;
 import static ru.beeline.capability.utils.Constants.ENTITY_TYPE_TECH_CAPABILITY;
 import static ru.beeline.capability.utils.Constants.UPDATE;
 
+@Slf4j
 @Service
 @Transactional
 public class TechCapabilityService {
@@ -143,28 +145,35 @@ public class TechCapabilityService {
     public void createOrUpdate(PutTechCapabilityDTO techCapability) {
         Optional<TechCapability> currentTechCapabilityOpt = techCapabilityRepository.findByCode(techCapability.getCode());
         boolean techCapabilityHaveParents = techCapability.getParents() != null && !techCapability.getParents().isEmpty();
+        log.info("techCapabilityHaveParents:" + techCapabilityHaveParents);
         TechCapability currentTechCapability;
         if (!currentTechCapabilityOpt.isPresent()) {
+            log.info("currentTechCapabilityOpt isn't present");
             currentTechCapability = createTechCapability(techCapability);
             techCapabilityRelationsRepository.deleteAllByTechCapability(currentTechCapability);
             if (techCapabilityHaveParents) {
+                log.info("create relations");
                 createRelations(currentTechCapability, businessCapabilityRepository.findAllByCodeIn(techCapability.getParents()));
             }
+            log.info("send notify");
             sendNotify(currentTechCapability.getId(), CREATE, changeTechCapabilityQueueName, techCapability.getName());
             findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode(), ENTITY_TYPE_TECH_CAPABILITY);
         } else {
+            log.info("currentTechCapabilityOpt is present");
             currentTechCapability = currentTechCapabilityOpt.get();
             PutTechCapabilityDTO currentTechCapabilityDTO = techCapabilityMapper.convertToPutTechCapabilityDTO(currentTechCapability);
+            log.info("check equals old techCapability and new techCapability");
             if (!techCapability.equals(currentTechCapabilityDTO)) {
+                log.info("old techCapability and new techCapability is not equals, and try update");
                 updateTechCapability(currentTechCapability, techCapability);
+                log.info("delete old relations");
                 techCapabilityRelationsRepository.deleteAllByTechCapability(currentTechCapability);
                 findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode(), ENTITY_TYPE_TECH_CAPABILITY);
                 if (techCapabilityHaveParents) {
                     Collections.sort(currentTechCapabilityDTO.getParents());
                     Collections.sort(techCapability.getParents());
-                    if (!techCapability.equals(currentTechCapabilityDTO)) {
-                        createRelations(currentTechCapability, businessCapabilityRepository.findAllByCodeIn(techCapability.getParents()));
-                    }
+                    log.info("create new relations");
+                    createRelations(currentTechCapability, businessCapabilityRepository.findAllByCodeIn(techCapability.getParents()));
                 }
                 sendNotify(currentTechCapability.getId(), UPDATE, changeTechCapabilityQueueName, techCapability.getName());
             }
@@ -178,6 +187,7 @@ public class TechCapabilityService {
             TechCapabilityRelations techCapabilityRelation = new TechCapabilityRelations();
             techCapabilityRelation.setBusinessCapability(businessCapability);
             techCapabilityRelation.setTechCapability(currentTechCapability);
+            log.info("check exist relations idBC=" + businessCapability.getId() + "and idTC=" + currentTechCapability.getId());
             if (!techCapabilityRelationsRepository.existsByBusinessCapabilityAndTechCapability(businessCapability, currentTechCapability)) {
                 techCapabilityRelations.add(techCapabilityRelation);
             }

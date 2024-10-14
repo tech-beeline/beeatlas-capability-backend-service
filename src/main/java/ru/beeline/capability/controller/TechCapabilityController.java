@@ -1,6 +1,7 @@
 package ru.beeline.capability.controller;
 
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.service.TechCapabilityService;
 import java.util.List;
 
+@Slf4j
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/v1/tech-capabilities")
@@ -41,6 +43,7 @@ public class TechCapabilityController {
     @PutMapping
     @ApiOperation(value = "Создание/Обновление технической возможности")
     public ResponseEntity putTechCapability(@RequestBody PutTechCapabilityDTO techCapability) {
+        log.info("Receive Tech Capability:" + techCapability.toString());
         techCapabilityService.validateTechCapabilityDTO(techCapability);
         techCapabilityService.createOrUpdate(techCapability);
         return new ResponseEntity<>(HttpStatus.OK);
