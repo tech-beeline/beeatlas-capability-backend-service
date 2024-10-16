@@ -54,7 +54,7 @@ public class BusinessCapabilityController {
     @GetMapping("/{id}/parents")
     @ApiOperation(value = "Получение всех родительских бизнес возможностей", response = CapabilityParentDTO.class)
     public CapabilityParentDTO getParentsById(@PathVariable Long id) {
-        CapabilityParentDTO capabilityParentDTO = businessCapabilityService.getParents(id);
+        CapabilityParentDTO capabilityParentDTO = businessCapabilityService.getParentsWithoutDeleteDate(id);
         Collections.reverse(capabilityParentDTO.getParents());
         return capabilityParentDTO;
     }

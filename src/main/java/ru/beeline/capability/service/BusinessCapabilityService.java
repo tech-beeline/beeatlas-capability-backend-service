@@ -120,6 +120,23 @@ public class BusinessCapabilityService {
         }
     }
 
+
+    public CapabilityParentDTO getParentsWithoutDeleteDate(Long id) {
+        ArrayList<Long> result = new ArrayList<>();
+        while (true) {
+            BusinessCapability businessCapability = findById(id);
+            if (businessCapability.getDeletedDate() != null){
+                throw new NotFoundException("Business Capability не найдено");
+            }
+            id = businessCapability.getParentId();
+            if (Objects.isNull(id)) {
+                return new CapabilityParentDTO(result);
+            } else {
+                result.add(id);
+            }
+        }
+    }
+
     public List<BusinessCapability> getBusinessCapabilityParentList(Long id) {
         ArrayList<BusinessCapability> result = new ArrayList<>();
         while (true) {
