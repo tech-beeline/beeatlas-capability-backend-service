@@ -274,6 +274,9 @@ public class BusinessCapabilityService {
     }
 
     private List<BusinessCapability> filterChildren(List<BusinessCapability> children, boolean isDomain) {
+        if(children == null || children.isEmpty()){
+            return new ArrayList<>();
+        }
         children.forEach(bc -> bc.setChildrenOfTree(getChildrenBC(bc)));
         return children.stream().filter(businessCapability -> businessCapability.getDeletedDate() == null && businessCapability.isDomain() == isDomain).peek(businessCapability -> businessCapability.setChildrenOfTree(filterChildren(businessCapability.getChildrenOfTree(), isDomain))).collect(Collectors.toList());
     }
