@@ -140,6 +140,10 @@ public class BusinessCapabilityService {
     public BusinessCapabilityShortDTO getById(Long id) {
         BusinessCapability businessCapability = findById(id);
 
+        if (businessCapability.getDeletedDate() != null){
+            throw new NotFoundException("Business Capability не найдено");
+        }
+
         if (businessCapability.getParentEntity() != null && businessCapability.getParentEntity().getDeletedDate() != null)
             businessCapability.setParentEntity(null);
 
