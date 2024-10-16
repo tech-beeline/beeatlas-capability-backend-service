@@ -285,8 +285,10 @@ public class TechCapabilityService {
         AtomicInteger valueSummary = new AtomicInteger();
         bc.getChildren().forEach(childChildBc -> {
             CriteriasBc childCriteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(childChildBc.getId(), quantityTc.getId());
-            if (childCriteriasBc != null && childCriteriasBc.getGrade() == 2) {
-                criteriaIterator.getAndIncrement();
+            if (childCriteriasBc != null) {
+                if (childCriteriasBc.getGrade() == 2) {
+                    criteriaIterator.getAndIncrement();
+                }
                 valueSummary.addAndGet(childCriteriasBc.getValue());
             }
         });
@@ -302,6 +304,7 @@ public class TechCapabilityService {
     private void extracted(Long bcId, EnumCriteria quantityTc, CriteriasBc criteriasBc, Integer value1, Integer value2, int grade) {
         if (criteriasBc != null) {
             criteriasBc.setValue(criteriasBc.getValue() + value1);
+            criteriasBc.setGrade(grade);
             criteriaBcRepository.save(criteriasBc);
         } else {
             criteriaBcRepository.save(CriteriasBc.builder()
