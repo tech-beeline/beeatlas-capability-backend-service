@@ -109,6 +109,9 @@ public class TechCapabilityService {
 
     public TechCapabilityDTO getCapabilityById(Long id) {
         TechCapability techCapability = techCapabilityRepository.findById(id).orElseThrow(() -> new NotFoundException("Tech Capability не найдено"));
+        if (techCapability.getDeletedDate() != null) {
+            throw new NotFoundException("Tech Capability не найдено");
+        }
         techCapability.getParents().get(0);
         entityManager.detach(techCapability);
         techCapability.setParents(techCapability.getParents().stream().filter(businessCapability -> Objects.isNull(businessCapability.getBusinessCapability().getDeletedDate())).collect(Collectors.toList()));
