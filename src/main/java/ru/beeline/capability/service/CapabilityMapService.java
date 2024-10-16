@@ -1,16 +1,25 @@
 package ru.beeline.capability.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import ru.beeline.capability.domain.BcGroup;
 import ru.beeline.capability.domain.CapabilityMap;
 import ru.beeline.capability.domain.EntityType;
+import ru.beeline.capability.domain.Group;
+import ru.beeline.capability.domain.TcGroup;
 import ru.beeline.capability.domain.UserMap;
+import ru.beeline.capability.dto.ChildrenGroupDTO;
+import ru.beeline.capability.dto.PatchCapabilityMapDTO;
 import ru.beeline.capability.dto.PostCapabilityMapDTO;
 import ru.beeline.capability.exception.ForbiddenException;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
+import ru.beeline.capability.repository.BcGroupRepository;
 import ru.beeline.capability.repository.CapabilityMapRepository;
 import ru.beeline.capability.repository.EntityTypeRepository;
+import ru.beeline.capability.repository.GroupRepository;
+import ru.beeline.capability.repository.TcGroupRepository;
 import ru.beeline.capability.repository.UserMapRepository;
 
 import java.util.Date;
@@ -25,10 +34,20 @@ public class CapabilityMapService {
     CapabilityMapRepository capabilityMapRepository;
 
     @Autowired
+    EntityTypeRepository entityTypeRepository;
+
+    @Autowired
+    TcGroupRepository tcGroupRepository;
+
+    @Autowired
     UserMapRepository userMapRepository;
 
     @Autowired
-    EntityTypeRepository entityTypeRepository;
+    BcGroupRepository bcGroupRepository;
+
+    @Autowired
+    GroupRepository groupRepository;
+
 
     public void validatePostCapabilityMapDTO(PostCapabilityMapDTO postCapabilityMapDTO) {
         StringBuilder errMsg = new StringBuilder();
@@ -96,5 +115,115 @@ public class CapabilityMapService {
             throw new IllegalArgumentException("Список пуст");
         }
         return result;
+    }
+
+    public void patchValidateBody(List<PatchCapabilityMapDTO> patchCapabilityMapDTO) {
+        for (PatchCapabilityMapDTO patchCapabilityMap : patchCapabilityMapDTO) {
+            boolean hasCapabilityIds = patchCapabilityMap.getCapabilityIds() != null && !patchCapabilityMap.getCapabilityIds().isEmpty();
+            boolean hasChildrenGroups = patchCapabilityMap.getChildrenGroups() != null && !patchCapabilityMap.getChildrenGroups().isEmpty();
+
+            if (!(hasCapabilityIds ^ hasChildrenGroups)) {
+                throw new IllegalArgumentException("Заполнено должно быть capabilityIds или childrenGroups ");
+            }
+
+            if (hasCapabilityIds) {
+                validateNameGroup(patchCapabilityMap.getNameGroup());
+            }
+
+            if (hasChildrenGroups) {
+                for (ChildrenGroupDTO childrenGroupDTO : patchCapabilityMap.getChildrenGroups()) {
+                    validateNameGroup(childrenGroupDTO.getNameGroup());
+                }
+            }
+        }
+    }
+
+    private void validateNameGroup(String nameGroup) {
+        if (nameGroup == null || nameGroup.isEmpty()) {
+            throw new ValidationException("Отсутствует обязательное поле Name Group");
+        }
+
+        if (Pattern.matches("^\\d+$", nameGroup)) {
+            throw new ForbiddenException("Поле Name Group: должно быть String");
+        }
+    }
+
+    public void patchCapabilityMap(Integer mapId, List<PatchCapabilityMapDTO> patchCapabilityMapDTOList, String userId) {
+        validateUserIdHeaders(userId);
+        patchValidateBody(patchCapabilityMapDTOList);
+        Optional<CapabilityMap> optionalCapabilityMap = capabilityMapRepository.findById(mapId);
+        CapabilityMap capabilityMap = optionalCapabilityMap.orElseThrow(() ->
+                new NotFoundException("404: Запись в таблице maps не найдена"));
+        if (capabilityMap.getDeletedDate() != null) {
+            throw new NotFoundException("404: Запись в таблице maps удалена");
+        }
+        capabilityMap.setUpdateDate(new Date());
+        capabilityMapRepository.save(capabilityMap);
+        Integer typeId = optionalCapabilityMap.get().getTypeId();
+        userMapRepository.findByUserIdAndMapIdAndAuthorTrue(Integer.valueOf(userId), mapId)
+                .orElseThrow(() -> new NotFoundException("403: Запись User Map не найдена"));
+        Optional<EntityType> optionalEntityType = entityTypeRepository.findById(typeId.longValue());
+        String entityTypeName = optionalEntityType.get().getName();
+        List<Group> groupsList = groupRepository.findAllByMapId(mapId);
+        if (!groupsList.isEmpty()) {
+            groupRepository.deleteAll(groupsList);
+        }
+        for (PatchCapabilityMapDTO patchCapabilityMap : patchCapabilityMapDTOList) {
+            Integer saveGroupId;
+            boolean hasCapabilityIds = !patchCapabilityMap.getCapabilityIds().isEmpty();
+            boolean hasChildrenGroups = !patchCapabilityMap.getChildrenGroups().isEmpty();
+            Group group = Group.builder()
+                    .name(patchCapabilityMap.getNameGroup())
+                    .mapId(mapId)
+                    .build();
+            group = groupRepository.save(group);
+            saveGroupId = group.getId();
+            if (hasChildrenGroups) {
+                Group groupChildrenGroup = Group.builder()
+                        .name(patchCapabilityMap.getNameGroup())
+                        .mapId(mapId)
+                        .parentId(String.valueOf(saveGroupId))
+                        .build();
+                groupRepository.save(groupChildrenGroup);
+                saveGroupId = groupChildrenGroup.getId();
+            }
+            try {
+                if (hasCapabilityIds) {
+                    saveCapabilityGroups(entityTypeName, patchCapabilityMap.getCapabilityIds(), saveGroupId);
+                }
+                if (hasChildrenGroups) {
+                    for (ChildrenGroupDTO childrenGroupDTO : patchCapabilityMap.getChildrenGroups()) {
+                        saveCapabilityGroups(entityTypeName, childrenGroupDTO.getCapabilityId(), saveGroupId);
+                    }
+                }
+            } catch (DataIntegrityViolationException e) {
+                throw new ForbiddenException("Запись в таблице нарушает ограничение внешнего ключа");
+            }
+        }
+    }
+
+    private void saveCapabilityGroups(String entityTypeName, List<Integer> capabilityIds, Integer groupId) {
+        switch (entityTypeName) {
+            case "BUSINESS_CAPABILITY":
+                for (Integer capabilityId : capabilityIds) {
+                    BcGroup bcGroup = BcGroup.builder()
+                            .bcId(capabilityId)
+                            .groupId(groupId)
+                            .build();
+                    bcGroupRepository.save(bcGroup);
+                }
+                break;
+            case "TECH_CAPABILITY":
+                for (Integer capabilityId : capabilityIds) {
+                    TcGroup tcGroup = TcGroup.builder()
+                            .tcId(capabilityId)
+                            .groupId(groupId)
+                            .build();
+                    tcGroupRepository.save(tcGroup);
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Неизвестный тип сущности: " + entityTypeName);
+        }
     }
 }
