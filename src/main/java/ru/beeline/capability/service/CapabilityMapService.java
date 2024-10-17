@@ -10,6 +10,7 @@ import ru.beeline.capability.domain.Group;
 import ru.beeline.capability.domain.TcGroup;
 import ru.beeline.capability.domain.UserMap;
 import ru.beeline.capability.dto.ChildrenGroupDTO;
+import ru.beeline.capability.dto.ShortCapabilityMapDTO;
 import ru.beeline.capability.dto.PatchCapabilityMapDTO;
 import ru.beeline.capability.dto.PostCapabilityMapDTO;
 import ru.beeline.capability.exception.ForbiddenException;
@@ -22,10 +23,13 @@ import ru.beeline.capability.repository.GroupRepository;
 import ru.beeline.capability.repository.TcGroupRepository;
 import ru.beeline.capability.repository.UserMapRepository;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class CapabilityMapService {
@@ -245,5 +249,28 @@ public class CapabilityMapService {
         if (!groupsList.isEmpty()) {
             groupRepository.deleteAll(groupsList);
         }
+    }
+
+    public List<ShortCapabilityMapDTO> getCapabilityMaps(String userId) {
+        validateUserIdHeaders(userId);
+        List<Integer> mapIds = userMapRepository.findAllByUserIdAndAuthorTrue(Integer.valueOf(userId))
+                .stream()
+                .map(UserMap::getMapId)
+                .collect(Collectors.toList());
+        List<CapabilityMap> capabilityMaps = capabilityMapRepository.findAllByIdInAndDeletedDateIsNull(mapIds);
+        if (capabilityMaps.isEmpty()) {
+            return new ArrayList<>();
+        }
+        capabilityMaps.sort(Comparator.comparing(CapabilityMap::getCreateDate).reversed());
+        return capabilityMaps.stream()
+                .map(capabilityMap -> ShortCapabilityMapDTO.builder()
+                        .id(capabilityMap.getId())
+                        .name(capabilityMap.getName())
+                        .description(capabilityMap.getDescription())
+                        .createdDate(capabilityMap.getCreateDate())
+                        .updatedDate(capabilityMap.getUpdateDate())
+                        .typeId(capabilityMap.getTypeId())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

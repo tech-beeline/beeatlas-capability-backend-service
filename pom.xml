@@ -10,7 +10,7 @@
     </parent>
     <groupId>ru.beeline</groupId>
     <artifactId>capability-backend</artifactId>
-    <version>0.0.34</version>
+    <version>0.0.35</version>
     <name>capability-backend</name>
     <description>capability-backend</description>
     <properties>
