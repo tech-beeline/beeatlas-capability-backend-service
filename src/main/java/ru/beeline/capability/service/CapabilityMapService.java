@@ -226,4 +226,24 @@ public class CapabilityMapService {
                 throw new IllegalArgumentException("Неизвестный тип сущности: " + entityTypeName);
         }
     }
+
+    public void deleteCapabilityMap(Integer mapId, String userId) {
+        validateUserIdHeaders(userId);
+        Optional<UserMap> optionalUserMap = userMapRepository.findByUserIdAndMapId(Integer.valueOf(userId), mapId);
+        if (optionalUserMap.isEmpty()) {
+            throw new NotFoundException("404: Запись User Map не найдена");
+        }
+        Optional<CapabilityMap> optionalCapabilityMap = capabilityMapRepository.findById(Integer.valueOf(userId));
+        if (optionalCapabilityMap.isEmpty() || optionalCapabilityMap.get().getDeletedDate() != null) {
+            throw new NotFoundException("404: Not Found");
+        }
+        optionalCapabilityMap.ifPresent(capabilityMap -> {
+            capabilityMap.setDeletedDate(new Date());
+            capabilityMapRepository.save(capabilityMap);
+        });
+        List<Group> groupsList = groupRepository.findAllByMapId(mapId);
+        if (!groupsList.isEmpty()) {
+            groupRepository.deleteAll(groupsList);
+        }
+    }
 }

@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface UserMapRepository extends JpaRepository<UserMap, Long> {
     Optional<UserMap> findByUserIdAndMapIdAndAuthorTrue(Integer userId, Integer mapId);
+
+    Optional<UserMap> findByUserIdAndMapId(Integer userId, Integer mapId);
 }
