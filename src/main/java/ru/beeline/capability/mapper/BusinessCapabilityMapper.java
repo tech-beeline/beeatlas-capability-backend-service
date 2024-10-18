@@ -113,25 +113,29 @@ public class BusinessCapabilityMapper {
     }
 
     public List<BusinessCapabilityTreeDTO> mapToTree(List<BusinessCapability> businessCapabilities) {
-        return businessCapabilities.stream().map(businessCapability -> {
-            businessCapability.setChildrenOfTree(getChildrenBC(businessCapability));
-            return BusinessCapabilityTreeDTO.builder()
-                    .id(businessCapability.getId())
-                    .code(businessCapability.getCode())
-                    .name(businessCapability.getName())
-                    .description(businessCapability.getDescription())
-                    .author(businessCapability.getAuthor())
-                    .status(businessCapability.getStatus())
-                    .link(businessCapability.getLink())
-                    .createdDate(businessCapability.getCreatedDate())
-                    .lastModifiedDate(businessCapability.getLastModifiedDate())
-                    .isDomain(businessCapability.isDomain())
-                    .owner(businessCapability.getOwner())
-                    .parentId(businessCapability.getParentId())
-                    .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
-                    .children(mapToTree(businessCapability.getChildrenOfTree()))
-                    .build();
-        }).collect(Collectors.toList());
+        return businessCapabilities.stream()
+                .filter(bc -> bc.getDeletedDate() == null)
+                .map(businessCapability -> {
+                    businessCapability.setChildrenOfTree(getChildrenBC(businessCapability).stream()
+                            .filter(bc -> bc.isDomain() == businessCapability.isDomain())
+                            .collect(Collectors.toList()));
+                    return BusinessCapabilityTreeDTO.builder()
+                            .id(businessCapability.getId())
+                            .code(businessCapability.getCode())
+                            .name(businessCapability.getName())
+                            .description(businessCapability.getDescription())
+                            .author(businessCapability.getAuthor())
+                            .status(businessCapability.getStatus())
+                            .link(businessCapability.getLink())
+                            .createdDate(businessCapability.getCreatedDate())
+                            .lastModifiedDate(businessCapability.getLastModifiedDate())
+                            .isDomain(businessCapability.isDomain())
+                            .owner(businessCapability.getOwner())
+                            .parentId(businessCapability.getParentId())
+                            .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
+                            .children(mapToTree(businessCapability.getChildrenOfTree()))
+                            .build();
+                }).collect(Collectors.toList());
     }
 
     private List<BusinessCapability> getChildrenBC(BusinessCapability businessCapability) {

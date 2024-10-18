@@ -125,7 +125,7 @@ public class BusinessCapabilityService {
         ArrayList<Long> result = new ArrayList<>();
         while (true) {
             BusinessCapability businessCapability = findById(id);
-            if (businessCapability.getDeletedDate() != null){
+            if (businessCapability.getDeletedDate() != null) {
                 throw new NotFoundException("Business Capability не найдено");
             }
             id = businessCapability.getParentId();
@@ -157,7 +157,7 @@ public class BusinessCapabilityService {
     public BusinessCapabilityShortDTO getById(Long id) {
         BusinessCapability businessCapability = findById(id);
 
-        if (businessCapability.getDeletedDate() != null){
+        if (businessCapability.getDeletedDate() != null) {
             throw new NotFoundException("Business Capability не найдено");
         }
 
@@ -242,7 +242,19 @@ public class BusinessCapabilityService {
 
     private BusinessCapability createCapabilities(PutBusinessCapabilityDTO capability) {
 
-        BusinessCapability result = businessCapabilityRepository.save(BusinessCapability.builder().code(capability.getCode()).name(capability.getName()).description(UrlWrapper.proxyUrl(capability.getDescription())).status(capability.getStatus()).author(capability.getAuthor()).createdDate(new Date()).lastModifiedDate(new Date()).link(capability.getLink()).owner(capability.getOwner()).parentId(getParentId(capability)).isDomain(capability.getIsDomain()).build());
+        BusinessCapability result = businessCapabilityRepository.save(
+                BusinessCapability.builder()
+                        .code(capability.getCode())
+                        .name(capability.getName())
+                        .description(UrlWrapper.proxyUrl(capability.getDescription()))
+                        .status(capability.getStatus())
+                        .author(capability.getAuthor())
+                        .createdDate(new Date()).lastModifiedDate(new Date())
+                        .link(capability.getLink())
+                        .owner(capability.getOwner())
+                        .parentId(getParentId(capability))
+                        .isDomain(capability.getIsDomain())
+                        .build());
         sendNotify(result.getId(), CREATE, changeBusinessCapabilityQueueName, capability.getName());
         return result;
     }
@@ -284,27 +296,41 @@ public class BusinessCapabilityService {
         bc.setChildrenOfTree(getChildrenBC(bc));
         List<BusinessCapability> filteredBusinessCapabilities = bc.getChildrenOfTree();
         filteredBusinessCapabilities.forEach(businessCapability ->
-                businessCapability.setChildrenOfTree(filterChildren(businessCapability.getChildrenOfTree(), businessCapability.isDomain())));
+                businessCapability.setChildrenOfTree(
+                        filterChildren(businessCapability.getChildrenOfTree(), businessCapability.isDomain())));
         return businessCapabilityMapper.mapToCustomTree(filteredBusinessCapabilities, bc);
 
     }
 
     public List<BusinessCapabilityTreeDTO> getBusinessCapabilityTree() {
-        List<BusinessCapability> businessCapabilities = businessCapabilityRepository.findAllByParentIdIsNullAndDeletedDateIsNullAndIsDomainIsTrue();
+        List<BusinessCapability> businessCapabilities =
+                businessCapabilityRepository.findAllByParentIdIsNullAndDeletedDateIsNullAndIsDomainIsTrue();
         return businessCapabilityMapper.mapToTree(filterChildrenWithDomainIsTrue(businessCapabilities));
     }
 
     private List<BusinessCapability> filterChildren(List<BusinessCapability> children, boolean isDomain) {
-        if(children == null || children.isEmpty()){
+        if (children == null || children.isEmpty()) {
             return new ArrayList<>();
         }
         children.forEach(bc -> bc.setChildrenOfTree(getChildrenBC(bc)));
-        return children.stream().filter(businessCapability -> businessCapability.getDeletedDate() == null && businessCapability.isDomain() == isDomain).peek(businessCapability -> businessCapability.setChildrenOfTree(filterChildren(businessCapability.getChildrenOfTree(), isDomain))).collect(Collectors.toList());
+        return children.stream()
+                .filter(businessCapability -> businessCapability.getDeletedDate() == null
+                        && businessCapability.isDomain() == isDomain)
+                .peek(businessCapability ->
+                        businessCapability.setChildrenOfTree(
+                                filterChildren(businessCapability.getChildrenOfTree(), isDomain)))
+                .collect(Collectors.toList());
     }
 
     private List<BusinessCapability> filterChildrenWithDomainIsTrue(List<BusinessCapability> children) {
         children.forEach(bc -> bc.setChildrenOfTree(getChildrenBC(bc)));
-        return children.stream().filter(businessCapability -> businessCapability.getDeletedDate() == null && businessCapability.isDomain()).peek(businessCapability -> businessCapability.setChildrenOfTree(filterChildrenWithDomainIsTrue(businessCapability.getChildrenOfTree()))).collect(Collectors.toList());
+        return children.stream()
+                .filter(businessCapability -> businessCapability.getDeletedDate() == null
+                        && businessCapability.isDomain())
+                .peek(businessCapability ->
+                        businessCapability.setChildrenOfTree(
+                                filterChildrenWithDomainIsTrue(businessCapability.getChildrenOfTree())))
+                .collect(Collectors.toList());
     }
 
 
