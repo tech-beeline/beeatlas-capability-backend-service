@@ -172,7 +172,14 @@ public class BusinessCapabilityService {
     }
 
     private boolean checkHasKids(BusinessCapability businessCapability) {
-        return techCapabilityRelationsRepository.existsByBusinessCapability(businessCapability) || businessCapabilityRepository.existsByParentId(businessCapability.getId());
+        List<TechCapabilityRelations> techCapabilityRelations = techCapabilityRelationsRepository.findByBusinessCapability(businessCapability);
+        if (!techCapabilityRelations.isEmpty()) {
+            if (techCapabilityRelations.stream()
+                    .map(TechCapabilityRelations::getTechCapability)
+                    .anyMatch(tech -> tech.getDeletedDate() == null))
+                return true;
+        }
+        return !businessCapabilityRepository.findAllByParentIdAndDeletedDateIsNull(businessCapability.getId()).isEmpty();
     }
 
     public List<BusinessCapabilityShortDTO> getCapabilities(Integer limit, Integer offset, String findBy) {

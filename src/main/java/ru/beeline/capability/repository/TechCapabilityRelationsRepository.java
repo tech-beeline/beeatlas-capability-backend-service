@@ -17,5 +17,6 @@ public interface TechCapabilityRelationsRepository extends JpaRepository<TechCap
 
     void deleteAllByTechCapability(TechCapability techCapability);
     List<TechCapabilityRelations> findByTechCapability(TechCapability techCapability);
+    List<TechCapabilityRelations> findByBusinessCapability(BusinessCapability businessCapability);
 
 }
