@@ -64,12 +64,6 @@ public class CapabilityMapService {
         if (!errMsg.toString().isEmpty()) {
             throw new ValidationException(errMsg.toString());
         }
-        if (Pattern.matches("^\\d+$", postCapabilityMapDTO.getName())) {
-            throw new ForbiddenException("Поле name: должно быть String");
-        }
-        if (Pattern.matches("^\\d+$", postCapabilityMapDTO.getDescription())) {
-            throw new ForbiddenException("Поле description: должно быть String");
-        }
     }
 
     public void validateUserIdHeaders(String userId) {
