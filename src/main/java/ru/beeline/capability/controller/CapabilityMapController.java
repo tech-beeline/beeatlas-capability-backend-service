@@ -41,7 +41,7 @@ public class CapabilityMapController {
 
     @PatchMapping("/{mapId}")
     @ApiOperation(value = "Обновления карты пользователя")
-    public ResponseEntity deleteCapabilityMap(@PathVariable Integer mapId,
+    public ResponseEntity patchCapabilityMap(@PathVariable Integer mapId,
                                               @RequestBody List<PatchCapabilityMapDTO> patchCapabilityMapDTO,
                                               HttpServletRequest request) {
         capabilityMapService.patchCapabilityMap(mapId, patchCapabilityMapDTO, request.getHeader(USER_ID_HEADER));

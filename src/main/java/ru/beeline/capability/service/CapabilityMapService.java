@@ -119,15 +119,9 @@ public class CapabilityMapService {
         for (PatchCapabilityMapDTO patchCapabilityMap : patchCapabilityMapDTO) {
             boolean hasCapabilityIds = patchCapabilityMap.getCapabilityIds() != null && !patchCapabilityMap.getCapabilityIds().isEmpty();
             boolean hasChildrenGroups = patchCapabilityMap.getChildrenGroups() != null && !patchCapabilityMap.getChildrenGroups().isEmpty();
-
-            if (!(hasCapabilityIds ^ hasChildrenGroups)) {
-                throw new IllegalArgumentException("Заполнено должно быть capabilityIds или childrenGroups ");
-            }
-
             if (hasCapabilityIds) {
                 validateNameGroup(patchCapabilityMap.getNameGroup());
             }
-
             if (hasChildrenGroups) {
                 for (ChildrenGroupDTO childrenGroupDTO : patchCapabilityMap.getChildrenGroups()) {
                     validateNameGroup(childrenGroupDTO.getNameGroup());
@@ -140,88 +134,87 @@ public class CapabilityMapService {
         if (nameGroup == null || nameGroup.isEmpty()) {
             throw new ValidationException("Отсутствует обязательное поле Name Group");
         }
-
-        if (Pattern.matches("^\\d+$", nameGroup)) {
-            throw new ForbiddenException("Поле Name Group: должно быть String");
-        }
     }
 
-    public void patchCapabilityMap(Integer mapId, List<PatchCapabilityMapDTO> patchCapabilityMapDTOList, String userId) {
-        validateUserIdHeaders(userId);
-        patchValidateBody(patchCapabilityMapDTOList);
-        Optional<CapabilityMap> optionalCapabilityMap = capabilityMapRepository.findById(mapId);
+    private CapabilityMap findCapabilityMapById(Integer id) {
+        Optional<CapabilityMap> optionalCapabilityMap = capabilityMapRepository.findById(id);
         CapabilityMap capabilityMap = optionalCapabilityMap.orElseThrow(() ->
                 new NotFoundException("404: Запись в таблице maps не найдена"));
         if (capabilityMap.getDeletedDate() != null) {
             throw new NotFoundException("404: Запись в таблице maps удалена");
         }
+        return capabilityMap;
+    }
+
+    public void patchCapabilityMap(Integer mapId, List<PatchCapabilityMapDTO> patchCapabilityMapDTOList, String userId) {
+        validateUserIdHeaders(userId);
+        patchValidateBody(patchCapabilityMapDTOList);
+        CapabilityMap capabilityMap = findCapabilityMapById(mapId);
         capabilityMap.setUpdateDate(new Date());
         capabilityMapRepository.save(capabilityMap);
-        Integer typeId = optionalCapabilityMap.get().getTypeId();
         userMapRepository.findByUserIdAndMapIdAndAuthorTrue(Integer.valueOf(userId), mapId)
                 .orElseThrow(() -> new NotFoundException("403: Запись User Map не найдена"));
-        Optional<EntityType> optionalEntityType = entityTypeRepository.findById(typeId.longValue());
+        Optional<EntityType> optionalEntityType = entityTypeRepository.findById(capabilityMap.getTypeId().longValue());
         String entityTypeName = optionalEntityType.get().getName();
         List<Group> groupsList = groupRepository.findAllByMapId(mapId);
         if (!groupsList.isEmpty()) {
             groupRepository.deleteAll(groupsList);
         }
+        Integer saveGroupId;
         for (PatchCapabilityMapDTO patchCapabilityMap : patchCapabilityMapDTOList) {
-            Integer saveGroupId;
-            boolean hasCapabilityIds = !patchCapabilityMap.getCapabilityIds().isEmpty();
-            boolean hasChildrenGroups = !patchCapabilityMap.getChildrenGroups().isEmpty();
+            boolean hasCapabilityIds = patchCapabilityMap.getCapabilityIds() != null && !patchCapabilityMap.getCapabilityIds().isEmpty();
+            boolean hasChildrenGroups = patchCapabilityMap.getCapabilityIds() != null && !patchCapabilityMap.getChildrenGroups().isEmpty();
             Group group = Group.builder()
                     .name(patchCapabilityMap.getNameGroup())
                     .mapId(mapId)
                     .build();
             group = groupRepository.save(group);
             saveGroupId = group.getId();
-            if (hasChildrenGroups) {
-                Group groupChildrenGroup = Group.builder()
-                        .name(patchCapabilityMap.getNameGroup())
-                        .mapId(mapId)
-                        .parentId(String.valueOf(saveGroupId))
-                        .build();
-                groupRepository.save(groupChildrenGroup);
-                saveGroupId = groupChildrenGroup.getId();
+            if (hasCapabilityIds) {
+                saveCapabilityGroups(entityTypeName, patchCapabilityMap.getCapabilityIds(), saveGroupId);
             }
-            try {
-                if (hasCapabilityIds) {
-                    saveCapabilityGroups(entityTypeName, patchCapabilityMap.getCapabilityIds(), saveGroupId);
+            if (hasChildrenGroups) {
+                for (ChildrenGroupDTO childrenGroupDTO : patchCapabilityMap.getChildrenGroups()) {
+                    Group groupChildrenGroup = Group.builder()
+                            .name(childrenGroupDTO.getNameGroup())
+                            .mapId(mapId)
+                            .parentId(String.valueOf(saveGroupId))
+                            .build();
+                    groupRepository.save(groupChildrenGroup);
+                    Integer saveChildrenGroupId = groupChildrenGroup.getId();
+                    saveCapabilityGroups(entityTypeName, childrenGroupDTO.getCapabilityId(), saveChildrenGroupId);
                 }
-                if (hasChildrenGroups) {
-                    for (ChildrenGroupDTO childrenGroupDTO : patchCapabilityMap.getChildrenGroups()) {
-                        saveCapabilityGroups(entityTypeName, childrenGroupDTO.getCapabilityId(), saveGroupId);
-                    }
-                }
-            } catch (DataIntegrityViolationException e) {
-                throw new ForbiddenException("Запись в таблице нарушает ограничение внешнего ключа");
             }
         }
     }
 
     private void saveCapabilityGroups(String entityTypeName, List<Integer> capabilityIds, Integer groupId) {
-        switch (entityTypeName) {
-            case "BUSINESS_CAPABILITY":
-                for (Integer capabilityId : capabilityIds) {
-                    BcGroup bcGroup = BcGroup.builder()
-                            .bcId(capabilityId)
-                            .groupId(groupId)
-                            .build();
-                    bcGroupRepository.save(bcGroup);
-                }
-                break;
-            case "TECH_CAPABILITY":
-                for (Integer capabilityId : capabilityIds) {
-                    TcGroup tcGroup = TcGroup.builder()
-                            .tcId(capabilityId)
-                            .groupId(groupId)
-                            .build();
-                    tcGroupRepository.save(tcGroup);
-                }
-                break;
-            default:
-                throw new IllegalArgumentException("Неизвестный тип сущности: " + entityTypeName);
+        try {
+            switch (entityTypeName) {
+                case "BUSINESS_CAPABILITY":
+                    for (Integer capabilityId : capabilityIds) {
+                        BcGroup bcGroup = BcGroup.builder()
+                                .bcId(capabilityId)
+                                .groupId(groupId)
+
+                                .build();
+                        bcGroupRepository.save(bcGroup);
+                    }
+                    break;
+                case "TECH_CAPABILITY":
+                    for (Integer capabilityId : capabilityIds) {
+                        TcGroup tcGroup = TcGroup.builder()
+                                .tcId(capabilityId)
+                                .groupId(groupId)
+                                .build();
+                        tcGroupRepository.save(tcGroup);
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("Неизвестный тип сущности: " + entityTypeName);
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new ForbiddenException("Записи с таким Id нет в таблице BC или TC");
         }
     }
 
