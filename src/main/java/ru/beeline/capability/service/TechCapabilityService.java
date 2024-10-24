@@ -12,44 +12,24 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.beeline.capability.domain.BusinessCapability;
-import ru.beeline.capability.domain.CriteriasBc;
-import ru.beeline.capability.domain.EntityType;
-import ru.beeline.capability.domain.EnumCriteria;
-import ru.beeline.capability.domain.TechCapability;
-import ru.beeline.capability.domain.TechCapabilityRelations;
+import ru.beeline.capability.domain.*;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
 import ru.beeline.capability.mapper.TechCapabilityMapper;
-import ru.beeline.capability.repository.BusinessCapabilityRepository;
-import ru.beeline.capability.repository.CriteriaBcRepository;
-import ru.beeline.capability.repository.EntityTypeRepository;
-import ru.beeline.capability.repository.EnumCriteriaRepository;
-import ru.beeline.capability.repository.FindNameSortTableRepository;
-import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
-import ru.beeline.capability.repository.TechCapabilityRepository;
+import ru.beeline.capability.repository.*;
 import ru.beeline.capability.utils.UrlWrapper;
 import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static ru.beeline.capability.utils.Constants.CREATE;
-import static ru.beeline.capability.utils.Constants.ENTITY_TYPE_TECH_CAPABILITY;
-import static ru.beeline.capability.utils.Constants.UPDATE;
+import static ru.beeline.capability.utils.Constants.*;
 
 @Slf4j
 @Service
@@ -273,17 +253,62 @@ public class TechCapabilityService {
                 .collect(Collectors.toList());
         EnumCriteria quantityTc = enumCriteriaRepository.findByName("quantity_tc");
         parentList.forEach(businessCapability -> {
+            Boolean newCriteria = false;
             CriteriasBc criteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(businessCapability.getId(), quantityTc.getId());
-            extracted(businessCapability.getId(), quantityTc, criteriasBc, 1, 1, 2);
-
+            if (criteriasBc != null) {
+                criteriasBc.setValue(criteriasBc.getValue() + 1);
+                criteriaBcRepository.save(criteriasBc);
+            } else {
+                newCriteria = true;
+                criteriasBc = criteriaBcRepository.save(CriteriasBc.builder()
+                        .criterionId(quantityTc.getId())
+                        .value(1)
+                        .grade(2)
+                        .bcId(businessCapability.getId())
+                        .build());
+            }
             List<BusinessCapability> businessCapabilityParentList =
                     businessCapabilityService.getBusinessCapabilityParentList(businessCapability.getId());
-            businessCapabilityParentList.forEach(bc -> iterateChildrenCriteriaBc(bc, quantityTc));
+            CriteriasBc finalCriteriasBc = criteriasBc;
+            Boolean finalNewCriteria = newCriteria;
+            businessCapabilityParentList.forEach(bc -> iterateChildrenCriteriaBc(bc, quantityTc, finalCriteriasBc, finalNewCriteria, false));
         });
     }
 
-    private void iterateChildrenCriteriaBc(BusinessCapability bc, EnumCriteria quantityTc) {
+    private void iterateChildrenCriteriaBc(BusinessCapability bc, EnumCriteria quantityTc, CriteriasBc criteriaParentBc, Boolean newCriteria, Boolean totalCount) {
         CriteriasBc criteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(bc.getId(), quantityTc.getId());
+        if (totalCount) {
+            if (criteriasBc != null) {
+                criteriasBc.setValue(criteriaParentBc.getValue());
+                criteriasBc.setGrade(getGradeOfChild(bc, quantityTc));
+                criteriaBcRepository.save(criteriasBc);
+            } else {
+                criteriaBcRepository.save(CriteriasBc.builder()
+                        .criterionId(quantityTc.getId())
+                        .value(criteriaParentBc.getValue())
+                        .grade(getGrade(bc))
+                        .bcId(bc.getId())
+                        .build());
+            }
+        } else {
+            if (criteriasBc != null) {
+                criteriasBc.setValue(criteriasBc.getValue() + 1);
+                if (newCriteria) {
+                    criteriasBc.setGrade(getGradeOfChild(bc, quantityTc));
+                }
+                criteriaBcRepository.save(criteriasBc);
+            } else {
+                criteriaBcRepository.save(CriteriasBc.builder()
+                        .criterionId(quantityTc.getId())
+                        .value(1)
+                        .grade(getGrade(bc))
+                        .bcId(bc.getId())
+                        .build());
+            }
+        }
+    }
+
+    private int getGradeOfChild(BusinessCapability bc, EnumCriteria quantityTc) {
         AtomicInteger criteriaIterator = new AtomicInteger();
         AtomicInteger valueSummary = new AtomicInteger();
         bc.getChildren().forEach(childChildBc -> {
@@ -296,31 +321,22 @@ public class TechCapabilityService {
             }
         });
         if (bc.getChildren().size() == criteriaIterator.get()) {
-            extracted(bc.getId(), quantityTc, criteriasBc, valueSummary.get(), 0, 2);
+            return 2;
 
         } else {
-            extracted(bc.getId(), quantityTc, criteriasBc, valueSummary.get(), 0, 1);
+            return 1;
         }
-
     }
 
-    private void extracted(Long bcId, EnumCriteria quantityTc, CriteriasBc criteriasBc, Integer value1, Integer value2, int grade) {
-        if (criteriasBc != null) {
-            criteriasBc.setValue(criteriasBc.getValue() + value1);
-            criteriasBc.setGrade(grade);
-            criteriaBcRepository.save(criteriasBc);
+    private int getGrade(BusinessCapability bc) {
+        if (bc.getChildren().size() > 1) {
+            return 1;
         } else {
-            criteriaBcRepository.save(CriteriasBc.builder()
-                    .criterionId(quantityTc.getId())
-                    .value(value2)
-                    .grade(grade)
-                    .bcId(bcId)
-                    .build());
+            return 2;
         }
     }
 
     public void calculateTotalTechCapabilitiesCount() {
-
         List<TechCapabilityRelations> techCapabilityRelationsList = techCapabilityRelationsRepository.findAll();
         List<BusinessCapability> parentList = techCapabilityRelationsList.stream()
                 .map(TechCapabilityRelations::getBusinessCapability)
@@ -328,21 +344,25 @@ public class TechCapabilityService {
                 .collect(Collectors.toList());
         EnumCriteria quantityTc = enumCriteriaRepository.findByName("quantity_tc");
         parentList.forEach(businessCapability -> {
+            Boolean newCriteria = false;
             CriteriasBc criteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(businessCapability.getId(), quantityTc.getId());
             if (criteriasBc != null) {
                 criteriasBc.setValue(businessCapabilityRepository.findAllByParentId(businessCapability.getId()).size());
                 criteriaBcRepository.save(criteriasBc);
             } else {
-                criteriaBcRepository.save(CriteriasBc.builder()
+                newCriteria=true;
+                criteriasBc = criteriaBcRepository.save(CriteriasBc.builder()
                         .criterionId(quantityTc.getId())
-                        .value(1)
+                        .value(businessCapabilityRepository.findAllByParentId(businessCapability.getId()).size())
                         .grade(2)
                         .bcId(businessCapability.getId())
                         .build());
             }
             List<BusinessCapability> businessCapabilityParentList =
                     businessCapabilityService.getBusinessCapabilityParentList(businessCapability.getId());
-            businessCapabilityParentList.forEach(bc -> iterateChildrenCriteriaBc(bc, quantityTc));
+            CriteriasBc finalCriteriasBc = criteriasBc;
+            Boolean finalNewCriteria = newCriteria;
+            businessCapabilityParentList.forEach(bc -> iterateChildrenCriteriaBc(bc, quantityTc, finalCriteriasBc, finalNewCriteria, true));
         });
     }
 
