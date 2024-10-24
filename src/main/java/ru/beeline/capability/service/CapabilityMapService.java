@@ -224,7 +224,7 @@ public class CapabilityMapService {
         if (optionalUserMap.isEmpty()) {
             throw new NotFoundException("404: Запись User Map не найдена");
         }
-        Optional<CapabilityMap> optionalCapabilityMap = capabilityMapRepository.findById(Integer.valueOf(userId));
+        Optional<CapabilityMap> optionalCapabilityMap = capabilityMapRepository.findById(mapId);
         if (optionalCapabilityMap.isEmpty() || optionalCapabilityMap.get().getDeletedDate() != null) {
             throw new NotFoundException("404: Not Found");
         }
