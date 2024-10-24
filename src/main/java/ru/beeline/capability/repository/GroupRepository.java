@@ -7,6 +7,6 @@ import ru.beeline.capability.domain.Group;
 import java.util.List;
 
 @Repository
-public interface GroupRepository extends JpaRepository<Group,Long> {
-    List<Group> findAllByMapId (Integer mapId);
+public interface GroupRepository extends JpaRepository<Group, Long> {
+    List<Group> findAllByMapId(Integer mapId);
 }
