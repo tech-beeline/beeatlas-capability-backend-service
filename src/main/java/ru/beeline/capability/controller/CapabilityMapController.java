@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.beeline.capability.dto.GetCapabilityMapByIdDTO;
 import ru.beeline.capability.dto.ShortCapabilityMapDTO;
 import ru.beeline.capability.dto.PatchCapabilityMapDTO;
 import ru.beeline.capability.dto.PostCapabilityMapDTO;
@@ -53,6 +54,12 @@ public class CapabilityMapController {
     public ResponseEntity deleteCapabilityMap(@PathVariable Integer mapId, HttpServletRequest request) {
         capabilityMapService.deleteCapabilityMap(mapId, request.getHeader(USER_ID_HEADER));
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/{Id}")
+    @ApiOperation(value = "Получение карты по id")
+    public GetCapabilityMapByIdDTO getCapabilityMapById(@PathVariable Integer Id) {
+        return capabilityMapService.getCapabilityMapById(Id);
     }
 
     @GetMapping
