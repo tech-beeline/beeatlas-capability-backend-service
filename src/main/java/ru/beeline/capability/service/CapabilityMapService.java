@@ -4,23 +4,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.beeline.capability.domain.BcGroup;
+import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.CapabilityMap;
 import ru.beeline.capability.domain.EntityType;
 import ru.beeline.capability.domain.Group;
 import ru.beeline.capability.domain.TcGroup;
+import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.UserMap;
+import ru.beeline.capability.dto.CapabilityDTO;
 import ru.beeline.capability.dto.ChildrenGroupDTO;
-import ru.beeline.capability.dto.ShortCapabilityMapDTO;
+import ru.beeline.capability.dto.GetCapabilityMapByIdDTO;
+import ru.beeline.capability.dto.GetChildrenGroupsDTO;
+import ru.beeline.capability.dto.GroupDTO;
 import ru.beeline.capability.dto.PatchCapabilityMapDTO;
 import ru.beeline.capability.dto.PostCapabilityMapDTO;
+import ru.beeline.capability.dto.ShortCapabilityMapDTO;
 import ru.beeline.capability.exception.ForbiddenException;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.repository.BcGroupRepository;
+import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.CapabilityMapRepository;
 import ru.beeline.capability.repository.EntityTypeRepository;
 import ru.beeline.capability.repository.GroupRepository;
 import ru.beeline.capability.repository.TcGroupRepository;
+import ru.beeline.capability.repository.TechCapabilityRepository;
 import ru.beeline.capability.repository.UserMapRepository;
 
 import java.util.ArrayList;
@@ -33,6 +41,12 @@ import java.util.stream.Collectors;
 
 @Service
 public class CapabilityMapService {
+
+    @Autowired
+    BusinessCapabilityRepository businessCapabilityRepository;
+
+    @Autowired
+    TechCapabilityRepository techCapabilityRepository;
 
     @Autowired
     CapabilityMapRepository capabilityMapRepository;
@@ -259,5 +273,186 @@ public class CapabilityMapService {
                         .typeId(capabilityMap.getTypeId())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    public GetCapabilityMapByIdDTO getCapabilityMapById(Integer id) {
+        Optional<CapabilityMap> optionalCapabilityMap = capabilityMapRepository.findById(id);
+        if (optionalCapabilityMap.isEmpty() || optionalCapabilityMap.get().getDeletedDate() != null) {
+            throw new NotFoundException("404: Карта не найдена");
+        }
+        GetCapabilityMapByIdDTO getCapabilityMapByIdDTO = createGetCapabilityMapByIdDTO(optionalCapabilityMap.get());
+        List<Group> groupsList = groupRepository.findAllByMapId(id);
+        List<Group> groupListParentIdIsNull = getGroupsWithNullParentId(groupsList);
+        List<Group> groupListParentIdNotNull = getGroupsWithNotNullParentId(groupsList);
+        if (!groupListParentIdIsNull.isEmpty()) {
+            getCapabilityMapByIdDTO.setGroups(createGroupDTOList(groupListParentIdIsNull));
+            if (!groupListParentIdNotNull.isEmpty()) {
+                setChildrenGroups(getCapabilityMapByIdDTO.getGroups(), createGetChildrenGroupsDTOList(groupListParentIdNotNull));
+            }
+            List<Integer> groupDTOListParentIdIsNullIDS = getGroupIds(groupListParentIdIsNull);
+            List<Integer> groupDTOListParentIdNotNullIDS = getGroupIds(groupListParentIdNotNull);
+            if (getCapabilityMapByIdDTO.getTypeId() == 2) {
+                createBcGroup(getCapabilityMapByIdDTO.getGroups(), groupDTOListParentIdIsNullIDS, groupDTOListParentIdNotNullIDS);
+            } else {
+                if (getCapabilityMapByIdDTO.getTypeId() == 1) {
+                    createTcGroup(getCapabilityMapByIdDTO.getGroups(), groupDTOListParentIdIsNullIDS, groupDTOListParentIdNotNullIDS);
+                }
+            }
+        }
+        return getCapabilityMapByIdDTO;
+    }
+
+    private List<Integer> getGroupIds(List<Group> groupList) {
+        return groupList.stream()
+                .map(Group::getId)
+                .collect(Collectors.toList());
+    }
+
+    private GetCapabilityMapByIdDTO createGetCapabilityMapByIdDTO(CapabilityMap capabilityMap) {
+        return GetCapabilityMapByIdDTO.builder()
+                .name(capabilityMap.getName())
+                .description(capabilityMap.getDescription())
+                .typeId(capabilityMap.getTypeId())
+                .build();
+    }
+
+    private List<Group> getGroupsWithNullParentId(List<Group> groupsList) {
+        return groupsList.stream()
+                .filter(group -> group.getParentId() == null)
+                .toList();
+    }
+
+    private List<Group> getGroupsWithNotNullParentId(List<Group> groupsList) {
+        return groupsList.stream()
+                .filter(group -> group.getParentId() != null)
+                .toList();
+    }
+
+    private List<GroupDTO> createGroupDTOList(List<Group> groupList) {
+        return groupList.stream()
+                .map(group -> GroupDTO.builder()
+                        .groupId(group.getId())
+                        .nameGroup(group.getName())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    private List<GetChildrenGroupsDTO> createGetChildrenGroupsDTOList(List<Group> groupList) {
+        return groupList.stream()
+                .map(group -> GetChildrenGroupsDTO.builder()
+                        .groupId(group.getId())
+                        .nameGroup(group.getName())
+                        .parentId(Integer.valueOf(group.getParentId()))
+                        .build())
+                .toList();
+    }
+
+    private void setChildrenGroups(List<GroupDTO> groupDTOList, List<GetChildrenGroupsDTO> childrenGroups) {
+        for (GroupDTO groupDTO : groupDTOList) {
+            List<GetChildrenGroupsDTO> childrenGroup = childrenGroups.stream()
+                    .filter(child -> child.getParentId().equals(groupDTO.getGroupId()))
+                    .collect(Collectors.toList());
+            groupDTO.setChildrenGroup(childrenGroup);
+        }
+    }
+
+    private void createBcGroup(List<GroupDTO> groups, List<Integer> groupDTOListParentIdIsNullIDS,
+                               List<Integer> groupDTOListParentIdNotNullIDS) {
+        boolean parent = !groupDTOListParentIdIsNullIDS.isEmpty();
+        boolean children = !groupDTOListParentIdNotNullIDS.isEmpty();
+        if (parent) {
+            List<BcGroup> bcGroupList = bcGroupRepository.findAllByGroupIdIn(groupDTOListParentIdIsNullIDS);
+            for (GroupDTO groupDTO : groups) {
+                groupDTO.setCapability(new ArrayList<>());
+                for (BcGroup bcGroup : bcGroupList) {
+                    if (groupDTO.getGroupId().equals(bcGroup.getGroupId())) {
+                        Optional<BusinessCapability> businessCapability = businessCapabilityRepository.findById(bcGroup.getBcId().longValue());
+                        businessCapability.ifPresent(capability -> groupDTO.getCapability().add(buildBcCapabilityDTO(capability)));
+                    }
+                }
+            }
+        }
+
+        if (children) {
+            List<BcGroup> bcGroups = bcGroupRepository.findAllByGroupIdIn(groupDTOListParentIdNotNullIDS);
+            for (GroupDTO groupDTO : groups) {
+                for (GetChildrenGroupsDTO childrenGroupDTO : groupDTO.getChildrenGroup()) {
+                    childrenGroupDTO.setCapability(new ArrayList<>());
+                    for (BcGroup bcGroup : bcGroups) {
+                        if (childrenGroupDTO.getGroupId().equals(bcGroup.getGroupId())) {
+                            Optional<BusinessCapability> businessCapability = businessCapabilityRepository.findById(bcGroup.getBcId().longValue());
+                            businessCapability.ifPresent(capability -> childrenGroupDTO.getCapability().add(buildBcCapabilityDTO(capability)));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void createTcGroup(List<GroupDTO> groups, List<Integer> groupDTOListParentIdIsNullIDS,
+                               List<Integer> groupDTOListParentIdNotNullIDS) {
+        boolean parent = !groupDTOListParentIdIsNullIDS.isEmpty();
+        boolean children = !groupDTOListParentIdNotNullIDS.isEmpty();
+        if (parent) {
+            List<TcGroup> tcGroups = tcGroupRepository.findAllByGroupIdIn(groupDTOListParentIdIsNullIDS);
+            for (GroupDTO groupDTO : groups) {
+                groupDTO.setCapability(new ArrayList<>());
+                for (TcGroup tcGroup : tcGroups) {
+                    if (groupDTO.getGroupId().equals(tcGroup.getGroupId())) {
+                        Optional<TechCapability> techCapability = techCapabilityRepository.findById(tcGroup.getTcId().longValue());
+                        techCapability.ifPresent(capability -> groupDTO.getCapability().add(buildTcCapabilityDTO(capability)));
+                    }
+                }
+            }
+        }
+        if (children) {
+            List<TcGroup> tcGroups = tcGroupRepository.findAllByGroupIdIn(groupDTOListParentIdNotNullIDS);
+            for (GroupDTO groupDTO : groups) {
+                for (GetChildrenGroupsDTO childrenGroupDTO : groupDTO.getChildrenGroup()) {
+                    childrenGroupDTO.setCapability(new ArrayList<>());
+                    for (TcGroup tcGroup : tcGroups) {
+                        if (childrenGroupDTO.getGroupId().equals(tcGroup.getGroupId())) {
+                            Optional<TechCapability> techCapability = techCapabilityRepository.findById(tcGroup.getTcId().longValue());
+                            techCapability.ifPresent(capability -> childrenGroupDTO.getCapability().add(buildTcCapabilityDTO(capability)));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private CapabilityDTO buildBcCapabilityDTO(BusinessCapability businessCapability) {
+
+        return CapabilityDTO.builder()
+                .id(businessCapability.getId())
+                .code(businessCapability.getCode())
+                .name(businessCapability.getName())
+                .description(businessCapability.getDescription())
+                .author(businessCapability.getAuthor())
+                .status(businessCapability.getStatus())
+                .link(businessCapability.getLink())
+                .createdDate(businessCapability.getCreatedDate())
+                .isDomain(businessCapability.isDomain())
+                .updatedDate(businessCapability.getLastModifiedDate())
+                .owner(businessCapability.getOwner())
+                .build();
+
+    }
+
+    private CapabilityDTO buildTcCapabilityDTO(TechCapability techCapability) {
+
+        return CapabilityDTO.builder()
+                .id(techCapability.getId())
+                .code(techCapability.getCode())
+                .name(techCapability.getName())
+                .description(techCapability.getDescription())
+                .author(techCapability.getAuthor())
+                .status(techCapability.getStatus())
+                .link(techCapability.getLink())
+                .createdDate(techCapability.getCreatedDate())
+                .updatedDate(techCapability.getLastModifiedDate())
+                .owner(techCapability.getOwner())
+                .responsibilityProductId(techCapability.getResponsibilityProductId())
+                .build();
     }
 }
