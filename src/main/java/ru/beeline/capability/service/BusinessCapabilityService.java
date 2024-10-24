@@ -120,19 +120,23 @@ public class BusinessCapabilityService {
         }
     }
 
-
     public CapabilityParentDTO getParentsWithoutDeleteDate(Long id) {
         ArrayList<Long> result = new ArrayList<>();
+        BusinessCapability businessCapability = findById(id);
+        if (businessCapability.getDeletedDate() != null) {
+            throw new NotFoundException("Business Capability не найдено");
+        }
+        if (businessCapability.getParentId() == null) {
+            result.add(businessCapability.getId());
+            return new CapabilityParentDTO(result);
+        }
         while (true) {
-            BusinessCapability businessCapability = findById(id);
-            if (businessCapability.getDeletedDate() != null) {
-                throw new NotFoundException("Business Capability не найдено");
-            }
-            id = businessCapability.getParentId();
-            if (Objects.isNull(id)) {
+            Long parentId = businessCapability.getParentId();
+            if (Objects.isNull(parentId)) {
                 return new CapabilityParentDTO(result);
             } else {
-                result.add(id);
+                result.add(parentId);
+                businessCapability = businessCapability.getParentEntity();
             }
         }
     }
