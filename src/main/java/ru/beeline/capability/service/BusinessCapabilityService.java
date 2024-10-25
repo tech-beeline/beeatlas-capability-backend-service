@@ -126,10 +126,6 @@ public class BusinessCapabilityService {
         if (businessCapability.getDeletedDate() != null) {
             throw new NotFoundException("Business Capability не найдено");
         }
-        if (businessCapability.getParentId() == null) {
-            result.add(businessCapability.getId());
-            return new CapabilityParentDTO(result);
-        }
         while (true) {
             Long parentId = businessCapability.getParentId();
             if (Objects.isNull(parentId)) {
