@@ -2,6 +2,7 @@ package ru.beeline.capability.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,7 @@ import static ru.beeline.capability.utils.Constants.CREATE;
 import static ru.beeline.capability.utils.Constants.ENTITY_TYPE_BUSINESS_CAPABILITY;
 import static ru.beeline.capability.utils.Constants.UPDATE;
 
+@Slf4j
 @Service
 @Transactional
 public class BusinessCapabilityService {
@@ -209,6 +211,7 @@ public class BusinessCapabilityService {
         if (businessCapabilityOptional.isPresent()) {
             businessCapability = businessCapabilityOptional.get();
             if (!capabilityDTO.equals(businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability))) {
+                log.info("capabilityDTO: " + capabilityDTO.toString() + "capability from bd: " + businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability).toString());
                 businessCapability = updateCapability(businessCapability, capabilityDTO);
                 sendNotify(businessCapability.getId(), UPDATE, changeBusinessCapabilityQueueName, capabilityDTO.getName());
                 findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
