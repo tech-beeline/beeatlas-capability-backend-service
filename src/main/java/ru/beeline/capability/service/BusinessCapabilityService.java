@@ -385,7 +385,7 @@ public class BusinessCapabilityService {
         return prefix;
     }
 
-    private List<BusinessCapability> getChildrenBC(BusinessCapability businessCapability) {
+    public List<BusinessCapability> getChildrenBC(BusinessCapability businessCapability) {
         return businessCapabilityRepository.findAllByParentId(businessCapability.getId());
     }
 

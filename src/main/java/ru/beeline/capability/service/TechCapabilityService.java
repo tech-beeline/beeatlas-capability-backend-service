@@ -269,6 +269,7 @@ public class TechCapabilityService {
             }
             List<BusinessCapability> businessCapabilityParentList =
                     businessCapabilityService.getBusinessCapabilityParentList(businessCapability.getId());
+            businessCapabilityParentList.remove(0);
             CriteriasBc finalCriteriasBc = criteriasBc;
             Boolean finalNewCriteria = newCriteria;
             businessCapabilityParentList.forEach(bc -> iterateChildrenCriteriaBc(bc, quantityTc, finalCriteriasBc, finalNewCriteria, false));
@@ -311,7 +312,7 @@ public class TechCapabilityService {
     private int getGradeOfChild(BusinessCapability bc, EnumCriteria quantityTc) {
         AtomicInteger criteriaIterator = new AtomicInteger();
         AtomicInteger valueSummary = new AtomicInteger();
-        bc.getChildren().forEach(childChildBc -> {
+        businessCapabilityService.getChildrenBC(bc).forEach(childChildBc -> {
             CriteriasBc childCriteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(childChildBc.getId(), quantityTc.getId());
             if (childCriteriasBc != null) {
                 if (childCriteriasBc.getGrade() == 2) {
@@ -320,7 +321,7 @@ public class TechCapabilityService {
                 valueSummary.addAndGet(childCriteriasBc.getValue());
             }
         });
-        if (bc.getChildren().size() == criteriaIterator.get()) {
+        if (businessCapabilityService.getChildrenBC(bc).size() == criteriaIterator.get()) {
             return 2;
 
         } else {
@@ -329,7 +330,7 @@ public class TechCapabilityService {
     }
 
     private int getGrade(BusinessCapability bc) {
-        if (bc.getChildren().size() > 1) {
+        if (businessCapabilityService.getChildrenBC(bc).size() > 1) {
             return 1;
         } else {
             return 2;
@@ -360,6 +361,7 @@ public class TechCapabilityService {
             }
             List<BusinessCapability> businessCapabilityParentList =
                     businessCapabilityService.getBusinessCapabilityParentList(businessCapability.getId());
+            businessCapabilityParentList.remove(0);
             CriteriasBc finalCriteriasBc = criteriasBc;
             Boolean finalNewCriteria = newCriteria;
             businessCapabilityParentList.forEach(bc -> iterateChildrenCriteriaBc(bc, quantityTc, finalCriteriasBc, finalNewCriteria, true));
