@@ -15,6 +15,7 @@ public class GroupDTO {
 
     private Integer groupId;
     private String nameGroup;
-    private List<GetChildrenGroupsDTO> childrenGroup;
     private List<CapabilityDTO> capability;
+    private List<GetChildrenGroupsDTO> childrenGroup;
+
 }
