@@ -3,40 +3,14 @@ package ru.beeline.capability.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import ru.beeline.capability.domain.BcGroup;
-import ru.beeline.capability.domain.BusinessCapability;
-import ru.beeline.capability.domain.CapabilityMap;
-import ru.beeline.capability.domain.EntityType;
-import ru.beeline.capability.domain.Group;
-import ru.beeline.capability.domain.TcGroup;
-import ru.beeline.capability.domain.TechCapability;
-import ru.beeline.capability.domain.UserMap;
-import ru.beeline.capability.dto.CapabilityDTO;
-import ru.beeline.capability.dto.ChildrenGroupDTO;
-import ru.beeline.capability.dto.GetCapabilityMapByIdDTO;
-import ru.beeline.capability.dto.GetChildrenGroupsDTO;
-import ru.beeline.capability.dto.GroupDTO;
-import ru.beeline.capability.dto.PatchCapabilityMapDTO;
-import ru.beeline.capability.dto.PostCapabilityMapDTO;
-import ru.beeline.capability.dto.ShortCapabilityMapDTO;
+import ru.beeline.capability.domain.*;
+import ru.beeline.capability.dto.*;
 import ru.beeline.capability.exception.ForbiddenException;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
-import ru.beeline.capability.repository.BcGroupRepository;
-import ru.beeline.capability.repository.BusinessCapabilityRepository;
-import ru.beeline.capability.repository.CapabilityMapRepository;
-import ru.beeline.capability.repository.EntityTypeRepository;
-import ru.beeline.capability.repository.GroupRepository;
-import ru.beeline.capability.repository.TcGroupRepository;
-import ru.beeline.capability.repository.TechCapabilityRepository;
-import ru.beeline.capability.repository.UserMapRepository;
+import ru.beeline.capability.repository.*;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Pattern;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -210,7 +184,6 @@ public class CapabilityMapService {
                         BcGroup bcGroup = BcGroup.builder()
                                 .bcId(capabilityId)
                                 .groupId(groupId)
-
                                 .build();
                         bcGroupRepository.save(bcGroup);
                     }
