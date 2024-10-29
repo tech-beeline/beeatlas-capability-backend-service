@@ -1,5 +1,6 @@
 package ru.beeline.capability.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +23,9 @@ public class CapabilityDTO {
     private String link;
     private Date createdDate;
     private Date updatedDate;
+    @JsonProperty("isDomain")
     private boolean isDomain;
     private String owner;
+    @JsonProperty("responsibilityProductId")
     private Integer responsibilityProductId;
 }
