@@ -210,6 +210,9 @@ public class BusinessCapabilityService {
         BusinessCapability businessCapability;
         if (businessCapabilityOptional.isPresent()) {
             businessCapability = businessCapabilityOptional.get();
+            if(capabilityDTO.getDescription()==null || capabilityDTO.getDescription().equals("null")){
+                capabilityDTO.setDescription("");
+            }
             if (!capabilityDTO.equals(businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability))) {
                 log.info("capabilityDTO: " + capabilityDTO.toString() + "capability from bd: " + businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability).toString());
                 businessCapability = updateCapability(businessCapability, capabilityDTO);
