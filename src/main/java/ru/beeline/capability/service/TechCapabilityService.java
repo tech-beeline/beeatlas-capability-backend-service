@@ -354,7 +354,7 @@ public class TechCapabilityService {
                 newCriteria=true;
                 criteriasBc = criteriaBcRepository.save(CriteriasBc.builder()
                         .criterionId(quantityTc.getId())
-                        .value(businessCapabilityRepository.findAllByParentId(businessCapability.getId()).size())
+                        .value(techCapabilityRelationsRepository.findByBusinessCapability(businessCapability).size())
                         .grade(2)
                         .bcId(businessCapability.getId())
                         .build());
