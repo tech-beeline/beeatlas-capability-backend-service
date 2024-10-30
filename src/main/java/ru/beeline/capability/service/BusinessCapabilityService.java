@@ -210,11 +210,11 @@ public class BusinessCapabilityService {
         BusinessCapability businessCapability;
         if (businessCapabilityOptional.isPresent()) {
             businessCapability = businessCapabilityOptional.get();
-            if(capabilityDTO.getDescription()==null || capabilityDTO.getDescription().equals("null")){
-                capabilityDTO.setDescription("");
-            }
+            capabilityDTO.setDescription(UrlWrapper.proxyUrl(capabilityDTO.getDescription()));
             if (!capabilityDTO.equals(businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability))) {
-                log.info("capabilityDTO: " + capabilityDTO.toString() + "capability from bd: " + businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability).toString());
+                log.info("businessCapability from BD : " + businessCapability.toString());
+                log.info("capabilityDTO from Dashboard: " + capabilityDTO.toString() + " Capability after Convert to PutCapability from bd: "
+                        + businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability).toString());
                 businessCapability = updateCapability(businessCapability, capabilityDTO);
                 sendNotify(businessCapability.getId(), UPDATE, changeBusinessCapabilityQueueName, capabilityDTO.getName());
                 findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
