@@ -20,6 +20,7 @@ import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
 import ru.beeline.capability.mapper.TechCapabilityMapper;
 import ru.beeline.capability.repository.*;
+import ru.beeline.capability.utils.Node;
 import ru.beeline.capability.utils.UrlWrapper;
 import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 
@@ -245,127 +246,82 @@ public class TechCapabilityService {
         });
     }
 
-    public void calculatePrivateTechCapabilitiesCount(Long entityId) {
-        List<TechCapabilityRelations> techCapabilityRelationsList = techCapabilityRelationsRepository.findByTechCapability(
-                techCapabilityRepository.findById(entityId).get());
-        List<BusinessCapability> parentList = techCapabilityRelationsList.stream()
-                .map(TechCapabilityRelations::getBusinessCapability)
-                .collect(Collectors.toList());
-        EnumCriteria quantityTc = enumCriteriaRepository.findByName("quantity_tc");
-        parentList.forEach(businessCapability -> {
-            Boolean newCriteria = false;
-            CriteriasBc criteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(businessCapability.getId(), quantityTc.getId());
-            if (criteriasBc != null) {
-                criteriasBc.setValue(criteriasBc.getValue() + 1);
-                criteriaBcRepository.save(criteriasBc);
-            } else {
-                newCriteria = true;
-                criteriasBc = criteriaBcRepository.save(CriteriasBc.builder()
-                        .criterionId(quantityTc.getId())
-                        .value(1)
-                        .grade(2)
-                        .bcId(businessCapability.getId())
-                        .build());
-            }
-            List<BusinessCapability> businessCapabilityParentList =
-                    businessCapabilityService.getBusinessCapabilityParentList(businessCapability.getId());
-            businessCapabilityParentList.remove(0);
-            CriteriasBc finalCriteriasBc = criteriasBc;
-            Boolean finalNewCriteria = newCriteria;
-            businessCapabilityParentList.forEach(bc -> iterateChildrenCriteriaBc(bc, quantityTc, finalCriteriasBc, finalNewCriteria, false));
-        });
-    }
-
-    private void iterateChildrenCriteriaBc(BusinessCapability bc, EnumCriteria quantityTc, CriteriasBc criteriaParentBc, Boolean newCriteria, Boolean totalCount) {
-        CriteriasBc criteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(bc.getId(), quantityTc.getId());
-        if (totalCount) {
-            if (criteriasBc != null) {
-                criteriasBc.setValue(criteriaParentBc.getValue());
-                criteriasBc.setGrade(getGradeOfChild(bc, quantityTc));
-                criteriaBcRepository.save(criteriasBc);
-            } else {
-                criteriaBcRepository.save(CriteriasBc.builder()
-                        .criterionId(quantityTc.getId())
-                        .value(criteriaParentBc.getValue())
-                        .grade(getGrade(bc))
-                        .bcId(bc.getId())
-                        .build());
-            }
-        } else {
-            if (criteriasBc != null) {
-                criteriasBc.setValue(criteriasBc.getValue() + 1);
-                if (newCriteria) {
-                    criteriasBc.setGrade(getGradeOfChild(bc, quantityTc));
-                }
-                criteriaBcRepository.save(criteriasBc);
-            } else {
-                criteriaBcRepository.save(CriteriasBc.builder()
-                        .criterionId(quantityTc.getId())
-                        .value(1)
-                        .grade(getGrade(bc))
-                        .bcId(bc.getId())
-                        .build());
-            }
-        }
-    }
-
-    private int getGradeOfChild(BusinessCapability bc, EnumCriteria quantityTc) {
-        AtomicInteger criteriaIterator = new AtomicInteger();
-        AtomicInteger valueSummary = new AtomicInteger();
-        businessCapabilityService.getChildrenBC(bc).forEach(childChildBc -> {
-            CriteriasBc childCriteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(childChildBc.getId(), quantityTc.getId());
-            if (childCriteriasBc != null) {
-                if (childCriteriasBc.getGrade() == 2) {
-                    criteriaIterator.getAndIncrement();
-                }
-                valueSummary.addAndGet(childCriteriasBc.getValue());
-            }
-        });
-        if (businessCapabilityService.getChildrenBC(bc).size() == criteriaIterator.get()) {
-            return 2;
-
-        } else {
-            return 1;
-        }
-    }
-
-    private int getGrade(BusinessCapability bc) {
-        if (businessCapabilityService.getChildrenBC(bc).size() > 1) {
-            return 1;
-        } else {
-            return 2;
-        }
-    }
-
     public void calculateTotalTechCapabilitiesCount() {
         List<TechCapabilityRelations> techCapabilityRelationsList = techCapabilityRelationsRepository.findAll();
-        List<BusinessCapability> parentList = techCapabilityRelationsList.stream()
-                .map(TechCapabilityRelations::getBusinessCapability)
-                .distinct()
-                .collect(Collectors.toList());
+        Map<Long, Node> nodeMap = getNodeMap(techCapabilityRelationsList);
         EnumCriteria quantityTc = enumCriteriaRepository.findByName("quantity_tc");
-        parentList.forEach(businessCapability -> {
-            Boolean newCriteria = false;
-            CriteriasBc criteriasBc = criteriaBcRepository.findByBcIdAndCriterionId(businessCapability.getId(), quantityTc.getId());
-            if (criteriasBc != null) {
-                criteriasBc.setValue(businessCapabilityRepository.findAllByParentId(businessCapability.getId()).size());
-                criteriaBcRepository.save(criteriasBc);
-            } else {
-                newCriteria=true;
-                criteriasBc = criteriaBcRepository.save(CriteriasBc.builder()
+        Map<Long, CriteriasBc> criteriasBcMap = new HashMap<>();
+        Node parentNode = findRootNode(nodeMap, nodeMap.values().stream().findFirst().get().getId());
+        calculateTree(parentNode, criteriasBcMap, quantityTc);
+        criteriaBcRepository.deleteAllByCriterionId(quantityTc.getId());
+        criteriaBcRepository.saveAll(criteriasBcMap.values().stream()
+                .filter(criteriaBc -> criteriaBc.getValue() > 0)
+                .collect(Collectors.toList()));
+    }
+
+    private void calculateTree(Node node, Map<Long, CriteriasBc> criteriasBcMap, EnumCriteria quantityTc) {
+        if (node.getChildren().size() > 0) {
+            AtomicInteger valueKidsSum = new AtomicInteger();
+            node.getChildren().forEach(child -> {
+                calculateTree(child, criteriasBcMap, quantityTc);
+                valueKidsSum.addAndGet(Math.toIntExact(child.getValue()));
+            });
+            node.setValue(node.getCountTech() + valueKidsSum.get());
+            node.setGrade(getGrade(node));
+            CriteriasBc criteriasBc = CriteriasBc.builder()
+                    .criterionId(quantityTc.getId())
+                    .value(node.getValue().intValue())
+                    .grade(node.getGrade().intValue())
+                    .bcId(node.getId())
+                    .build();
+            criteriasBcMap.put(node.getId(), criteriasBc);
+        } else {
+            if (node.getCountTech().intValue() > 0) {
+                CriteriasBc criteriasBc = CriteriasBc.builder()
                         .criterionId(quantityTc.getId())
-                        .value(techCapabilityRelationsRepository.findByBusinessCapability(businessCapability).size())
+                        .value(node.getCountTech().intValue())
                         .grade(2)
-                        .bcId(businessCapability.getId())
-                        .build());
+                        .bcId(node.getId())
+                        .build();
+                criteriasBcMap.put(node.getId(), criteriasBc);
+                node.setValue(node.getCountTech());
+                node.setGrade(2L);
             }
-            List<BusinessCapability> businessCapabilityParentList =
-                    businessCapabilityService.getBusinessCapabilityParentList(businessCapability.getId());
-            businessCapabilityParentList.remove(0);
-            CriteriasBc finalCriteriasBc = criteriasBc;
-            Boolean finalNewCriteria = newCriteria;
-            businessCapabilityParentList.forEach(bc -> iterateChildrenCriteriaBc(bc, quantityTc, finalCriteriasBc, finalNewCriteria, true));
-        });
+        }
+    }
+
+    private Long getGrade(Node node) {
+        if ((node.getChildren().size() == 0 && node.getCountTech() > 0)
+                || node.getChildren().size() == node.getChildren().stream().filter(child -> child.getGrade() == 2L).count()
+                || node.getChildren().size() == node.getChildren().stream().filter(child -> child.getCountTech() > 0).count()
+        ) {
+            return 2L;
+        }
+        return 1L;
+    }
+
+    public Node findRootNode(Map<Long, Node> nodeMap, Long id) {
+        return nodeMap.get(id).getParentId() != null ? findRootNode(nodeMap, nodeMap.get(id).getParentId()) : nodeMap.get(id);
+    }
+
+    private Map<Long, Node> getNodeMap(List<TechCapabilityRelations> techCapabilityRelationsList) {
+        Map<Long, Node> nodeMap = new HashMap<>();
+        for (BusinessCapability obj : businessCapabilityRepository.findAll()) {
+            Node node = new Node(obj.getId(), obj.getParentId());
+            nodeMap.put(obj.getId(), node);
+        }
+        for (Node node : nodeMap.values()) {
+            if (node.getParentId() != null) {
+                Node parent = nodeMap.get(node.getParentId());
+                if (parent != null) {
+                    parent.getChildren().add(node);
+                }
+            }
+        }
+        techCapabilityRelationsList.forEach(relation -> nodeMap.get(relation.getBusinessCapability().getId()).setCountTech(
+                nodeMap.get(relation.getBusinessCapability().getId()).getCountTech() + 1));
+
+        return nodeMap;
     }
 
     public void deleteTechCapability(String code) {

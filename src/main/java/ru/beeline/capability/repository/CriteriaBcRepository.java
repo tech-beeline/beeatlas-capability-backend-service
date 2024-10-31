@@ -6,5 +6,5 @@ import ru.beeline.capability.domain.CriteriasBc;
 
 @Repository
 public interface CriteriaBcRepository extends JpaRepository<CriteriasBc, Long> {
-    CriteriasBc findByBcIdAndCriterionId(Long bcId, Long criterionId);
+    void deleteAllByCriterionId(Long criterionId);
 }
