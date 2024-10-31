@@ -45,4 +45,18 @@ public class TechCapability {
     @OneToMany
     @JoinColumn(name = "id_child")
     private List<TechCapabilityRelations> parents;
+
+    @Override
+    public String toString() {
+        return "TechCapability{" +
+                "code='" + code + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", owner='" + owner + '\'' +
+                ", status='" + status + '\'' +
+                ", author='" + author + '\'' +
+                ", link='" + link + '\'' +
+                ", responsibilityProductId=" + responsibilityProductId +
+                '}';
+    }
 }
