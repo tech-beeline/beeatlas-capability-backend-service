@@ -148,7 +148,11 @@ public class TechCapabilityService {
             currentTechCapability = currentTechCapabilityOpt.get();
             PutTechCapabilityDTO currentTechCapabilityDTO = techCapabilityMapper.convertToPutTechCapabilityDTO(currentTechCapability);
             log.info("check equals old techCapability and new techCapability");
+            techCapability.setDescription(UrlWrapper.proxyUrl(techCapability.getDescription()));
             if (!techCapability.equals(currentTechCapabilityDTO)) {
+                log.info("techCapability from BD find By Code: " + currentTechCapability);
+                log.info("techCapability from dashboard: " + techCapability + " techCapabilityBD after Convert to PutCapability "
+                        + currentTechCapabilityDTO);
                 log.info("old techCapability and new techCapability is not equals, and try update");
                 updateTechCapability(currentTechCapability, techCapability);
                 log.info("delete old relations");
@@ -353,7 +357,7 @@ public class TechCapabilityService {
                 criteriasBc.setValue(businessCapabilityRepository.findAllByParentId(businessCapability.getId()).size());
                 criteriaBcRepository.save(criteriasBc);
             } else {
-                newCriteria=true;
+                newCriteria = true;
                 criteriasBc = criteriaBcRepository.save(CriteriasBc.builder()
                         .criterionId(quantityTc.getId())
                         .value(techCapabilityRelationsRepository.findByBusinessCapability(businessCapability).size())
