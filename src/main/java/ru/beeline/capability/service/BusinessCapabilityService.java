@@ -87,7 +87,11 @@ public class BusinessCapabilityService {
     }
 
     public BusinessCapabilityChildrenDTO getChildren(Long id) {
-        List<TechCapability> techCapabilities = findById(id).getChildren().stream().map(TechCapabilityRelations::getTechCapability).filter(techCapability -> Objects.isNull(techCapability.getDeletedDate())).collect(Collectors.toList());
+        BusinessCapability businessCapability = findById(id);
+        if(businessCapability.getDeletedDate()!=null){
+            throw new NotFoundException ("Business Capability не найдено");
+        }
+        List<TechCapability> techCapabilities = businessCapability.getChildren().stream().map(TechCapabilityRelations::getTechCapability).filter(techCapability -> Objects.isNull(techCapability.getDeletedDate())).collect(Collectors.toList());
         List<BusinessCapability> businessCapabilitiesKids = businessCapabilityRepository.findAllByParentIdAndDeletedDateIsNull(id);
         return businessCapabilityMapper.convert(techCapabilities, businessCapabilitiesKids);
     }

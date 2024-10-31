@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.TechCapability;
+import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.BCParentDTO;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeCustomDTO;
@@ -49,9 +50,23 @@ public class BusinessCapabilityMapper {
                 .author(businessCapability.getAuthor())
                 .link(businessCapability.getLink())
                 .createdDate(businessCapability.getCreatedDate())
-                .hasChildren(businessCapabilityRepository.existsByParentId(businessCapability.getId())
-                        || techCapabilityRelationsRepository.existsByBusinessCapability(businessCapability))
+                .hasChildren(isAnyChildrenBcNotDeleted(businessCapability.getId())
+                        || isAnyChildrenTcNotDeleted(businessCapability))
                 .build();
+    }
+
+    private Boolean isAnyChildrenTcNotDeleted(BusinessCapability businessCapability) {
+        List<TechCapabilityRelations> techCapabilityRelations = techCapabilityRelationsRepository.findByBusinessCapability(businessCapability);
+        if (!techCapabilityRelations.isEmpty()) {
+            return techCapabilityRelations.stream()
+                    .map(TechCapabilityRelations::getTechCapability)
+                    .anyMatch(tech -> tech.getDeletedDate() == null);
+        }
+        return false;
+    }
+
+    private Boolean isAnyChildrenBcNotDeleted(Long parentId) {
+        return businessCapabilityRepository.findAllByParentId(parentId).stream().anyMatch(bc -> bc.getDeletedDate() == null);
     }
 
     public PutBusinessCapabilityDTO convertToPutCapabilityDTO(BusinessCapability businessCapability) {
