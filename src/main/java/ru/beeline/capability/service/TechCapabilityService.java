@@ -132,7 +132,6 @@ public class TechCapabilityService {
         log.info("techCapabilityHaveParents:" + techCapabilityHaveParents);
         TechCapability currentTechCapability;
         if (!currentTechCapabilityOpt.isPresent()) {
-            log.info("techCapability find By Code: " + currentTechCapabilityOpt);
             log.info("currentTechCapabilityOpt isn't present");
             currentTechCapability = createTechCapability(techCapability);
             techCapabilityRelationsRepository.deleteAllByTechCapability(currentTechCapability);
@@ -144,15 +143,12 @@ public class TechCapabilityService {
             sendNotify(currentTechCapability.getId(), CREATE, changeTechCapabilityQueueName, techCapability.getName());
             findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode(), ENTITY_TYPE_TECH_CAPABILITY);
         } else {
-            log.info("techCapability find By Code: " + currentTechCapabilityOpt);
             log.info("currentTechCapabilityOpt is present");
             currentTechCapability = currentTechCapabilityOpt.get();
             PutTechCapabilityDTO currentTechCapabilityDTO = techCapabilityMapper.convertToPutTechCapabilityDTO(currentTechCapability);
             log.info("check equals old techCapability and new techCapability");
-            techCapability.setDescription(UrlWrapper.proxyUrl(techCapability.getDescription()));
-            if (!techCapability.equals(currentTechCapabilityDTO)) {
-                log.info("techCapability from BD find By Code: " + currentTechCapability);
-                log.info("techCapability from dashboard: " + techCapability + " techCapabilityBD after Convert to PutCapability "
+            if (equalsDashboardDTO(techCapability, currentTechCapabilityDTO)) {
+                log.info("techCapability from dashboard: " + techCapability + " equals techCapability from BD "
                         + currentTechCapabilityDTO);
                 log.info("old techCapability and new techCapability is not equals, and try update");
                 updateTechCapability(currentTechCapability, techCapability);
@@ -168,7 +164,15 @@ public class TechCapabilityService {
                 sendNotify(currentTechCapability.getId(), UPDATE, changeTechCapabilityQueueName, techCapability.getName());
             }
         }
+    }
 
+    private Boolean equalsDashboardDTO(PutTechCapabilityDTO techCapability, PutTechCapabilityDTO currentTechCapabilityDTO) {
+        techCapability.setDescription(UrlWrapper.proxyUrl(techCapability.getDescription()));
+        Set<String> techCapabilityList = new TreeSet<>(techCapability.getParents());
+        techCapability.setParents(new ArrayList<>(techCapabilityList));
+        Set<String> currentTechCapabilityDTOList = new TreeSet<>(currentTechCapabilityDTO.getParents());
+        currentTechCapabilityDTO.setParents(new ArrayList<>(currentTechCapabilityDTOList));
+        return !techCapability.equals(currentTechCapabilityDTO);
     }
 
     private void createRelations(TechCapability currentTechCapability, List<BusinessCapability> businessCapabilities) {
