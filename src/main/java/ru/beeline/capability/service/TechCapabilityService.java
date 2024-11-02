@@ -72,6 +72,12 @@ public class TechCapabilityService {
     @Autowired
     private CriteriaBcRepository criteriaBcRepository;
 
+    @Autowired
+    private HistoryTechCapabilityRepository historyTechCapabilityRepository;
+
+    @Autowired
+    private HistoryTechCapabilityRelationsRepository historyTechCapabilityRelationsRepository;
+
     @Value("${queue.change-tech-capability.name}")
     private String changeTechCapabilityQueueName;
 
@@ -145,6 +151,7 @@ public class TechCapabilityService {
         } else {
             log.info("currentTechCapabilityOpt is present");
             currentTechCapability = currentTechCapabilityOpt.get();
+            addToHistory(currentTechCapability);
             PutTechCapabilityDTO currentTechCapabilityDTO = techCapabilityMapper.convertToPutTechCapabilityDTO(currentTechCapability);
             log.info("check equals old techCapability and new techCapability");
             if (equalsDashboardDTO(techCapability, currentTechCapabilityDTO)) {
@@ -163,6 +170,31 @@ public class TechCapabilityService {
                 }
                 sendNotify(currentTechCapability.getId(), UPDATE, changeTechCapabilityQueueName, techCapability.getName());
             }
+        }
+    }
+
+    private void addToHistory(TechCapability currentTechCapability) {
+        Optional<HistoryTechCapability> historyTechCapability = historyTechCapabilityRepository.findTopByIdRefOrderByVersionDesc(currentTechCapability.getId());
+        HistoryTechCapability newHistoryTechCapability = historyTechCapabilityRepository.save(HistoryTechCapability.builder()
+                .idRef(currentTechCapability.getId())
+                .version(historyTechCapability.isPresent() ? historyTechCapability.get().getVersion() + 1 : 1)
+                .code(currentTechCapability.getCode())
+                .name(currentTechCapability.getName())
+                .description(currentTechCapability.getDescription())
+                .owner(currentTechCapability.getOwner())
+                .status(currentTechCapability.getStatus())
+                .link(currentTechCapability.getLink())
+                .author(currentTechCapability.getAuthor())
+                .build());
+        List<TechCapabilityRelations> relations = techCapabilityRelationsRepository.findByTechCapability(currentTechCapability);
+        if (!relations.isEmpty()) {
+            List<HistoryTechCapabilityRelations> forSave = relations.stream()
+                    .map(rel -> HistoryTechCapabilityRelations.builder()
+                            .idParent(rel.getBusinessCapability().getId())
+                            .idHistoryChild(newHistoryTechCapability.getId())
+                            .build())
+                    .collect(Collectors.toList());
+            historyTechCapabilityRelationsRepository.saveAll(forSave);
         }
     }
 
