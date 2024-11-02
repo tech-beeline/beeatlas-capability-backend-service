@@ -317,8 +317,10 @@ public class TechCapabilityService {
     private Map<Long, Node> getNodeMap(List<TechCapabilityRelations> techCapabilityRelationsList) {
         Map<Long, Node> nodeMap = new HashMap<>();
         for (BusinessCapability obj : businessCapabilityRepository.findAll()) {
-            Node node = new Node(obj.getId(), obj.getParentId());
-            nodeMap.put(obj.getId(), node);
+            if (obj.getDeletedDate() == null) {
+                Node node = new Node(obj.getId(), obj.getParentId());
+                nodeMap.put(obj.getId(), node);
+            }
         }
         for (Node node : nodeMap.values()) {
             if (node.getParentId() != null) {
@@ -328,8 +330,11 @@ public class TechCapabilityService {
                 }
             }
         }
-        techCapabilityRelationsList.forEach(relation -> nodeMap.get(relation.getBusinessCapability().getId()).setCountTech(
-                nodeMap.get(relation.getBusinessCapability().getId()).getCountTech() + 1));
+        techCapabilityRelationsList.forEach(relation -> {
+            if (relation.getBusinessCapability().getDeletedDate() == null) {
+                nodeMap.get(relation.getBusinessCapability().getId()).setCountTech(nodeMap.get(relation.getBusinessCapability().getId()).getCountTech() + 1);
+            }
+        });
 
         return nodeMap;
     }
