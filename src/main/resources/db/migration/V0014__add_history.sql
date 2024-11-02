@@ -79,15 +79,15 @@ CREATE INDEX ixfk_h_tech_capability_relations_tech_capability ON history_tech_ca
 /* Create Foreign Key Constraints */
 
 ALTER TABLE history_busines_capability ADD CONSTRAINT fk_h_busines_capability_busines_capability
-    FOREIGN KEY (parent_id) REFERENCES busines_capability (id) ON DELETE No Action ON UPDATE No Action
+    FOREIGN KEY (parent_id) REFERENCES business_capability (id) ON DELETE No Action ON UPDATE No Action
 ;
 
 ALTER TABLE history_busines_capability ADD CONSTRAINT fk_h_busines_capability_actual
-    FOREIGN KEY (id_ref) REFERENCES busines_capability (id) ON DELETE No Action ON UPDATE No Action
+    FOREIGN KEY (id_ref) REFERENCES business_capability (id) ON DELETE No Action ON UPDATE No Action
 ;
 
 ALTER TABLE history_tech_capability_relations ADD CONSTRAINT fk_h_tech_capability_relations_busines_capability
-    FOREIGN KEY (id_parent) REFERENCES busines_capability (id) ON DELETE No Action ON UPDATE No Action
+    FOREIGN KEY (id_parent) REFERENCES business_capability (id) ON DELETE No Action ON UPDATE No Action
 ;
 
 ALTER TABLE history_tech_capability_relations ADD CONSTRAINT fk_h_tech_capability_relations_tech_capability
