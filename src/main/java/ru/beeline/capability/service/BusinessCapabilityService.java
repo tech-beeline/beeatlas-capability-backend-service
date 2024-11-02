@@ -14,10 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.beeline.capability.cleint.DashboardClient;
 import ru.beeline.capability.cleint.UserClient;
-import ru.beeline.capability.domain.BusinessCapability;
-import ru.beeline.capability.domain.EntityType;
-import ru.beeline.capability.domain.TechCapability;
-import ru.beeline.capability.domain.TechCapabilityRelations;
+import ru.beeline.capability.domain.*;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeCustomDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeDTO;
@@ -26,25 +23,16 @@ import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
 import ru.beeline.capability.mapper.BusinessCapabilityMapper;
-import ru.beeline.capability.repository.BusinessCapabilityRepository;
-import ru.beeline.capability.repository.EntityTypeRepository;
-import ru.beeline.capability.repository.FindNameSortTableRepository;
-import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
+import ru.beeline.capability.repository.*;
 import ru.beeline.capability.utils.UrlWrapper;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenIdsDTO;
 import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static ru.beeline.capability.utils.Constants.CREATE;
-import static ru.beeline.capability.utils.Constants.ENTITY_TYPE_BUSINESS_CAPABILITY;
-import static ru.beeline.capability.utils.Constants.UPDATE;
+import static ru.beeline.capability.utils.Constants.*;
 
 @Slf4j
 @Service
@@ -81,6 +69,11 @@ public class BusinessCapabilityService {
     @Value("${queue.change-business-capability.name}")
     private String changeBusinessCapabilityQueueName;
 
+    @Autowired
+    private HistoryBusinessCapabilityRepository historyBusinessCapabilityRepository;
+
+    @Autowired
+    private HistoryTechCapabilityRelationsRepository historyTechCapabilityRelationsRepository;
 
     public BusinessCapability findById(Long id) {
         return businessCapabilityRepository.findById(id).orElseThrow(() -> new NotFoundException("Business Capability не найдено"));
@@ -88,8 +81,8 @@ public class BusinessCapabilityService {
 
     public BusinessCapabilityChildrenDTO getChildren(Long id) {
         BusinessCapability businessCapability = findById(id);
-        if(businessCapability.getDeletedDate()!=null){
-            throw new NotFoundException ("Business Capability не найдено");
+        if (businessCapability.getDeletedDate() != null) {
+            throw new NotFoundException("Business Capability не найдено");
         }
         List<TechCapability> techCapabilities = businessCapability.getChildren().stream().map(TechCapabilityRelations::getTechCapability).filter(techCapability -> Objects.isNull(techCapability.getDeletedDate())).collect(Collectors.toList());
         List<BusinessCapability> businessCapabilitiesKids = businessCapabilityRepository.findAllByParentIdAndDeletedDateIsNull(id);
@@ -219,6 +212,7 @@ public class BusinessCapabilityService {
                 log.info("businessCapability from BD : " + businessCapability.toString());
                 log.info("capabilityDTO from Dashboard: " + capabilityDTO.toString() + " Capability after Convert to PutCapability from bd: "
                         + businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability).toString());
+                addToHistory(businessCapability);
                 businessCapability = updateCapability(businessCapability, capabilityDTO);
                 sendNotify(businessCapability.getId(), UPDATE, changeBusinessCapabilityQueueName, capabilityDTO.getName());
                 findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
@@ -229,6 +223,22 @@ public class BusinessCapabilityService {
             findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
             putCapabilityToDashboard(capabilityDTO, userId, productIds, roles, permissions);
         }
+    }
+
+    private void addToHistory(BusinessCapability businessCapability) {
+        Optional<HistoryBusinessCapability> historyBusinessCapability = historyBusinessCapabilityRepository.findTopByIdRefOrderByVersionDesc(businessCapability.getId());
+        historyBusinessCapabilityRepository.save(HistoryBusinessCapability.builder()
+                .idRef(businessCapability.getId())
+                .version(historyBusinessCapability.isPresent() ? historyBusinessCapability.get().getVersion() + 1 : 1)
+                .code(businessCapability.getCode())
+                .name(businessCapability.getName())
+                .description(businessCapability.getDescription())
+                .owner(businessCapability.getOwner())
+                .status(businessCapability.getStatus())
+                .link(businessCapability.getLink())
+                .author(businessCapability.getAuthor())
+                .isDomain(businessCapability.isDomain())
+                .build());
     }
 
     private void putCapabilityToDashboard(PutBusinessCapabilityDTO capabilityDTO, String userId, String productIds, String roles, String permissions) {
