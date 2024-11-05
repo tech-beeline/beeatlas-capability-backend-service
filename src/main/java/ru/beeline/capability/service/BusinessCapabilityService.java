@@ -72,9 +72,6 @@ public class BusinessCapabilityService {
     @Autowired
     private HistoryBusinessCapabilityRepository historyBusinessCapabilityRepository;
 
-    @Autowired
-    private HistoryTechCapabilityRelationsRepository historyTechCapabilityRelationsRepository;
-
     public BusinessCapability findById(Long id) {
         return businessCapabilityRepository.findById(id).orElseThrow(() -> new NotFoundException("Business Capability не найдено"));
     }
@@ -132,23 +129,6 @@ public class BusinessCapabilityService {
             } else {
                 result.add(parentId);
                 businessCapability = businessCapability.getParentEntity();
-            }
-        }
-    }
-
-    public List<BusinessCapability> getBusinessCapabilityParentList(Long id) {
-        ArrayList<BusinessCapability> result = new ArrayList<>();
-        while (true) {
-            BusinessCapability parent = findById(id);
-
-            if (Objects.isNull(parent)) {
-                return result;
-            } else {
-                id = parent.getParentId();
-                result.add(parent);
-                if (id == null) {
-                    return result;
-                }
             }
         }
     }
@@ -233,6 +213,7 @@ public class BusinessCapabilityService {
                 .code(businessCapability.getCode())
                 .name(businessCapability.getName())
                 .description(businessCapability.getDescription())
+                .modifiedDate(new Date())
                 .owner(businessCapability.getOwner())
                 .status(businessCapability.getStatus())
                 .link(businessCapability.getLink())
