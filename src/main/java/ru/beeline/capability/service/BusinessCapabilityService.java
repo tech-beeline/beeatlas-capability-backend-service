@@ -24,6 +24,7 @@ import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
 import ru.beeline.capability.mapper.BusinessCapabilityMapper;
 import ru.beeline.capability.repository.*;
+import ru.beeline.capability.utils.Node;
 import ru.beeline.capability.utils.UrlWrapper;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenIdsDTO;
@@ -86,21 +87,46 @@ public class BusinessCapabilityService {
         return businessCapabilityMapper.convert(techCapabilities, businessCapabilitiesKids);
     }
 
+    private Map<Long, Node> getNodeMap() {
+        Map<Long, Node> nodeMap = new HashMap<>();
+        for (BusinessCapability obj : businessCapabilityRepository.findAll()) {
+            if (obj.getDeletedDate() == null) {
+                Node node = new Node(obj.getId(), obj.getParentId(), obj);
+                nodeMap.put(obj.getId(), node);
+            }
+        }
+        for (Node node : nodeMap.values()) {
+            if (node.getParentId() != null) {
+                Node parent = nodeMap.get(node.getParentId());
+                if (parent != null) {
+                    parent.getChildren().add(node);
+                }
+            }
+        }
+        return nodeMap;
+    }
+
     public BusinessCapabilityChildrenIdsDTO getChildrenIds(Long id) {
         List<Long> bcIds = new ArrayList<>();
         List<Long> tcIds = new ArrayList<>();
+        Map<Long, Node> bcMap = getNodeMap();
+
         BusinessCapability businessCapability = findById(id);
-        businessCapability.setChildrenOfTree(getChildrenBC(businessCapability));
-        tcIds.addAll(businessCapability.getChildren().stream().map(TechCapabilityRelations::getTechCapability).map(TechCapability::getId).collect(Collectors.toList()));
-        businessCapability.getChildrenOfTree().forEach(childBc -> getTechCapabilities(childBc, bcIds, tcIds));
-        return new BusinessCapabilityChildrenIdsDTO(tcIds, bcIds);
+        businessCapability.setChildrenOfTree(bcMap.get(businessCapability.getId()).getChildren().stream().map(Node::getBusinessCapability).collect(Collectors.toList()));
+        tcIds.addAll(businessCapability.getChildren().stream().map(TechCapabilityRelations::getTechCapability)
+                .map(TechCapability::getId).collect(Collectors.toList()));
+        businessCapability.getChildrenOfTree().forEach(childBc -> getTechCapabilities(childBc, bcIds, tcIds, bcMap));
+
+        Set<Long> tcIdsSet = new HashSet<>(tcIds);
+        List<Long> tcIdsWithoutDuplicates = new ArrayList<>(tcIdsSet);
+        return new BusinessCapabilityChildrenIdsDTO(tcIdsWithoutDuplicates, bcIds);
     }
 
-    public void getTechCapabilities(BusinessCapability bc, List<Long> bcIds, List<Long> tcIds) {
-        bc.setChildrenOfTree(getChildrenBC(bc));
+    public void getTechCapabilities(BusinessCapability bc, List<Long> bcIds, List<Long> tcIds, Map<Long, Node> bcMap) {
+        bc.setChildrenOfTree(bcMap.get(bc.getId()).getChildren().stream().map(Node::getBusinessCapability).collect(Collectors.toList()));
         bcIds.add(bc.getId());
         tcIds.addAll(bc.getChildren().stream().map(TechCapabilityRelations::getTechCapability).map(TechCapability::getId).collect(Collectors.toList()));
-        bc.getChildrenOfTree().forEach(childBc -> getTechCapabilities(childBc, bcIds, tcIds));
+        bc.getChildrenOfTree().forEach(childBc -> getTechCapabilities(childBc, bcIds, tcIds, bcMap));
     }
 
     public CapabilityParentDTO getParents(Long id) {
