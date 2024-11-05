@@ -374,14 +374,15 @@ public class TechCapabilityService {
     public void deleteTechCapability(String code) {
         Optional<TechCapability> optionalTechCapability = techCapabilityRepository.findByCode(code);
         if (optionalTechCapability.isPresent()) {
-            if (optionalTechCapability.get().getDeletedDate() == null) {
-                Long techCapabilityId = optionalTechCapability.get().getId();
-                optionalTechCapability.map(techCapability -> {
-                    techCapability.setDeletedDate(new Date());
-                    return techCapabilityRepository.save(techCapability);
-                });
+            TechCapability techCapability = optionalTechCapability.get();
+            if (techCapability.getDeletedDate() == null) {
+                Long techCapabilityId = techCapability.getId();
+                techCapability.setDeletedDate(new Date());
+                techCapabilityRepository.save(techCapability);
+
                 EntityType entityType = entityTypeRepository.findByName("TECH_CAPABILITY");
                 findNameSortTableRepository.deleteByRefIdAndType(techCapabilityId, entityType);
+                techCapabilityRelationsRepository.deleteAllByTechCapability(techCapability);
             }
         }
     }
