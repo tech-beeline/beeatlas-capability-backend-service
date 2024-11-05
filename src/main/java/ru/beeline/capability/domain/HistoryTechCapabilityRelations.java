@@ -14,6 +14,8 @@ import javax.persistence.*;
 public class HistoryTechCapabilityRelations {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "history_bc_id_generator")
+    @SequenceGenerator(name = "history_bc_id_generator", sequenceName = "history_bc_id_seq", allocationSize = 1)
     private Long id;
 
     @Column(name = "id_parent", nullable = false)

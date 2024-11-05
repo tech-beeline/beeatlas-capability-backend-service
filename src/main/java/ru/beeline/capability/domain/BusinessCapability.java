@@ -16,8 +16,8 @@ import java.util.List;
 public class BusinessCapability {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "business_capability_id_generator")
-    @SequenceGenerator(name = "business_capability_id_generator", sequenceName = "BC_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "history_tc_bc_rel_id_generator")
+    @SequenceGenerator(name = "history_tc_bc_rel_id_generator", sequenceName = "history_tc_bc_rel_id_seq", allocationSize = 1)
     private Long id;
     private String code;
     private String name;

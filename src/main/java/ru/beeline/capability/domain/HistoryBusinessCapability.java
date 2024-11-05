@@ -2,10 +2,7 @@ package ru.beeline.capability.domain;
 
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 
 @Builder
@@ -18,6 +15,8 @@ import java.util.Date;
 public class HistoryBusinessCapability {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "history_bc_id_generator")
+    @SequenceGenerator(name = "history_bc_id_generator", sequenceName = "history_bc_id_seq", allocationSize = 1)
     private Long id;
 
     @Column(name = "id_ref", nullable = false)
