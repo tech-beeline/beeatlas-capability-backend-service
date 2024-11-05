@@ -379,7 +379,6 @@ public class TechCapabilityService {
                 Long techCapabilityId = techCapability.getId();
                 techCapability.setDeletedDate(new Date());
                 techCapabilityRepository.save(techCapability);
-
                 EntityType entityType = entityTypeRepository.findByName("TECH_CAPABILITY");
                 findNameSortTableRepository.deleteByRefIdAndType(techCapabilityId, entityType);
                 techCapabilityRelationsRepository.deleteAllByTechCapability(techCapability);
