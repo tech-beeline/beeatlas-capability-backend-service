@@ -22,6 +22,9 @@ public class HistoryBusinessCapability {
     @Column(name = "id_ref", nullable = false)
     private Long idRef;
 
+    @Column(name = "parent_id")
+    private Long parentId;
+
     private String code;
 
     @Column(nullable = false)

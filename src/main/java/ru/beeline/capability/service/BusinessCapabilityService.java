@@ -192,8 +192,8 @@ public class BusinessCapabilityService {
                 log.info("businessCapability from BD : " + businessCapability.toString());
                 log.info("capabilityDTO from Dashboard: " + capabilityDTO.toString() + " Capability after Convert to PutCapability from bd: "
                         + businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability).toString());
-                addToHistory(businessCapability);
                 businessCapability = updateCapability(businessCapability, capabilityDTO);
+                addToHistory(businessCapability);
                 sendNotify(businessCapability.getId(), UPDATE, changeBusinessCapabilityQueueName, capabilityDTO.getName());
                 findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
                 putCapabilityToDashboard(capabilityDTO, userId, productIds, roles, permissions);
@@ -214,6 +214,7 @@ public class BusinessCapabilityService {
                 .name(businessCapability.getName())
                 .description(businessCapability.getDescription())
                 .modifiedDate(new Date())
+                .parentId(businessCapability.getParentId())
                 .owner(businessCapability.getOwner())
                 .status(businessCapability.getStatus())
                 .link(businessCapability.getLink())
