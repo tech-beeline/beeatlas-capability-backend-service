@@ -102,8 +102,8 @@ public class BusinessCapabilityMapper {
         List<BusinessCapabilityShortDTO> techCapabilityDTOS = new ArrayList<>();
         for (BusinessCapability businessCapability : businessCapabilities) {
             BusinessCapabilityShortDTO techCapabilityDTO = convert(businessCapability,
-                    businessCapabilityRepository.existsByParentId(businessCapability.getId())
-                            || techCapabilityRelationsRepository.existsByBusinessCapability(businessCapability));
+                    isAnyChildrenBcNotDeleted(businessCapability.getId())
+                            || isAnyChildrenTcNotDeleted(businessCapability));
             techCapabilityDTOS.add(techCapabilityDTO);
         }
         return techCapabilityDTOS;
