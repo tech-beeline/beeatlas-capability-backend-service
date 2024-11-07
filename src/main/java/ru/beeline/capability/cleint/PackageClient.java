@@ -11,15 +11,19 @@ import org.springframework.web.client.RestTemplate;
 import ru.beeline.capability.dto.PackageRegistrationRequestDTO;
 import ru.beeline.capability.dto.PackageRegistrationResponseDTO;
 
-import static ru.beeline.capability.utils.RestHelper.getRestTemplate;
 
 @Slf4j
 @Service
 public class PackageClient {
+    RestTemplate restTemplate;
     private final String packLoaderServerUrl;
-    public PackageClient(@Value("${integration.pack-loader-server-url}") String packLoaderServerUrl) {
+
+    public PackageClient(@Value("${integration.pack-loader-server-url}") String packLoaderServerUrl,
+                         RestTemplate restTemplate) {
         this.packLoaderServerUrl = packLoaderServerUrl;
+        this.restTemplate = restTemplate;
     }
+
     public PackageRegistrationResponseDTO registerPackage(String operation, int dataSize) {
         try {
 
@@ -31,7 +35,6 @@ public class PackageClient {
                     .count(dataSize)
                     .build(),
                     headers);
-            final RestTemplate restTemplate = getRestTemplate();
 
             return restTemplate.exchange(packLoaderServerUrl + "/api/v1/package",
                     HttpMethod.POST, entity, PackageRegistrationResponseDTO.class).getBody();

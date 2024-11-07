@@ -6,13 +6,14 @@ import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.dto.BCParentDTO;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
+import ru.beeline.capability.dto.BusinessCapabilityTreeCustomDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeDTO;
-import ru.beeline.capability.dto.CapabilitySubscribedDTO;
+import ru.beeline.capability.dto.BusinessCapabilityTreeInfoDTO;
+import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityDTO;
 import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
-import ru.beeline.capability.repository.BusinessCapabilityRepository;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -52,6 +53,7 @@ public class BusinessCapabilityMapper {
                         || techCapabilityRelationsRepository.existsByBusinessCapability(businessCapability))
                 .build();
     }
+
     public PutBusinessCapabilityDTO convertToPutCapabilityDTO(BusinessCapability businessCapability) {
         return PutBusinessCapabilityDTO.builder()
                 .code(businessCapability.getCode())
@@ -65,6 +67,7 @@ public class BusinessCapabilityMapper {
                 .parent(getParentCode(businessCapability))
                 .build();
     }
+
     private String getParentCode(BusinessCapability capability) {
         if (capability == null || capability.getParentId() == null)
             return null;
@@ -72,28 +75,13 @@ public class BusinessCapabilityMapper {
                 .map(BusinessCapability::getCode)
                 .orElse(null);
     }
+
     public BusinessCapabilityChildrenDTO convert(List<TechCapability> children, List<BusinessCapability> businessCapabilities) {
         BusinessCapabilityChildrenDTO businessCapabilityChildrenDTO = new BusinessCapabilityChildrenDTO();
         businessCapabilityChildrenDTO.setTechCapabilities(TechCapabilityMapper.convertToTechCapabilityShortDTOList(children));
         businessCapabilityChildrenDTO.setBusinessCapabilities(convert(businessCapabilities));
         return businessCapabilityChildrenDTO;
     }
-
-    public List<CapabilitySubscribedDTO> convertToCapabilitySubscribedDTOs(List<BusinessCapability> businessCapabilities) {
-        return businessCapabilities.stream().map(this::convertToCapabilitySubscribedDTO).collect(Collectors.toList());
-    }
-
-    public CapabilitySubscribedDTO convertToCapabilitySubscribedDTO(BusinessCapability businessCapabilities) {
-        return CapabilitySubscribedDTO.builder()
-                .id(businessCapabilities.getId())
-                .code(businessCapabilities.getCode())
-                .name(businessCapabilities.getName())
-                .description(businessCapabilities.getDescription())
-                .isDomain(businessCapabilities.isDomain())
-                .owner(businessCapabilities.getOwner())
-                .build();
-    }
-
 
     public List<BusinessCapabilityShortDTO> convertToBusinessCapabilityShortDTOList(List<BusinessCapability> businessCapabilities) {
         List<BusinessCapabilityShortDTO> techCapabilityDTOS = new ArrayList<>();
@@ -126,21 +114,65 @@ public class BusinessCapabilityMapper {
 
     public List<BusinessCapabilityTreeDTO> mapToTree(List<BusinessCapability> businessCapabilities) {
         return businessCapabilities.stream().map(businessCapability -> {
-                return BusinessCapabilityTreeDTO.builder()
-                        .id(businessCapability.getId())
-                        .code(businessCapability.getCode())
-                        .name(businessCapability.getName())
-                        .description(businessCapability.getDescription())
-                        .author(businessCapability.getAuthor())
-                        .status(businessCapability.getStatus())
-                        .link(businessCapability.getLink())
-                        .createdDate(businessCapability.getCreatedDate())
-                        .lastModifiedDate(businessCapability.getLastModifiedDate())
-                        .isDomain(businessCapability.isDomain())
-                        .owner(businessCapability.getOwner())
-                        .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
-                        .children(mapToTree(businessCapability.getChildrenOfTree()))
-                        .build();
+            return BusinessCapabilityTreeDTO.builder()
+                    .id(businessCapability.getId())
+                    .code(businessCapability.getCode())
+                    .name(businessCapability.getName())
+                    .description(businessCapability.getDescription())
+                    .author(businessCapability.getAuthor())
+                    .status(businessCapability.getStatus())
+                    .link(businessCapability.getLink())
+                    .createdDate(businessCapability.getCreatedDate())
+                    .lastModifiedDate(businessCapability.getLastModifiedDate())
+                    .isDomain(businessCapability.isDomain())
+                    .owner(businessCapability.getOwner())
+                    .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
+                    .children(mapToTree(businessCapability.getChildrenOfTree()))
+                    .build();
         }).collect(Collectors.toList());
+    }
+
+    public BusinessCapabilityTreeInfoDTO mapToTreeInfo(BusinessCapability businessCapability) {
+        return BusinessCapabilityTreeInfoDTO.builder()
+                .id(businessCapability.getId())
+                .code(businessCapability.getCode())
+                .name(businessCapability.getName())
+                .description(businessCapability.getDescription())
+                .author(businessCapability.getAuthor())
+                .status(businessCapability.getStatus())
+                .link(businessCapability.getLink())
+                .createdDate(businessCapability.getCreatedDate())
+                .lastModifiedDate(businessCapability.getLastModifiedDate())
+                .isDomain(businessCapability.isDomain())
+                .owner(businessCapability.getOwner())
+                .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
+                .build();
+    }
+
+    public BusinessCapabilityTreeCustomDTO mapToCustomTree(List<BusinessCapability> businessCapabilities, BusinessCapability businessCapability) {
+        return BusinessCapabilityTreeCustomDTO.builder()
+                .id(businessCapability.getId())
+                .code(businessCapability.getCode())
+                .name(businessCapability.getName())
+                .description(businessCapability.getDescription())
+                .author(businessCapability.getAuthor())
+                .status(businessCapability.getStatus())
+                .link(businessCapability.getLink())
+                .createdDate(businessCapability.getCreatedDate())
+                .lastModifiedDate(businessCapability.getLastModifiedDate())
+                .isDomain(businessCapability.isDomain())
+                .owner(businessCapability.getOwner())
+                .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
+                .children(mapToTree(businessCapabilities))
+                .parent(getParentList(businessCapability.getParentEntity(), new ArrayList<BusinessCapabilityTreeInfoDTO>()))
+                .build();
+    }
+
+    private List<BusinessCapabilityTreeInfoDTO> getParentList(BusinessCapability businessCapability, ArrayList<BusinessCapabilityTreeInfoDTO> businessCapabilityTreeInfoDTOS) {
+        businessCapabilityTreeInfoDTOS.add(mapToTreeInfo(businessCapability));
+        if (businessCapability.getParentEntity() != null) {
+            return getParentList(businessCapability.getParentEntity(), businessCapabilityTreeInfoDTOS);
+        }
+        return businessCapabilityTreeInfoDTOS;
     }
 }
