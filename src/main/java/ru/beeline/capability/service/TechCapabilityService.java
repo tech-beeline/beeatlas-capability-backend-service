@@ -151,7 +151,6 @@ public class TechCapabilityService {
         } else {
             log.info("currentTechCapabilityOpt is present");
             currentTechCapability = currentTechCapabilityOpt.get();
-            addToHistory(currentTechCapability);
             PutTechCapabilityDTO currentTechCapabilityDTO = techCapabilityMapper.convertToPutTechCapabilityDTO(currentTechCapability);
             log.info("check equals old techCapability and new techCapability");
             if (equalsDashboardDTO(techCapability, currentTechCapabilityDTO)) {
@@ -159,6 +158,7 @@ public class TechCapabilityService {
                         + currentTechCapabilityDTO);
                 log.info("old techCapability and new techCapability is not equals, and try update");
                 updateTechCapability(currentTechCapability, techCapability);
+                addToHistory(currentTechCapability);
                 log.info("delete old relations");
                 techCapabilityRelationsRepository.deleteAllByTechCapability(currentTechCapability);
                 findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode(), ENTITY_TYPE_TECH_CAPABILITY);
