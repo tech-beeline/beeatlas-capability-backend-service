@@ -7,8 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.beeline.capability.domain.TechCapability;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +18,5 @@ public interface TechCapabilityRepository extends JpaRepository<TechCapability, 
 
     Optional<TechCapability> findByCode(String code);
 
-    List<TechCapability> findAllByIdIn(List<Long> ids);
-
+    List<TechCapability> findAllByIdInAndDeletedDateIsNull(List<Long> ids);
 }
