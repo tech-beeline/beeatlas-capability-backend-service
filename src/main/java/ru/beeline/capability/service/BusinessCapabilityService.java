@@ -173,7 +173,7 @@ public class BusinessCapabilityService {
     }
 
     public List<BusinessCapability> getByIdIn(List<Long> ids) {
-        return businessCapabilityRepository.findAllByIdIn(ids).stream().filter(bc -> bc.getDeletedDate() == null).collect(Collectors.toList());
+        return businessCapabilityRepository.findAllByIdInAndDeletedDateIsNull(ids);
     }
 
     private boolean checkHasKids(BusinessCapability businessCapability) {

@@ -28,7 +28,9 @@ public class SubscribeService {
 
 
     public List<CapabilitySubscribedDTO> getCapabilitiesSubscribed(EntityType entityType) {
+        log.info("get subscribes method start");
         List<Long> subscribes = notificationClient.getSubscribes(entityType);
+        log.info("the list has been received from notificationClient");
         if (subscribes.isEmpty()) {
             log.info("subscribes are empty");
             return new ArrayList<>();

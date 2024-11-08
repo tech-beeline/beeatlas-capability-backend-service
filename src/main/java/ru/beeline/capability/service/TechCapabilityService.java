@@ -91,7 +91,7 @@ public class TechCapabilityService {
     }
 
     public List<TechCapability> getByIdIn(List<Long> ids) {
-        return techCapabilityRepository.findAllByIdIn(ids).stream().filter(tech -> tech.getDeletedDate() == null).collect(Collectors.toList());
+        return techCapabilityRepository.findAllByIdInAndDeletedDateIsNull(ids);
     }
 
     public TechCapabilityDTO getCapabilityById(Long id) {
