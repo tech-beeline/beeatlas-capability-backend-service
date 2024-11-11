@@ -201,11 +201,21 @@ public class TechCapabilityService {
 
     private Boolean equalsDashboardDTO(PutTechCapabilityDTO techCapability, PutTechCapabilityDTO currentTechCapabilityDTO) {
         techCapability.setDescription(UrlWrapper.proxyUrl(techCapability.getDescription()));
-        Set<String> techCapabilityList = new TreeSet<>(techCapability.getParents());
-        techCapability.setParents(new ArrayList<>(techCapabilityList));
-        Set<String> currentTechCapabilityDTOList = new TreeSet<>(currentTechCapabilityDTO.getParents());
-        currentTechCapabilityDTO.setParents(new ArrayList<>(currentTechCapabilityDTOList));
+        if (techCapability.getParents() != null) {
+            Set<String> techCapabilityList = new TreeSet<>(techCapability.getParents());
+            techCapability.setParents(new ArrayList<>(techCapabilityList));
+        } else {
+            techCapability.setParents(new ArrayList<>());
+        }
+        if (currentTechCapabilityDTO.getParents() != null) {
+            Set<String> currentTechCapabilityDTOList = new TreeSet<>(currentTechCapabilityDTO.getParents());
+            currentTechCapabilityDTO.setParents(new ArrayList<>(currentTechCapabilityDTOList));
+        } else {
+            currentTechCapabilityDTO.setParents(new ArrayList<>());
+        }
         return !techCapability.equals(currentTechCapabilityDTO);
+
+
     }
 
     private void createRelations(TechCapability currentTechCapability, List<BusinessCapability> businessCapabilities) {
