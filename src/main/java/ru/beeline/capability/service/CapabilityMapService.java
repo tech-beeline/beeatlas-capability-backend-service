@@ -72,7 +72,8 @@ public class CapabilityMapService {
         }
     }
 
-    public void createCapabilityMap(PostCapabilityMapDTO postCapabilityMapDTO, String userId) {
+    public CreateCapabilityMapResponseDTO createCapabilityMap(PostCapabilityMapDTO postCapabilityMapDTO,
+                                                              String userId) {
         validateUserIdHeaders(userId);
         validatePostCapabilityMapDTO(postCapabilityMapDTO);
         findEntityTypeById(postCapabilityMapDTO);
@@ -89,7 +90,8 @@ public class CapabilityMapService {
                 .mapId(mapId.intValue())
                 .author(true)
                 .build();
-        userMapRepository.save(userMap);
+        return CreateCapabilityMapResponseDTO.builder().id(userMapRepository.save(userMap).getId())
+                .build();
     }
 
     public List<EntityType> getCapabilityMapTypes(String userId) {
