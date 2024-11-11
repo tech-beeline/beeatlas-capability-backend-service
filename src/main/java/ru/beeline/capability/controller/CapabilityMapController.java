@@ -13,10 +13,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.beeline.capability.dto.CreateCapabilityMapResponseDTO;
 import ru.beeline.capability.dto.GetCapabilityMapByIdDTO;
-import ru.beeline.capability.dto.ShortCapabilityMapDTO;
 import ru.beeline.capability.dto.PatchCapabilityMapDTO;
 import ru.beeline.capability.dto.PostCapabilityMapDTO;
+import ru.beeline.capability.dto.ShortCapabilityMapDTO;
 import ru.beeline.capability.service.CapabilityMapService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,17 +35,17 @@ public class CapabilityMapController {
 
     @PostMapping()
     @ApiOperation(value = "Создание карты возможностей")
-    public ResponseEntity createCapabilityMap(@RequestBody PostCapabilityMapDTO postCapabilityMapDTO,
-                                              HttpServletRequest request) {
-        capabilityMapService.createCapabilityMap(postCapabilityMapDTO, request.getHeader(USER_ID_HEADER));
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<CreateCapabilityMapResponseDTO> createCapabilityMap(@RequestBody PostCapabilityMapDTO postCapabilityMapDTO,
+                                                                              HttpServletRequest request) {
+        return new ResponseEntity<>(capabilityMapService.createCapabilityMap(postCapabilityMapDTO,
+                request.getHeader(USER_ID_HEADER)), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{mapId}")
     @ApiOperation(value = "Обновления карты пользователя")
     public ResponseEntity patchCapabilityMap(@PathVariable Integer mapId,
-                                              @RequestBody List<PatchCapabilityMapDTO> patchCapabilityMapDTO,
-                                              HttpServletRequest request) {
+                                             @RequestBody List<PatchCapabilityMapDTO> patchCapabilityMapDTO,
+                                             HttpServletRequest request) {
         capabilityMapService.patchCapabilityMap(mapId, patchCapabilityMapDTO, request.getHeader(USER_ID_HEADER));
         return new ResponseEntity<>(HttpStatus.OK);
     }
