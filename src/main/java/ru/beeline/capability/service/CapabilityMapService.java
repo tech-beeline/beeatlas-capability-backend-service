@@ -90,7 +90,9 @@ public class CapabilityMapService {
                 .mapId(mapId.intValue())
                 .author(true)
                 .build();
-        return CreateCapabilityMapResponseDTO.builder().id(userMapRepository.save(userMap).getId())
+        userMapRepository.save(userMap);
+        return CreateCapabilityMapResponseDTO.builder()
+                .id(capabilityMap.getId())
                 .build();
     }
 
