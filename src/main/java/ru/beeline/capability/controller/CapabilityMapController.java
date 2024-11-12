@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.beeline.capability.dto.CreateCapabilityMapResponseDTO;
 import ru.beeline.capability.dto.GetCapabilityMapByIdDTO;
+import ru.beeline.capability.dto.NameAndDescriptionDTO;
 import ru.beeline.capability.dto.PatchCapabilityMapDTO;
 import ru.beeline.capability.dto.PostCapabilityMapDTO;
 import ru.beeline.capability.dto.ShortCapabilityMapDTO;
@@ -41,7 +42,7 @@ public class CapabilityMapController {
                 request.getHeader(USER_ID_HEADER)), HttpStatus.CREATED);
     }
 
-    @PatchMapping("/{mapId}")
+    @PatchMapping("/groups/{mapId}")
     @ApiOperation(value = "Обновления карты пользователя")
     public ResponseEntity patchCapabilityMap(@PathVariable Integer mapId,
                                              @RequestBody List<PatchCapabilityMapDTO> patchCapabilityMapDTO,
@@ -67,5 +68,14 @@ public class CapabilityMapController {
     @ApiOperation(value = "Получение всех карт пользователя")
     public List<ShortCapabilityMapDTO> getCapabilityMaps(HttpServletRequest request) {
         return capabilityMapService.getCapabilityMaps(request.getHeader(USER_ID_HEADER));
+    }
+
+    @PatchMapping("/{mapId}")
+    @ApiOperation(value = "Изменение названия и описания карты")
+    public ResponseEntity patchNameAndDescriptionCapabilityMap(@PathVariable Integer mapId,
+                                                               @RequestBody NameAndDescriptionDTO nameAndDescriptionDTO,
+                                                               HttpServletRequest request) {
+        capabilityMapService.patchNameAndDescriptionCapabilityMap(mapId, nameAndDescriptionDTO, request.getHeader(USER_ID_HEADER));
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

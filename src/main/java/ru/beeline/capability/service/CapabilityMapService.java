@@ -180,6 +180,32 @@ public class CapabilityMapService {
         }
     }
 
+    private void nameValidateBody(NameAndDescriptionDTO nameAndDescriptionDTO) {
+        StringBuilder errMsg = new StringBuilder();
+        if (nameAndDescriptionDTO.getName() == null || nameAndDescriptionDTO.getName().equals("")) {
+            errMsg.append("Отсутствует обязательное поле name");
+        }
+        if (!errMsg.toString().isEmpty()) {
+            throw new ValidationException(errMsg.toString());
+        }
+    }
+
+    public void patchNameAndDescriptionCapabilityMap(Integer mapId,
+                                                     NameAndDescriptionDTO nameAndDescriptionDTO,
+                                                     String userId) {
+        validateUserIdHeaders(userId);
+        nameValidateBody(nameAndDescriptionDTO);
+        userMapRepository.findByUserIdAndMapIdAndAuthorTrue(Integer.valueOf(userId), mapId)
+                .orElseThrow(() -> new NotFoundException("403: Запись User Map не найдена"));
+        CapabilityMap capabilityMap = findCapabilityMapById(mapId);
+        capabilityMap.setName(nameAndDescriptionDTO.getName());
+        if (nameAndDescriptionDTO.getDescription() != null && !nameAndDescriptionDTO.getDescription().trim().isEmpty()) {
+            capabilityMap.setDescription(nameAndDescriptionDTO.getDescription());
+        }
+        capabilityMap.setUpdateDate(new Date());
+        capabilityMapRepository.save(capabilityMap);
+    }
+
     private void saveCapabilityGroups(String entityTypeName, List<Integer> capabilityIds, Integer groupId) {
         try {
             switch (entityTypeName) {
