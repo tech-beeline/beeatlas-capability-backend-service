@@ -30,5 +30,6 @@ public class BusinessCapabilityTreeInfoDTO {
     @JsonProperty("isDomain")
     private boolean isDomain;
     private String owner;
+    private Long parentId;
     private List<BusinessCapabilityCriteriaDTO>  criteria;
 }

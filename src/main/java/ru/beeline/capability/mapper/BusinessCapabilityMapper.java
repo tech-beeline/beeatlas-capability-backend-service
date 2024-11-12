@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.TechCapability;
+import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.BCParentDTO;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeCustomDTO;
@@ -49,9 +50,23 @@ public class BusinessCapabilityMapper {
                 .author(businessCapability.getAuthor())
                 .link(businessCapability.getLink())
                 .createdDate(businessCapability.getCreatedDate())
-                .hasChildren(businessCapabilityRepository.existsByParentId(businessCapability.getId())
-                        || techCapabilityRelationsRepository.existsByBusinessCapability(businessCapability))
+                .hasChildren(isAnyChildrenBcNotDeleted(businessCapability.getId())
+                        || isAnyChildrenTcNotDeleted(businessCapability))
                 .build();
+    }
+
+    private Boolean isAnyChildrenTcNotDeleted(BusinessCapability businessCapability) {
+        List<TechCapabilityRelations> techCapabilityRelations = techCapabilityRelationsRepository.findByBusinessCapability(businessCapability);
+        if (!techCapabilityRelations.isEmpty()) {
+            return techCapabilityRelations.stream()
+                    .map(TechCapabilityRelations::getTechCapability)
+                    .anyMatch(tech -> tech.getDeletedDate() == null);
+        }
+        return false;
+    }
+
+    private Boolean isAnyChildrenBcNotDeleted(Long parentId) {
+        return businessCapabilityRepository.findAllByParentId(parentId).stream().anyMatch(bc -> bc.getDeletedDate() == null);
     }
 
     public PutBusinessCapabilityDTO convertToPutCapabilityDTO(BusinessCapability businessCapability) {
@@ -87,8 +102,8 @@ public class BusinessCapabilityMapper {
         List<BusinessCapabilityShortDTO> techCapabilityDTOS = new ArrayList<>();
         for (BusinessCapability businessCapability : businessCapabilities) {
             BusinessCapabilityShortDTO techCapabilityDTO = convert(businessCapability,
-                    businessCapabilityRepository.existsByParentId(businessCapability.getId())
-                            || techCapabilityRelationsRepository.existsByBusinessCapability(businessCapability));
+                    isAnyChildrenBcNotDeleted(businessCapability.getId())
+                            || isAnyChildrenTcNotDeleted(businessCapability));
             techCapabilityDTOS.add(techCapabilityDTO);
         }
         return techCapabilityDTOS;
@@ -113,23 +128,33 @@ public class BusinessCapabilityMapper {
     }
 
     public List<BusinessCapabilityTreeDTO> mapToTree(List<BusinessCapability> businessCapabilities) {
-        return businessCapabilities.stream().map(businessCapability -> {
-            return BusinessCapabilityTreeDTO.builder()
-                    .id(businessCapability.getId())
-                    .code(businessCapability.getCode())
-                    .name(businessCapability.getName())
-                    .description(businessCapability.getDescription())
-                    .author(businessCapability.getAuthor())
-                    .status(businessCapability.getStatus())
-                    .link(businessCapability.getLink())
-                    .createdDate(businessCapability.getCreatedDate())
-                    .lastModifiedDate(businessCapability.getLastModifiedDate())
-                    .isDomain(businessCapability.isDomain())
-                    .owner(businessCapability.getOwner())
-                    .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
-                    .children(mapToTree(businessCapability.getChildrenOfTree()))
-                    .build();
-        }).collect(Collectors.toList());
+        return businessCapabilities.stream()
+                .filter(bc -> bc.getDeletedDate() == null)
+                .map(businessCapability -> {
+                    businessCapability.setChildrenOfTree(getChildrenBC(businessCapability).stream()
+                            .filter(bc -> bc.isDomain() == businessCapability.isDomain())
+                            .collect(Collectors.toList()));
+                    return BusinessCapabilityTreeDTO.builder()
+                            .id(businessCapability.getId())
+                            .code(businessCapability.getCode())
+                            .name(businessCapability.getName())
+                            .description(businessCapability.getDescription())
+                            .author(businessCapability.getAuthor())
+                            .status(businessCapability.getStatus())
+                            .link(businessCapability.getLink())
+                            .createdDate(businessCapability.getCreatedDate())
+                            .lastModifiedDate(businessCapability.getLastModifiedDate())
+                            .isDomain(businessCapability.isDomain())
+                            .owner(businessCapability.getOwner())
+                            .parentId(businessCapability.getParentId())
+                            .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
+                            .children(mapToTree(businessCapability.getChildrenOfTree()))
+                            .build();
+                }).collect(Collectors.toList());
+    }
+
+    private List<BusinessCapability> getChildrenBC(BusinessCapability businessCapability) {
+        return businessCapabilityRepository.findAllByParentId(businessCapability.getId());
     }
 
     public BusinessCapabilityTreeInfoDTO mapToTreeInfo(BusinessCapability businessCapability) {
@@ -145,6 +170,7 @@ public class BusinessCapabilityMapper {
                 .lastModifiedDate(businessCapability.getLastModifiedDate())
                 .isDomain(businessCapability.isDomain())
                 .owner(businessCapability.getOwner())
+                .parentId(businessCapability.getParentId())
                 .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
                 .build();
     }
@@ -161,6 +187,7 @@ public class BusinessCapabilityMapper {
                 .createdDate(businessCapability.getCreatedDate())
                 .lastModifiedDate(businessCapability.getLastModifiedDate())
                 .isDomain(businessCapability.isDomain())
+                .parentId(businessCapability.getParentId())
                 .owner(businessCapability.getOwner())
                 .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
                 .children(mapToTree(businessCapabilities))
@@ -169,8 +196,8 @@ public class BusinessCapabilityMapper {
     }
 
     private List<BusinessCapabilityTreeInfoDTO> getParentList(BusinessCapability businessCapability, ArrayList<BusinessCapabilityTreeInfoDTO> businessCapabilityTreeInfoDTOS) {
-        businessCapabilityTreeInfoDTOS.add(mapToTreeInfo(businessCapability));
-        if (businessCapability.getParentEntity() != null) {
+        if (businessCapability != null && businessCapability.getDeletedDate() == null) {
+            businessCapabilityTreeInfoDTOS.add(mapToTreeInfo(businessCapability));
             return getParentList(businessCapability.getParentEntity(), businessCapabilityTreeInfoDTOS);
         }
         return businessCapabilityTreeInfoDTOS;

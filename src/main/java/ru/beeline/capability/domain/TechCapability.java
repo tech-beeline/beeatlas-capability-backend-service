@@ -1,6 +1,7 @@
 package ru.beeline.capability.domain;
 
 import lombok.*;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
@@ -38,8 +39,24 @@ public class TechCapability {
     private String author;
 
     private String link;
+    @Column(name = "responsibility_product_id")
+    private Integer responsibilityProductId;
 
     @OneToMany
     @JoinColumn(name = "id_child")
     private List<TechCapabilityRelations> parents;
+
+    @Override
+    public String toString() {
+        return "TechCapability{" +
+                "code='" + code + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", owner='" + owner + '\'' +
+                ", status='" + status + '\'' +
+                ", author='" + author + '\'' +
+                ", link='" + link + '\'' +
+                ", responsibilityProductId=" + responsibilityProductId +
+                '}';
+    }
 }

@@ -12,10 +12,10 @@ import java.util.List;
 @Repository
 public interface TechCapabilityRelationsRepository extends JpaRepository<TechCapabilityRelations, String> {
     Boolean existsByBusinessCapability(BusinessCapability businessCapability);
-
     Boolean existsByBusinessCapabilityAndTechCapability(BusinessCapability businessCapability, TechCapability techCapability);
 
     void deleteAllByTechCapability(TechCapability techCapability);
     List<TechCapabilityRelations> findByTechCapability(TechCapability techCapability);
+    List<TechCapabilityRelations> findByBusinessCapability(BusinessCapability businessCapability);
 
 }

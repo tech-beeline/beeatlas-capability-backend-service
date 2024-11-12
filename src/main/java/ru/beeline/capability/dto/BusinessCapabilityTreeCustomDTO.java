@@ -29,6 +29,7 @@ public class BusinessCapabilityTreeCustomDTO {
     private Date lastModifiedDate;
     @JsonProperty("isDomain")
     private boolean isDomain;
+    private Long parentId;
     private String owner;
     private List<BusinessCapabilityCriteriaDTO>  criteria;
     private List<BusinessCapabilityTreeDTO> children;

@@ -43,13 +43,14 @@ public class UrlWrapper {
                 continue;
             }
             if (currentChar == 'h' && pos + 7 < description.length()) {
-                String subString = description.substring(pos, pos + 8);
-                if (subString.equals("https://")) {
+                String subString = description.substring(pos, pos + 7);
+                if (subString.equals("https:/") || subString.equals("http://")) {
                     int startIndexUrl = pos;
                     int endIndexUrl = pos + 8;
                     while (endIndexUrl < description.length()
                             && description.charAt(endIndexUrl) != ' '
                             && description.charAt(endIndexUrl) != '\"'
+                            && description.charAt(endIndexUrl) != '\n'
                             && description.charAt(endIndexUrl) != '<') {
                         endIndexUrl++;
                     }
@@ -82,13 +83,14 @@ public class UrlWrapper {
                 continue;
             }
             if (currentChar == 'h' && pos + 7 < description.length()) {
-                String subString = description.substring(pos, pos + 8);
-                if (subString.equals("https://")) {
+                String subString = description.substring(pos, pos + 7);
+                if (subString.equals("https:/") || subString.equals("http://")) {
                     int startIndexUrl = pos;
                     int endIndexUrl = pos + 8;
                     while (endIndexUrl < description.length()
                             && description.charAt(endIndexUrl) != ' '
                             && description.charAt(endIndexUrl) != '\"'
+                            && description.charAt(endIndexUrl) != '\n'
                             && description.charAt(endIndexUrl) != '<') {
                         endIndexUrl++;
                     }
@@ -136,13 +138,14 @@ public class UrlWrapper {
             while (pos2 < endIndexTag - 1) {
                 pos2++;
                 if (urlWithTags.charAt(pos2) == 'h' && pos2 + 7 < urlWithTags.length()) {
-                    String subString = urlWithTags.substring(pos2, pos2 + 8);
-                    if (subString.equals("https://")) {
+                    String subString = urlWithTags.substring(pos2, pos2 + 7);
+                    if (subString.equals("https:/") || subString.equals("http://")) {
                         int startIndexUrl = pos2;
                         int endIndexUrl = pos2 + 8;
                         while (endIndexUrl < urlWithTags.length()
                                 && urlWithTags.charAt(endIndexUrl) != ' '
                                 && urlWithTags.charAt(endIndexUrl) != '\"'
+                                && urlWithTags.charAt(endIndexUrl) != '\n'
                                 && urlWithTags.charAt(endIndexUrl) != '<') {
                             endIndexUrl++;
                         }

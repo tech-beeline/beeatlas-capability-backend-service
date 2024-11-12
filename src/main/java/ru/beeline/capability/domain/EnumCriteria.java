@@ -24,6 +24,8 @@ public class EnumCriteria {
 
     private String name;
 
+    private String description;
+
     private String type;
 
     private Integer interval;

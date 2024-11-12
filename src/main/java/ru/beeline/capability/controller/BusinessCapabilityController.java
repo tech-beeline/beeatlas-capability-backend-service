@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,6 +20,7 @@ import ru.beeline.capability.dto.BusinessCapabilityTreeDTO;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.service.BusinessCapabilityService;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
+import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenIdsDTO;
 import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
 
 import java.util.Collections;
@@ -43,10 +45,16 @@ public class BusinessCapabilityController {
         return businessCapabilityService.getChildren(id);
     }
 
+    @GetMapping("/{id}/children/all")
+    @ApiOperation(value = "Получение всех дочерних бизнес возможностей", response = BusinessCapabilityChildrenDTO.class)
+    public BusinessCapabilityChildrenIdsDTO getAllKidsIdById(@PathVariable Long id) {
+        return businessCapabilityService.getChildrenIds(id);
+    }
+
     @GetMapping("/{id}/parents")
     @ApiOperation(value = "Получение всех родительских бизнес возможностей", response = CapabilityParentDTO.class)
     public CapabilityParentDTO getParentsById(@PathVariable Long id) {
-        CapabilityParentDTO capabilityParentDTO = businessCapabilityService.getParents(id);
+        CapabilityParentDTO capabilityParentDTO = businessCapabilityService.getParentsWithoutDeleteDate(id);
         Collections.reverse(capabilityParentDTO.getParents());
         return capabilityParentDTO;
     }
@@ -60,7 +68,7 @@ public class BusinessCapabilityController {
     @GetMapping("/tree")
     @ApiOperation(value = "Построение дерева", response = List.class)
     public List<BusinessCapabilityTreeDTO> getBusinessCapabilityTree() {
-        return businessCapabilityService.getBusinessCapabilityTree(null);
+        return businessCapabilityService.getBusinessCapabilityTree();
     }
 
     @GetMapping("/tree/{id}")
@@ -88,6 +96,13 @@ public class BusinessCapabilityController {
     ) {
         businessCapabilityService.validateBusinessCapabilityDTO(capability, userId, productIds, roles, permissions);
         businessCapabilityService.putCapability(capability, userId, productIds, roles, permissions);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{code}")
+    @ApiOperation(value = "Удаление записи из таблицы find_name_sort_table со статусом BC")
+    public ResponseEntity deleteBusinessCapability(@PathVariable String code) {
+        businessCapabilityService.deleteBusinessCapability(code);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
