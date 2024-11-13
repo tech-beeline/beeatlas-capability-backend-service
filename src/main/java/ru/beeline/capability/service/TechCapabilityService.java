@@ -157,8 +157,8 @@ public class TechCapabilityService {
                 log.info("techCapability from dashboard: " + techCapability + " equals techCapability from BD "
                         + currentTechCapabilityDTO);
                 log.info("old techCapability and new techCapability is not equals, and try update");
-                updateTechCapability(currentTechCapability, techCapability);
                 addToHistory(currentTechCapability);
+                updateTechCapability(currentTechCapability, techCapability);
                 log.info("delete old relations");
                 techCapabilityRelationsRepository.deleteAllByTechCapability(currentTechCapability);
                 findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode(), ENTITY_TYPE_TECH_CAPABILITY);
