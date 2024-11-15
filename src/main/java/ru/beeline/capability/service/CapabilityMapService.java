@@ -17,6 +17,9 @@ import java.util.stream.Collectors;
 public class CapabilityMapService {
 
     @Autowired
+    TechCapabilityRelationsRepository techCapabilityRelationsRepository;
+
+    @Autowired
     BusinessCapabilityRepository businessCapabilityRepository;
 
     @Autowired
@@ -28,6 +31,11 @@ public class CapabilityMapService {
     @Autowired
     EntityTypeRepository entityTypeRepository;
 
+    @Autowired
+    CriteriaBcRepository criteriaBcRepository;
+
+    @Autowired
+    CriteriaTcRepository criteriaTcRepository;
     @Autowired
     TcGroupRepository tcGroupRepository;
 
@@ -423,6 +431,7 @@ public class CapabilityMapService {
     }
 
     private CapabilityDTO buildBcCapabilityDTO(BusinessCapability businessCapability) {
+        CriteriasBc criteriasBc = criteriaBcRepository.findByBcId(businessCapability.getId());
 
         return CapabilityDTO.builder()
                 .id(businessCapability.getId())
@@ -436,11 +445,34 @@ public class CapabilityMapService {
                 .isDomain(businessCapability.isDomain())
                 .updatedDate(businessCapability.getLastModifiedDate())
                 .owner(businessCapability.getOwner())
+                .parentId(businessCapability.getParentId() != null ? businessCapability.getParentId().intValue() : 0)
+                .criteria(criteriasBc != null ? buildCriteriaDTO(criteriasBc) : null)
                 .build();
+    }
 
+     public CriteriaDTO buildCriteriaDTO(Object criteria) {
+        if(criteria!=null) {
+            if (criteria instanceof CriteriasBc) {
+                CriteriasBc criteriasBc = (CriteriasBc) criteria;
+                return CriteriaDTO.builder()
+                        .criteriaId(criteriasBc.getCriterionId().intValue())
+                        .value(criteriasBc.getValue())
+                        .grade(criteriasBc.getGrade())
+                        .build();
+            } else if (criteria instanceof CriteriasTc) {
+                CriteriasTc criteriasTc = (CriteriasTc) criteria;
+                return CriteriaDTO.builder()
+                        .criteriaId(criteriasTc.getCriterionId().intValue())
+                        .value(criteriasTc.getValue())
+                        .grade(criteriasTc.getGrade())
+                        .build();
+            }
+        }
+        return null;
     }
 
     private CapabilityDTO buildTcCapabilityDTO(TechCapability techCapability) {
+        CriteriasTc criteriasTc = criteriaTcRepository.findByTcId(techCapability.getId());
 
         return CapabilityDTO.builder()
                 .id(techCapability.getId())
@@ -454,6 +486,7 @@ public class CapabilityMapService {
                 .updatedDate(techCapability.getLastModifiedDate())
                 .owner(techCapability.getOwner())
                 .responsibilityProductId(techCapability.getResponsibilityProductId())
+                .criteria(criteriasTc !=null ? buildCriteriaDTO(criteriasTc) : null)
                 .build();
     }
 }
