@@ -197,9 +197,7 @@ public class CapabilityMapService {
                 .orElseThrow(() -> new NotFoundException("403: Запись User Map не найдена"));
         CapabilityMap capabilityMap = findCapabilityMapById(mapId);
         capabilityMap.setName(nameAndDescriptionDTO.getName());
-        if (nameAndDescriptionDTO.getDescription() != null && !nameAndDescriptionDTO.getDescription().trim().isEmpty()) {
-            capabilityMap.setDescription(nameAndDescriptionDTO.getDescription());
-        }
+        capabilityMap.setDescription(nameAndDescriptionDTO.getDescription());
         capabilityMap.setUpdateDate(new Date());
         capabilityMapRepository.save(capabilityMap);
     }
