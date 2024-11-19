@@ -226,8 +226,12 @@ public class BusinessCapabilityService {
             }
         } else {
             businessCapability = createCapabilities(capabilityDTO);
-            findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
-            putCapabilityToDashboard(capabilityDTO, userId, productIds, roles, permissions);
+            if (putCapabilityToDashboard(capabilityDTO, userId, productIds, roles, permissions) != null) {
+                sendNotify(businessCapability.getId(), CREATE, changeBusinessCapabilityQueueName, businessCapability.getName());
+                findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
+            } else {
+                businessCapabilityRepository.delete(businessCapability);
+            }
         }
     }
 
@@ -249,13 +253,14 @@ public class BusinessCapabilityService {
                 .build());
     }
 
-    private void putCapabilityToDashboard(PutBusinessCapabilityDTO capabilityDTO, String userId, String productIds, String roles, String permissions) {
+    private String putCapabilityToDashboard(PutBusinessCapabilityDTO capabilityDTO, String userId, String productIds, String roles, String permissions) {
         if (Objects.nonNull(userId) && Objects.nonNull(productIds) && Objects.nonNull(roles) && Objects.nonNull(permissions)) {
             if (capabilityDTO.getAuthor() == null || capabilityDTO.getAuthor().isEmpty()) {
                 fillAuthor(capabilityDTO, userId);
             }
-            dashboardClient.putCapability(capabilityDTO);
+            return dashboardClient.putCapability(capabilityDTO);
         }
+        return null;
     }
 
     private void fillAuthor(PutBusinessCapabilityDTO capabilityDTO, String userId) {
@@ -290,7 +295,6 @@ public class BusinessCapabilityService {
                         .parentId(getParentId(capability))
                         .isDomain(capability.getIsDomain())
                         .build());
-        sendNotify(result.getId(), CREATE, changeBusinessCapabilityQueueName, capability.getName());
         return result;
     }
 
