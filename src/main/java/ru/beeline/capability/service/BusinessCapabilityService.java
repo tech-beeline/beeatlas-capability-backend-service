@@ -221,18 +221,34 @@ public class BusinessCapabilityService {
                 addToHistory(businessCapability);
                 businessCapability = updateCapability(businessCapability, capabilityDTO);
                 sendNotify(businessCapability.getId(), UPDATE, changeBusinessCapabilityQueueName, capabilityDTO.getName());
-                findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
+                findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
+                        businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
                 putCapabilityToDashboard(capabilityDTO, userId, productIds, roles, permissions);
             }
         } else {
             businessCapability = createCapabilities(capabilityDTO);
-            if (putCapabilityToDashboard(capabilityDTO, userId, productIds, roles, permissions) != null) {
+            if (!areParametersValid(userId, productIds, roles, permissions)) {
                 sendNotify(businessCapability.getId(), CREATE, changeBusinessCapabilityQueueName, businessCapability.getName());
-                findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
+                findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
+                        businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
+                log.warn("One or more required parameters are null or empty. Business capability  has been preserved.");
             } else {
-                businessCapabilityRepository.delete(businessCapability);
+                if (putCapabilityToDashboard(capabilityDTO, userId, productIds, roles, permissions) != null) {
+                    sendNotify(businessCapability.getId(), CREATE, changeBusinessCapabilityQueueName, businessCapability.getName());
+                    findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
+                            businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
+                } else {
+                    businessCapabilityRepository.delete(businessCapability);
+                }
             }
         }
+    }
+
+    private boolean areParametersValid(String userId, String productIds, String roles, String permissions) {
+        return userId != null && !userId.isEmpty() &&
+                productIds != null && !productIds.isEmpty() &&
+                roles != null && !roles.isEmpty() &&
+                permissions != null && !permissions.isEmpty();
     }
 
     private void addToHistory(BusinessCapability businessCapability) {
