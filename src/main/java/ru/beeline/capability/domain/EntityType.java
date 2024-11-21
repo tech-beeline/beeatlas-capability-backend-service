@@ -19,4 +19,6 @@ public class EntityType {
     private Long id;
 
     private String name;
+
+    private String title;
 }
