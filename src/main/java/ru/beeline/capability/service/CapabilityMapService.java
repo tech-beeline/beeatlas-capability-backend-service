@@ -279,7 +279,7 @@ public class CapabilityMapService {
                         .description(capabilityMap.getDescription())
                         .createdDate(capabilityMap.getCreateDate())
                         .updatedDate(capabilityMap.getUpdateDate())
-                        .typeId(capabilityMap.getTypeId())
+                        .type(entityTypeRepository.findById(capabilityMap.getTypeId().longValue()).get())
                         .build())
                 .collect(Collectors.toList());
     }
