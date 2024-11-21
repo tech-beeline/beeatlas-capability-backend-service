@@ -1,6 +1,7 @@
 package ru.beeline.capability.dto;
 
 import lombok.*;
+import ru.beeline.capability.domain.EntityType;
 
 import java.util.Date;
 
@@ -16,5 +17,5 @@ public class ShortCapabilityMapDTO {
     private String description;
     private Date createdDate;
     private Date updatedDate;
-    private Integer typeId;
+    private EntityType type;
 }

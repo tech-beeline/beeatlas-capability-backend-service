@@ -279,7 +279,7 @@ public class CapabilityMapService {
                         .description(capabilityMap.getDescription())
                         .createdDate(capabilityMap.getCreateDate())
                         .updatedDate(capabilityMap.getUpdateDate())
-                        .typeId(capabilityMap.getTypeId())
+                        .type(entityTypeRepository.findById(capabilityMap.getTypeId().longValue()).get())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -300,10 +300,10 @@ public class CapabilityMapService {
             }
             List<Integer> groupDTOListParentIdIsNullIDS = getGroupIds(groupListParentIdIsNull);
             List<Integer> groupDTOListParentIdNotNullIDS = getGroupIds(groupListParentIdNotNull);
-            if (getCapabilityMapByIdDTO.getEntityType().getId() == 2) {
+            if (getCapabilityMapByIdDTO.getType().getId() == 2) {
                 createBcGroup(getCapabilityMapByIdDTO.getGroups(), groupDTOListParentIdIsNullIDS, groupDTOListParentIdNotNullIDS);
             } else {
-                if (getCapabilityMapByIdDTO.getEntityType().getId() == 1) {
+                if (getCapabilityMapByIdDTO.getType().getId() == 1) {
                     createTcGroup(getCapabilityMapByIdDTO.getGroups(), groupDTOListParentIdIsNullIDS, groupDTOListParentIdNotNullIDS);
                 }
             }
@@ -321,7 +321,7 @@ public class CapabilityMapService {
         return GetCapabilityMapByIdDTO.builder()
                 .name(capabilityMap.getName())
                 .description(capabilityMap.getDescription())
-                .entityType(entityTypeRepository.findById(capabilityMap.getTypeId().longValue()).get())
+                .type(entityTypeRepository.findById(capabilityMap.getTypeId().longValue()).get())
                 .build();
     }
 
