@@ -300,10 +300,10 @@ public class CapabilityMapService {
             }
             List<Integer> groupDTOListParentIdIsNullIDS = getGroupIds(groupListParentIdIsNull);
             List<Integer> groupDTOListParentIdNotNullIDS = getGroupIds(groupListParentIdNotNull);
-            if (getCapabilityMapByIdDTO.getTypeId() == 2) {
+            if (getCapabilityMapByIdDTO.getEntityType().getId() == 2) {
                 createBcGroup(getCapabilityMapByIdDTO.getGroups(), groupDTOListParentIdIsNullIDS, groupDTOListParentIdNotNullIDS);
             } else {
-                if (getCapabilityMapByIdDTO.getTypeId() == 1) {
+                if (getCapabilityMapByIdDTO.getEntityType().getId() == 1) {
                     createTcGroup(getCapabilityMapByIdDTO.getGroups(), groupDTOListParentIdIsNullIDS, groupDTOListParentIdNotNullIDS);
                 }
             }
@@ -321,7 +321,7 @@ public class CapabilityMapService {
         return GetCapabilityMapByIdDTO.builder()
                 .name(capabilityMap.getName())
                 .description(capabilityMap.getDescription())
-                .typeId(capabilityMap.getTypeId())
+                .entityType(entityTypeRepository.findById(capabilityMap.getTypeId().longValue()).get())
                 .build();
     }
 
@@ -450,8 +450,8 @@ public class CapabilityMapService {
                 .build();
     }
 
-     public CriteriaDTO buildCriteriaDTO(Object criteria) {
-        if(criteria!=null) {
+    public CriteriaDTO buildCriteriaDTO(Object criteria) {
+        if (criteria != null) {
             if (criteria instanceof CriteriasBc) {
                 CriteriasBc criteriasBc = (CriteriasBc) criteria;
                 return CriteriaDTO.builder()
@@ -486,7 +486,7 @@ public class CapabilityMapService {
                 .updatedDate(techCapability.getLastModifiedDate())
                 .owner(techCapability.getOwner())
                 .responsibilityProductId(techCapability.getResponsibilityProductId())
-                .criteria(criteriasTc !=null ? buildCriteriaDTO(criteriasTc) : null)
+                .criteria(criteriasTc != null ? buildCriteriaDTO(criteriasTc) : null)
                 .build();
     }
 }

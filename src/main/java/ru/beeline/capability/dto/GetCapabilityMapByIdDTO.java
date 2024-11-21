@@ -1,6 +1,7 @@
 package ru.beeline.capability.dto;
 
 import lombok.*;
+import ru.beeline.capability.domain.EntityType;
 
 import java.util.List;
 
@@ -13,6 +14,6 @@ public class GetCapabilityMapByIdDTO {
 
     private String name;
     private String description;
-    private Integer typeId;
+    private EntityType entityType;
     private List<GroupDTO> groups;
 }
