@@ -14,6 +14,6 @@ public class GetCapabilityMapByIdDTO {
 
     private String name;
     private String description;
-    private EntityType entityType;
+    private EntityType type;
     private List<GroupDTO> groups;
 }
