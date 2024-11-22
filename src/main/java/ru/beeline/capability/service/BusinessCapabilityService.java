@@ -19,6 +19,8 @@ import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeCustomDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeDTO;
 import ru.beeline.capability.dto.CapabilityParentDTO;
+import ru.beeline.capability.dto.GetHistoryByIdDTO;
+import ru.beeline.capability.dto.VersionInfoDTO;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
@@ -450,6 +452,46 @@ public class BusinessCapabilityService {
                 EntityType entityType = entityTypeRepository.findByName("BUSINESS_CAPABILITY");
                 findNameSortTableRepository.deleteByRefIdAndType(businessCapabilityId, entityType);
             }
+        }
+    }
+
+    public List<GetHistoryByIdDTO> getBusinessCapabilityHistory(Long id) {
+        Optional<BusinessCapability> optionalBusinessCapability = businessCapabilityRepository.findById(id);
+        if (optionalBusinessCapability.isEmpty()) {
+            throw new NotFoundException("Business Capability не найдено");
+        }
+        BusinessCapability businessCapability = optionalBusinessCapability.get();
+        List<HistoryBusinessCapability> historyBcList = historyBusinessCapabilityRepository.findByIdRef(id);
+        VersionInfoDTO versionInfo = VersionInfoDTO.builder()
+                .version(1)
+                .modified_date(businessCapability.getLastModifiedDate())
+                .author(businessCapability.getAuthor())
+                .build();
+        if (historyBcList.isEmpty()) {
+            return List.of(GetHistoryByIdDTO.builder()
+                    .versionInfo(versionInfo)
+                    .build());
+        } else {
+            List<VersionInfoDTO> versionInfoList = historyBcList.stream()
+                    .map(historyBc -> VersionInfoDTO.builder()
+                            .version(historyBc.getVersion().intValue())
+                            .modified_date(historyBc.getModifiedDate())
+                            .author(historyBc.getAuthor())
+                            .build())
+                    .collect(Collectors.toList());
+            Integer lostVersion = versionInfoList.stream()
+                    .mapToInt(VersionInfoDTO::getVersion)
+                    .max()
+                    .getAsInt();
+            versionInfo.setVersion(lostVersion + 1);
+            versionInfoList.add(versionInfo);
+            versionInfoList.sort(Comparator.comparingInt(VersionInfoDTO::getVersion).reversed());
+
+            return versionInfoList.stream()
+                    .map(versionInfoDTO -> GetHistoryByIdDTO.builder()
+                            .versionInfo(versionInfoDTO)
+                            .build())
+                    .collect(Collectors.toList());
         }
     }
 }
