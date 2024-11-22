@@ -261,7 +261,7 @@ public class BusinessCapabilityService {
                 .code(businessCapability.getCode())
                 .name(businessCapability.getName())
                 .description(businessCapability.getDescription())
-                .modifiedDate(new Date())
+                .modifiedDate(businessCapability.getLastModifiedDate())
                 .parentId(businessCapability.getParentId())
                 .owner(businessCapability.getOwner())
                 .status(businessCapability.getStatus())
