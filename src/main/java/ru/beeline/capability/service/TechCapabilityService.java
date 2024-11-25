@@ -181,7 +181,7 @@ public class TechCapabilityService {
                 .code(currentTechCapability.getCode())
                 .name(currentTechCapability.getName())
                 .description(currentTechCapability.getDescription())
-                .modifiedDate(currentTechCapability.getLastModifiedDate())
+                .modifiedDate(new Date())
                 .owner(currentTechCapability.getOwner())
                 .status(currentTechCapability.getStatus())
                 .link(currentTechCapability.getLink())
