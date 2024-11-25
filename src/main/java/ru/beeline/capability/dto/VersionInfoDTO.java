@@ -12,7 +12,7 @@ import java.util.Date;
 public class VersionInfoDTO {
 
     private Integer version;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date modified_date;
     private String author;
 }
