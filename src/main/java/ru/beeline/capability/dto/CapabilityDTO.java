@@ -28,4 +28,6 @@ public class CapabilityDTO {
     private String owner;
     @JsonProperty("responsibilityProductId")
     private Integer responsibilityProductId;
+    private Integer parentId;
+    private CriteriaDTO criteria;
 }

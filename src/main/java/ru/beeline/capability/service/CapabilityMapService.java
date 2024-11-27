@@ -17,6 +17,9 @@ import java.util.stream.Collectors;
 public class CapabilityMapService {
 
     @Autowired
+    TechCapabilityRelationsRepository techCapabilityRelationsRepository;
+
+    @Autowired
     BusinessCapabilityRepository businessCapabilityRepository;
 
     @Autowired
@@ -28,6 +31,11 @@ public class CapabilityMapService {
     @Autowired
     EntityTypeRepository entityTypeRepository;
 
+    @Autowired
+    CriteriaBcRepository criteriaBcRepository;
+
+    @Autowired
+    CriteriaTcRepository criteriaTcRepository;
     @Autowired
     TcGroupRepository tcGroupRepository;
 
@@ -199,9 +207,7 @@ public class CapabilityMapService {
                 .orElseThrow(() -> new NotFoundException("403: Запись User Map не найдена"));
         CapabilityMap capabilityMap = findCapabilityMapById(mapId);
         capabilityMap.setName(nameAndDescriptionDTO.getName());
-        if (nameAndDescriptionDTO.getDescription() != null && !nameAndDescriptionDTO.getDescription().trim().isEmpty()) {
-            capabilityMap.setDescription(nameAndDescriptionDTO.getDescription());
-        }
+        capabilityMap.setDescription(nameAndDescriptionDTO.getDescription());
         capabilityMap.setUpdateDate(new Date());
         capabilityMapRepository.save(capabilityMap);
     }
@@ -273,7 +279,7 @@ public class CapabilityMapService {
                         .description(capabilityMap.getDescription())
                         .createdDate(capabilityMap.getCreateDate())
                         .updatedDate(capabilityMap.getUpdateDate())
-                        .typeId(capabilityMap.getTypeId())
+                        .type(entityTypeRepository.findById(capabilityMap.getTypeId().longValue()).get())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -294,10 +300,10 @@ public class CapabilityMapService {
             }
             List<Integer> groupDTOListParentIdIsNullIDS = getGroupIds(groupListParentIdIsNull);
             List<Integer> groupDTOListParentIdNotNullIDS = getGroupIds(groupListParentIdNotNull);
-            if (getCapabilityMapByIdDTO.getTypeId() == 2) {
+            if (getCapabilityMapByIdDTO.getType().getId() == 2) {
                 createBcGroup(getCapabilityMapByIdDTO.getGroups(), groupDTOListParentIdIsNullIDS, groupDTOListParentIdNotNullIDS);
             } else {
-                if (getCapabilityMapByIdDTO.getTypeId() == 1) {
+                if (getCapabilityMapByIdDTO.getType().getId() == 1) {
                     createTcGroup(getCapabilityMapByIdDTO.getGroups(), groupDTOListParentIdIsNullIDS, groupDTOListParentIdNotNullIDS);
                 }
             }
@@ -315,7 +321,7 @@ public class CapabilityMapService {
         return GetCapabilityMapByIdDTO.builder()
                 .name(capabilityMap.getName())
                 .description(capabilityMap.getDescription())
-                .typeId(capabilityMap.getTypeId())
+                .type(entityTypeRepository.findById(capabilityMap.getTypeId().longValue()).get())
                 .build();
     }
 
@@ -425,6 +431,7 @@ public class CapabilityMapService {
     }
 
     private CapabilityDTO buildBcCapabilityDTO(BusinessCapability businessCapability) {
+        CriteriasBc criteriasBc = criteriaBcRepository.findByBcId(businessCapability.getId());
 
         return CapabilityDTO.builder()
                 .id(businessCapability.getId())
@@ -438,11 +445,34 @@ public class CapabilityMapService {
                 .isDomain(businessCapability.isDomain())
                 .updatedDate(businessCapability.getLastModifiedDate())
                 .owner(businessCapability.getOwner())
+                .parentId(businessCapability.getParentId() != null ? businessCapability.getParentId().intValue() : 0)
+                .criteria(criteriasBc != null ? buildCriteriaDTO(criteriasBc) : null)
                 .build();
+    }
 
+    public CriteriaDTO buildCriteriaDTO(Object criteria) {
+        if (criteria != null) {
+            if (criteria instanceof CriteriasBc) {
+                CriteriasBc criteriasBc = (CriteriasBc) criteria;
+                return CriteriaDTO.builder()
+                        .criteriaId(criteriasBc.getCriterionId().intValue())
+                        .value(criteriasBc.getValue())
+                        .grade(criteriasBc.getGrade())
+                        .build();
+            } else if (criteria instanceof CriteriasTc) {
+                CriteriasTc criteriasTc = (CriteriasTc) criteria;
+                return CriteriaDTO.builder()
+                        .criteriaId(criteriasTc.getCriterionId().intValue())
+                        .value(criteriasTc.getValue())
+                        .grade(criteriasTc.getGrade())
+                        .build();
+            }
+        }
+        return null;
     }
 
     private CapabilityDTO buildTcCapabilityDTO(TechCapability techCapability) {
+        CriteriasTc criteriasTc = criteriaTcRepository.findByTcId(techCapability.getId());
 
         return CapabilityDTO.builder()
                 .id(techCapability.getId())
@@ -456,6 +486,7 @@ public class CapabilityMapService {
                 .updatedDate(techCapability.getLastModifiedDate())
                 .owner(techCapability.getOwner())
                 .responsibilityProductId(techCapability.getResponsibilityProductId())
+                .criteria(criteriasTc != null ? buildCriteriaDTO(criteriasTc) : null)
                 .build();
     }
 }

@@ -19,6 +19,8 @@ import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeCustomDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeDTO;
 import ru.beeline.capability.dto.CapabilityParentDTO;
+import ru.beeline.capability.dto.GetHistoryByIdDTO;
+import ru.beeline.capability.dto.VersionInfoDTO;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
@@ -218,17 +220,37 @@ public class BusinessCapabilityService {
                 log.info("businessCapability from BD : " + businessCapability.toString());
                 log.info("capabilityDTO from Dashboard: " + capabilityDTO.toString() + " Capability after Convert to PutCapability from bd: "
                         + businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability).toString());
-                businessCapability = updateCapability(businessCapability, capabilityDTO);
                 addToHistory(businessCapability);
+                businessCapability = updateCapability(businessCapability, capabilityDTO);
                 sendNotify(businessCapability.getId(), UPDATE, changeBusinessCapabilityQueueName, capabilityDTO.getName());
-                findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
+                findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
+                        businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
                 putCapabilityToDashboard(capabilityDTO, userId, productIds, roles, permissions);
             }
         } else {
             businessCapability = createCapabilities(capabilityDTO);
-            findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(), businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
-            putCapabilityToDashboard(capabilityDTO, userId, productIds, roles, permissions);
+            if (!areParametersValid(userId, productIds, roles, permissions)) {
+                sendNotify(businessCapability.getId(), CREATE, changeBusinessCapabilityQueueName, businessCapability.getName());
+                findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
+                        businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
+                log.warn("One or more required parameters are null or empty. Business capability  has been preserved.");
+            } else {
+                if (putCapabilityToDashboard(capabilityDTO, userId, productIds, roles, permissions) != null) {
+                    sendNotify(businessCapability.getId(), CREATE, changeBusinessCapabilityQueueName, businessCapability.getName());
+                    findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
+                            businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
+                } else {
+                    businessCapabilityRepository.delete(businessCapability);
+                }
+            }
         }
+    }
+
+    private boolean areParametersValid(String userId, String productIds, String roles, String permissions) {
+        return userId != null && !userId.isEmpty() &&
+                productIds != null && !productIds.isEmpty() &&
+                roles != null && !roles.isEmpty() &&
+                permissions != null && !permissions.isEmpty();
     }
 
     private void addToHistory(BusinessCapability businessCapability) {
@@ -249,13 +271,14 @@ public class BusinessCapabilityService {
                 .build());
     }
 
-    private void putCapabilityToDashboard(PutBusinessCapabilityDTO capabilityDTO, String userId, String productIds, String roles, String permissions) {
+    private String putCapabilityToDashboard(PutBusinessCapabilityDTO capabilityDTO, String userId, String productIds, String roles, String permissions) {
         if (Objects.nonNull(userId) && Objects.nonNull(productIds) && Objects.nonNull(roles) && Objects.nonNull(permissions)) {
             if (capabilityDTO.getAuthor() == null || capabilityDTO.getAuthor().isEmpty()) {
                 fillAuthor(capabilityDTO, userId);
             }
-            dashboardClient.putCapability(capabilityDTO);
+            return dashboardClient.putCapability(capabilityDTO);
         }
+        return null;
     }
 
     private void fillAuthor(PutBusinessCapabilityDTO capabilityDTO, String userId) {
@@ -290,7 +313,6 @@ public class BusinessCapabilityService {
                         .parentId(getParentId(capability))
                         .isDomain(capability.getIsDomain())
                         .build());
-        sendNotify(result.getId(), CREATE, changeBusinessCapabilityQueueName, capability.getName());
         return result;
     }
 
@@ -430,6 +452,46 @@ public class BusinessCapabilityService {
                 EntityType entityType = entityTypeRepository.findByName("BUSINESS_CAPABILITY");
                 findNameSortTableRepository.deleteByRefIdAndType(businessCapabilityId, entityType);
             }
+        }
+    }
+
+    public List<GetHistoryByIdDTO> getBusinessCapabilityHistory(Long id) {
+        Optional<BusinessCapability> optionalBusinessCapability = businessCapabilityRepository.findById(id);
+        if (optionalBusinessCapability.isEmpty()) {
+            throw new NotFoundException("Business Capability не найдено");
+        }
+        BusinessCapability businessCapability = optionalBusinessCapability.get();
+        List<HistoryBusinessCapability> historyBcList = historyBusinessCapabilityRepository.findByIdRef(id);
+        VersionInfoDTO versionInfo = VersionInfoDTO.builder()
+                .version(1)
+                .modified_date(businessCapability.getLastModifiedDate())
+                .author(businessCapability.getAuthor())
+                .build();
+        if (historyBcList.isEmpty()) {
+            return List.of(GetHistoryByIdDTO.builder()
+                    .versionInfo(versionInfo)
+                    .build());
+        } else {
+            List<VersionInfoDTO> versionInfoList = historyBcList.stream()
+                    .map(historyBc -> VersionInfoDTO.builder()
+                            .version(historyBc.getVersion().intValue())
+                            .modified_date(historyBc.getModifiedDate())
+                            .author(historyBc.getAuthor())
+                            .build())
+                    .collect(Collectors.toList());
+            Integer lostVersion = versionInfoList.stream()
+                    .mapToInt(VersionInfoDTO::getVersion)
+                    .max()
+                    .getAsInt();
+            versionInfo.setVersion(lostVersion + 1);
+            versionInfoList.add(versionInfo);
+            versionInfoList.sort(Comparator.comparingInt(VersionInfoDTO::getVersion).reversed());
+
+            return versionInfoList.stream()
+                    .map(versionInfoDTO -> GetHistoryByIdDTO.builder()
+                            .versionInfo(versionInfoDTO)
+                            .build())
+                    .collect(Collectors.toList());
         }
     }
 }
