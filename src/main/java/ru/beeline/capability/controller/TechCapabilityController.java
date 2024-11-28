@@ -7,9 +7,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.dto.CapabilityParentDTO;
-import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
+import ru.beeline.capability.dto.GetHistoryByIdDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.service.TechCapabilityService;
+import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
+
 import java.util.List;
 
 @Slf4j
@@ -27,7 +29,7 @@ public class TechCapabilityController {
                                                        @RequestParam(value = "offset", required = false) Integer offset) {
         return techCapabilityService.getCapabilities(limit, offset);
     }
-    
+
     @GetMapping("/{id}")
     @ApiOperation(value = "получение технической возможности", response = TechCapabilityDTO.class)
     public TechCapabilityDTO getAllTech(@PathVariable Long id) {
@@ -54,5 +56,11 @@ public class TechCapabilityController {
     public ResponseEntity deleteTechCapability(@PathVariable String code) {
         techCapabilityService.deleteTechCapability(code);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/history/{id}")
+    @ApiOperation(value = "Получение списка версий TC")
+    public List<GetHistoryByIdDTO> getTechCapabilityHistory(@PathVariable Long id) {
+        return techCapabilityService.getTechCapabilityHistory(id);
     }
 }
