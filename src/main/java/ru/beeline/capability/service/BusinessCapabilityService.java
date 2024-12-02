@@ -19,7 +19,10 @@ import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeCustomDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeDTO;
 import ru.beeline.capability.dto.CapabilityParentDTO;
+import ru.beeline.capability.dto.GetBcHistoryVersionDTO;
 import ru.beeline.capability.dto.GetHistoryByIdDTO;
+import ru.beeline.capability.dto.HistoryCapabilityDTO;
+import ru.beeline.capability.dto.ParentDTO;
 import ru.beeline.capability.dto.VersionInfoDTO;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
@@ -492,6 +495,100 @@ public class BusinessCapabilityService {
                             .versionInfo(versionInfoDTO)
                             .build())
                     .collect(Collectors.toList());
+        }
+    }
+
+    public List<GetBcHistoryVersionDTO> getBusinessCapabilityHistoryVersion(Long id, Integer version,
+                                                                            Integer otherVersion) {
+        Optional<BusinessCapability> optionalBusinessCapability = businessCapabilityRepository.findById(id);
+        if (optionalBusinessCapability.isEmpty()) {
+            throw new NotFoundException(String.format("Business Capability с id: %s не найдено", id));
+        }
+        BusinessCapability businessCapability = optionalBusinessCapability.get();
+        HistoryBusinessCapability historyBcFirstVersion = findHistoryBcVersion(id, version.longValue());
+        List<HistoryCapabilityDTO> result = new ArrayList<>();
+        result.add(buildBcHistoryVersionDTO(historyBcFirstVersion, id, version));
+        if (otherVersion != null) {
+            HistoryBusinessCapability historyBcSecondVersion = findHistoryBcVersion(id, otherVersion.longValue());
+            result.add(buildBcHistoryVersionDTO(historyBcSecondVersion, id, otherVersion));
+        } else {
+            Optional<HistoryBusinessCapability> optionalFindHistoryBcOtherVersion =
+                    historyBusinessCapabilityRepository.findByIdRefOtherVersion(id);
+            if (optionalFindHistoryBcOtherVersion.isPresent()) {
+                HistoryCapabilityDTO getHistoryCapabilityDTO = HistoryCapabilityDTO.builder()
+                        .id(id)
+                        .code(businessCapability.getCode())
+                        .name(businessCapability.getName())
+                        .description(businessCapability.getDescription())
+                        .owner(businessCapability.getOwner())
+                        .modifiedDate(businessCapability.getLastModifiedDate())
+                        .status(businessCapability.getStatus())
+                        .parent(findParentBc(businessCapability.getParentId()))
+                        .author(businessCapability.getAuthor())
+                        .link(businessCapability.getLink())
+                        .version(optionalFindHistoryBcOtherVersion.get().getVersion().intValue() + 1)
+                        .build();
+                result.add(getHistoryCapabilityDTO);
+            } else {
+                throw new NotFoundException("History Business Capability с последней версией не найдено");
+            }
+        }
+
+        result.sort(Comparator.comparingInt(HistoryCapabilityDTO::getVersion).reversed());
+        return result.stream()
+                .map(capability -> GetBcHistoryVersionDTO.builder()
+                        .capability(capability)
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    private HistoryBusinessCapability findHistoryBcVersion(Long id, Long version) {
+        Optional<HistoryBusinessCapability> optionalHistoryBc =
+                historyBusinessCapabilityRepository.findByIdRefAndVersion(id, version);
+        if (optionalHistoryBc.isEmpty()) {
+            throw new NotFoundException(String.format("History Business Capability с id: %d, version: %s не найдено",
+                    id, version));
+        }
+        return optionalHistoryBc.get();
+    }
+
+    private HistoryCapabilityDTO buildBcHistoryVersionDTO(HistoryBusinessCapability historyBusinessCapability,
+                                                          Long id, Integer version) {
+        ParentDTO parentDTO = null;
+        if (historyBusinessCapability.getParentId() != null) {
+            parentDTO = findParentBc(historyBusinessCapability.getParentId());
+        }
+        return buildBcHistoryVersion(historyBusinessCapability, parentDTO, id, version);
+    }
+
+    private HistoryCapabilityDTO buildBcHistoryVersion(HistoryBusinessCapability historyBusinessCapability,
+                                                       ParentDTO parentDTO, Long id, Integer version) {
+        return HistoryCapabilityDTO.builder()
+                .id(id)
+                .code(historyBusinessCapability.getCode())
+                .name(historyBusinessCapability.getName())
+                .description(historyBusinessCapability.getDescription())
+                .owner(historyBusinessCapability.getOwner())
+                .modifiedDate(historyBusinessCapability.getModifiedDate())
+                .status(historyBusinessCapability.getStatus())
+                .parent(parentDTO)
+                .author(historyBusinessCapability.getAuthor())
+                .link(historyBusinessCapability.getLink())
+                .version(version)
+                .build();
+    }
+
+    private ParentDTO findParentBc(Long parentId) {
+        Optional<BusinessCapability> optionalParentFirstBc = businessCapabilityRepository.findById(parentId);
+        if (optionalParentFirstBc.isPresent()) {
+            BusinessCapability parentFirstBc = optionalParentFirstBc.get();
+            return ParentDTO.builder()
+                    .id(parentId)
+                    .code(parentFirstBc.getCode())
+                    .name((parentFirstBc.getName()))
+                    .build();
+        } else {
+            throw new NotFoundException(String.format("Business Capability с parentId: %s не найдено", parentId));
         }
     }
 }
