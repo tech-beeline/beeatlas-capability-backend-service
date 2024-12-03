@@ -11,4 +11,5 @@ public class NameAndDescriptionDTO {
 
     private String name;
     private String description;
+    private TypeDTO type;
 }
