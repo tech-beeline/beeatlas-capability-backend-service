@@ -7,6 +7,7 @@ import ru.beeline.capability.domain.*;
 import ru.beeline.capability.dto.*;
 import ru.beeline.capability.exception.ForbiddenException;
 import ru.beeline.capability.exception.NotFoundException;
+import ru.beeline.capability.exception.PackageRegistrationException;
 import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.repository.*;
 
@@ -204,10 +205,17 @@ public class CapabilityMapService {
         validateUserIdHeaders(userId);
         nameValidateBody(nameAndDescriptionDTO);
         userMapRepository.findByUserIdAndMapIdAndAuthorTrue(Integer.valueOf(userId), mapId)
-                .orElseThrow(() -> new NotFoundException("403: Запись User Map не найдена"));
+                .orElseThrow(() -> new NotFoundException("Запись User Map не найдена"));
+        List<Group> groups = groupRepository.findAllByMapId(mapId);
+        if (!groups.isEmpty()) {
+            throw new PackageRegistrationException("Найдены записи в таблице groups с данным map id");
+        }
         CapabilityMap capabilityMap = findCapabilityMapById(mapId);
         capabilityMap.setName(nameAndDescriptionDTO.getName());
         capabilityMap.setDescription(nameAndDescriptionDTO.getDescription());
+        if (nameAndDescriptionDTO.getType() != null && nameAndDescriptionDTO.getType().getId() != null) {
+            capabilityMap.setTypeId(nameAndDescriptionDTO.getType().getId().intValue());
+        }
         capabilityMap.setUpdateDate(new Date());
         capabilityMapRepository.save(capabilityMap);
     }
