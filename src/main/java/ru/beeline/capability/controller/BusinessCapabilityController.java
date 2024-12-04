@@ -114,7 +114,7 @@ public class BusinessCapabilityController {
         return businessCapabilityService.getBusinessCapabilityHistory(id);
     }
 
-    @GetMapping("/business-capability/history/compare/{id}/{version}")
+    @GetMapping("/history/compare/{id}/{version}")
     @ApiOperation(value = "Получение выбраных версий BC")
     public List<GetBcHistoryVersionDTO> getBusinessCapabilityHistoryVersion(@PathVariable Long id,
                                                                             @PathVariable Integer version,
