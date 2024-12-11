@@ -18,6 +18,7 @@ import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeCustomDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeDTO;
 import ru.beeline.capability.dto.CapabilityParentDTO;
+import ru.beeline.capability.dto.GetBcHistoryVersionDTO;
 import ru.beeline.capability.dto.GetHistoryByIdDTO;
 import ru.beeline.capability.service.BusinessCapabilityService;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
@@ -111,5 +112,14 @@ public class BusinessCapabilityController {
     @ApiOperation(value = "Получение списка версий ВС")
     public List<GetHistoryByIdDTO> getBusinessCapabilityHistory(@PathVariable Long id) {
         return businessCapabilityService.getBusinessCapabilityHistory(id);
+    }
+
+    @GetMapping("/history/compare/{id}/{version}")
+    @ApiOperation(value = "Получение выбраных версий BC")
+    public List<GetBcHistoryVersionDTO> getBusinessCapabilityHistoryVersion(@PathVariable Long id,
+                                                                            @PathVariable Integer version,
+                                                                            @RequestParam(value = "other_version",
+                                                                                    required = false) Integer otherVersion) {
+        return businessCapabilityService.getBusinessCapabilityHistoryVersion(id, version, otherVersion);
     }
 }
