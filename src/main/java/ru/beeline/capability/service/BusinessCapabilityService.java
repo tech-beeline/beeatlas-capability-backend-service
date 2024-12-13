@@ -292,7 +292,8 @@ public class BusinessCapabilityService {
         businessCapability.setName(capabilityDTO.getName());
         businessCapability.setDescription(UrlWrapper.proxyUrl(capabilityDTO.getDescription()));
         businessCapability.setStatus(capabilityDTO.getStatus());
-        businessCapability.setAuthor(capabilityDTO.getAuthor());
+        businessCapability.setAuthor(capabilityDTO.getAuthor() == null || capabilityDTO.getAuthor().isEmpty() ?
+                "Sparx EA" : capabilityDTO.getAuthor());
         businessCapability.setLastModifiedDate(new Date());
         businessCapability.setLink(capabilityDTO.getLink());
         businessCapability.setOwner(capabilityDTO.getOwner());
@@ -309,7 +310,8 @@ public class BusinessCapabilityService {
                         .name(capability.getName())
                         .description(UrlWrapper.proxyUrl(capability.getDescription()))
                         .status(capability.getStatus())
-                        .author(capability.getAuthor())
+                        .author(capability.getAuthor() == null || capability.getAuthor().isEmpty() ?
+                                "Sparx EA" : capability.getAuthor())
                         .createdDate(new Date()).lastModifiedDate(new Date())
                         .link(capability.getLink())
                         .owner(capability.getOwner())

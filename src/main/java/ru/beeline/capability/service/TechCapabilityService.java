@@ -237,7 +237,8 @@ public class TechCapabilityService {
     private void updateTechCapability(TechCapability currentTechCapability, PutTechCapabilityDTO techCapability) {
         currentTechCapability.setName(techCapability.getName());
         currentTechCapability.setDescription(UrlWrapper.proxyUrl(techCapability.getDescription()));
-        currentTechCapability.setAuthor(techCapability.getAuthor());
+        currentTechCapability.setAuthor(techCapability.getAuthor() == null || techCapability.getAuthor().isEmpty() ?
+                "Sparx EA" : techCapability.getAuthor());
         currentTechCapability.setOwner(techCapability.getOwner());
         currentTechCapability.setLastModifiedDate(new Date());
         currentTechCapability.setLink(techCapability.getLink());
@@ -252,7 +253,8 @@ public class TechCapabilityService {
                 .createdDate(new Date())
                 .lastModifiedDate(new Date())
                 .description(UrlWrapper.proxyUrl(techCapability.getDescription()))
-                .author(techCapability.getAuthor())
+                .author(techCapability.getAuthor() == null || techCapability.getAuthor().isEmpty() ?
+                        "Sparx EA" : techCapability.getAuthor())
                 .owner(techCapability.getOwner())
                 .link(techCapability.getLink())
                 .status(techCapability.getStatus())
