@@ -411,13 +411,9 @@ public class BusinessCapabilityService {
         if (capabilityDTO.getName() == null) {
             errMsg.append("Отсутствует обязательное поле name\n");
         }
-        if (capabilityDTO.getAuthor() == null) {
-            errMsg.append("Отсутствует обязательное поле author\n");
-        }
         if (capabilityDTO.getCode().equals(capabilityDTO.getParent())) {
             errMsg.append("Возможность не может быть собственным родителем\n");
         }
-
         if (!errMsg.toString().isEmpty()) {
             throw new ValidationException(errMsg.toString());
         }

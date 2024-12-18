@@ -291,9 +291,6 @@ public class TechCapabilityService {
         if (techCapability.getName() == null) {
             errMsg.append("Отсутствует обязательное поле name\n");
         }
-        if (techCapability.getAuthor() == null) {
-            errMsg.append("Отсутствует обязательное поле author\n");
-        }
         if (!errMsg.toString().isEmpty()) {
             throw new ValidationException(errMsg.toString());
         }
