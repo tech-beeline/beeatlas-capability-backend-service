@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.beeline.capability.domain.*;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.dto.GetHistoryByIdDTO;
+import ru.beeline.capability.dto.GetTcHistoryVersionDTO;
+import ru.beeline.capability.dto.HistoryTechCapabilityDTO;
+import ru.beeline.capability.dto.ParentDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.dto.VersionInfoDTO;
 import ru.beeline.capability.exception.NotFoundException;
@@ -439,5 +442,81 @@ public class TechCapabilityService {
                             .build())
                     .collect(Collectors.toList());
         }
+    }
+
+    public List<GetTcHistoryVersionDTO> getTechCapabilityHistoryVersion(Long id, Integer version, Integer otherVersion) {
+        TechCapability techCapability = techCapabilityRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format("TechCapability с id: %s не найдено", id)));
+        HistoryTechCapability historyTcFirstVersion = findHistoryTcVersion(id, version);
+        List<HistoryTechCapabilityDTO> result = new ArrayList<>();
+        result.add(buildTcHistoryVersionDTO(historyTcFirstVersion, id, version));
+        if (otherVersion != null) {
+            HistoryTechCapability historyTcSecondVersion = findHistoryTcVersion(id, otherVersion);
+            result.add(buildTcHistoryVersionDTO(historyTcSecondVersion, id, otherVersion));
+        } else {
+            Optional<HistoryTechCapability> optionalFindHistoryTcOtherVersion =
+                    historyTechCapabilityRepository.findByIdRefOtherVersion(id);
+            if (optionalFindHistoryTcOtherVersion.isPresent()) {
+                List<TechCapabilityRelations> techCapabilityRelations = techCapabilityRelationsRepository
+                        .findByTechCapability(techCapability);
+                if (techCapabilityRelations.isEmpty()) {
+                    throw new NotFoundException(String.format("Не найдено родительских BC для TC с Id: %s ",
+                            techCapability.getId()));
+                }
+                List<ParentDTO> parentDTOS = new ArrayList<>();
+                for (TechCapabilityRelations techCapabilityRelation : techCapabilityRelations) {
+                    ParentDTO parentDTO = ParentDTO.builder()
+                            .id(techCapabilityRelation.getId())
+                            .code(techCapabilityRelation.getBusinessCapability().getCode())
+                            .name(techCapabilityRelation.getBusinessCapability().getName())
+                            .build();
+                    parentDTOS.add(parentDTO);
+                }
+                parentDTOS.sort(Comparator.comparingLong(ParentDTO::getId));
+                HistoryTechCapabilityDTO gethistoryTechCapabilityDTO = techCapabilityMapper.toHistoryTechCapabilityDTO(
+                        optionalFindHistoryTcOtherVersion.get(), parentDTOS, id,
+                        optionalFindHistoryTcOtherVersion.get().getVersion().intValue() + 1);
+                result.add(gethistoryTechCapabilityDTO);
+            } else {
+                throw new NotFoundException("History Business Capability с последней версией не найдено");
+            }
+        }
+        result.sort(Comparator.comparingInt(HistoryTechCapabilityDTO::getVersion).reversed());
+        return result.stream()
+                .map(capability -> GetTcHistoryVersionDTO.builder()
+                        .techCapability(capability)
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    private HistoryTechCapability findHistoryTcVersion(Long id, Integer version) {
+        return historyTechCapabilityRepository.findByIdRefAndVersion(id, version)
+                .orElseThrow(() -> new NotFoundException(String.format("History Tech Capability с id: %d, version: %s не найдено", id, version)));
+    }
+
+    private HistoryTechCapabilityDTO buildTcHistoryVersionDTO(HistoryTechCapability historyTechCapability,
+                                                              Long id, Integer version) {
+        List<HistoryTechCapabilityRelations> result = historyTechCapabilityRelationsRepository
+                .findAllByIdHistoryChild(historyTechCapability.getId());
+        List<ParentDTO> parentDTOS = new ArrayList<>();
+        if (result.isEmpty()) {
+            throw new NotFoundException(String.format("Не найдено родительских Business Capability с Id: %s",
+                    historyTechCapability.getId()));
+        }
+        for (HistoryTechCapabilityRelations historyTechCapabilityRelations : result) {
+            Optional<BusinessCapability> optionalBusinessCapability = businessCapabilityRepository
+                    .findById(historyTechCapabilityRelations.getIdParent());
+            if (optionalBusinessCapability.isPresent()) {
+                BusinessCapability parenBc = optionalBusinessCapability.get();
+                ParentDTO parentDTO = ParentDTO.builder()
+                        .id(historyTechCapabilityRelations.getIdParent())
+                        .code(parenBc.getCode())
+                        .name((parenBc.getName()))
+                        .build();
+                parentDTOS.add(parentDTO);
+            }
+        }
+        parentDTOS.sort(Comparator.comparingLong(ParentDTO::getId));
+        return techCapabilityMapper.toHistoryTechCapabilityDTO(historyTechCapability, parentDTOS, id, version);
     }
 }
