@@ -2,8 +2,11 @@ package ru.beeline.capability.mapper;
 
 
 import org.springframework.stereotype.Component;
+import ru.beeline.capability.domain.HistoryTechCapability;
 import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
+import ru.beeline.capability.dto.HistoryTechCapabilityDTO;
+import ru.beeline.capability.dto.ParentDTO;
 import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTO;
 
@@ -54,6 +57,22 @@ public class TechCapabilityMapper {
                 .link(techCapability.getLink())
                 .createdDate(techCapability.getCreatedDate())
                 .lastModifiedDate(techCapability.getLastModifiedDate())
+                .build();
+    }
+
+    public HistoryTechCapabilityDTO toHistoryTechCapabilityDTO(HistoryTechCapability historyTechCapability, List<ParentDTO> parentDTOS, Long id, Integer version) {
+        return HistoryTechCapabilityDTO.builder()
+                .id(id)
+                .code(historyTechCapability.getCode())
+                .name(historyTechCapability.getName())
+                .description(historyTechCapability.getDescription())
+                .owner(historyTechCapability.getOwner())
+                .modifiedDate(historyTechCapability.getModifiedDate())
+                .status(historyTechCapability.getStatus())
+                .author(historyTechCapability.getAuthor())
+                .link(historyTechCapability.getLink())
+                .version(version)
+                .parents(parentDTOS)
                 .build();
     }
 }

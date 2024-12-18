@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.dto.GetHistoryByIdDTO;
+import ru.beeline.capability.dto.GetTcHistoryVersionDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.service.TechCapabilityService;
 import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
@@ -62,5 +63,14 @@ public class TechCapabilityController {
     @ApiOperation(value = "Получение списка версий TC")
     public List<GetHistoryByIdDTO> getTechCapabilityHistory(@PathVariable Long id) {
         return techCapabilityService.getTechCapabilityHistory(id);
+    }
+
+    @GetMapping("/history/compare/{id}/{version}")
+    @ApiOperation(value = "Получение выбраных версий TC")
+    public List<GetTcHistoryVersionDTO> getBusinessCapabilityHistoryVersion(@PathVariable Long id,
+                                                                            @PathVariable Integer version,
+                                                                            @RequestParam(value = "other_version",
+                                                                                    required = false) Integer otherVersion) {
+        return techCapabilityService.getTechCapabilityHistoryVersion(id, version, otherVersion);
     }
 }
