@@ -22,6 +22,8 @@ public class HistoryCapabilityDTO {
     private String owner;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date modifiedDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date deletedDate;
     private String status;
     private ParentDTO parent;
     private String author;

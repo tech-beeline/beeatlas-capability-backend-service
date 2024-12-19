@@ -48,6 +48,7 @@ public class BusinessCapabilityMapper {
                 .description(businessCapability.getDescription())
                 .isDomain(businessCapability.isDomain())
                 .author(businessCapability.getAuthor())
+                .owner(businessCapability.getOwner())
                 .link(businessCapability.getLink())
                 .createdDate(businessCapability.getCreatedDate())
                 .hasChildren(isAnyChildrenBcNotDeleted(businessCapability.getId())

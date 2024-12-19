@@ -271,6 +271,7 @@ public class BusinessCapabilityService {
                 .link(businessCapability.getLink())
                 .author(businessCapability.getAuthor())
                 .isDomain(businessCapability.isDomain())
+                .deletedDate(businessCapability.getDeletedDate())
                 .build());
     }
 
@@ -295,6 +296,7 @@ public class BusinessCapabilityService {
         businessCapability.setAuthor(capabilityDTO.getAuthor() == null || capabilityDTO.getAuthor().isEmpty() ?
                 "Sparx EA" : capabilityDTO.getAuthor());
         businessCapability.setLastModifiedDate(new Date());
+        businessCapability.setDeletedDate(null);
         businessCapability.setLink(capabilityDTO.getLink());
         businessCapability.setOwner(capabilityDTO.getOwner());
         businessCapability.setParentId(getParentId(capabilityDTO));
@@ -520,6 +522,7 @@ public class BusinessCapabilityService {
                         .description(businessCapability.getDescription())
                         .owner(businessCapability.getOwner())
                         .modifiedDate(businessCapability.getLastModifiedDate())
+                        .deletedDate(businessCapability.getDeletedDate())
                         .status(businessCapability.getStatus())
                         .parent(findParentBc(businessCapability.getParentId()))
                         .author(businessCapability.getAuthor())
@@ -568,6 +571,7 @@ public class BusinessCapabilityService {
                 .description(historyBusinessCapability.getDescription())
                 .owner(historyBusinessCapability.getOwner())
                 .modifiedDate(historyBusinessCapability.getModifiedDate())
+                .deletedDate(historyBusinessCapability.getDeletedDate())
                 .status(historyBusinessCapability.getStatus())
                 .parent(parentDTO)
                 .author(historyBusinessCapability.getAuthor())
