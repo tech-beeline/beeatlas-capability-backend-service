@@ -206,11 +206,13 @@ public class CapabilityMapService {
         nameValidateBody(nameAndDescriptionDTO);
         userMapRepository.findByUserIdAndMapIdAndAuthorTrue(Integer.valueOf(userId), mapId)
                 .orElseThrow(() -> new NotFoundException("Запись User Map не найдена"));
-        List<Group> groups = groupRepository.findAllByMapId(mapId);
-        if (!groups.isEmpty()) {
-            throw new PackageRegistrationException("Найдены записи в таблице groups с данным map id");
-        }
         CapabilityMap capabilityMap = findCapabilityMapById(mapId);
+        if (!(capabilityMap.getTypeId() == nameAndDescriptionDTO.getType().getId().intValue())) {
+            List<Group> groups = groupRepository.findAllByMapId(mapId);
+            if (!groups.isEmpty()) {
+                throw new PackageRegistrationException("Найдены записи в таблице groups с данным map id");
+            }
+        }
         capabilityMap.setName(nameAndDescriptionDTO.getName());
         capabilityMap.setDescription(nameAndDescriptionDTO.getDescription());
         if (nameAndDescriptionDTO.getType() != null && nameAndDescriptionDTO.getType().getId() != null) {
