@@ -33,6 +33,9 @@ public class HistoryTechCapability {
     @Column(name = "modified_date", nullable = false)
     private Date modifiedDate;
 
+    @Column(name = "deleted_date")
+    private Date deletedDate;
+
     private String status;
 
     private String author;

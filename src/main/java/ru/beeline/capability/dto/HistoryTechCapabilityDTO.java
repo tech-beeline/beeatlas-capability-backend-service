@@ -23,6 +23,8 @@ public class HistoryTechCapabilityDTO {
     private String owner;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date modifiedDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date deletedDate;
     private String status;
     private String author;
     private String link;

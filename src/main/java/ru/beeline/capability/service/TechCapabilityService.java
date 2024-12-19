@@ -187,6 +187,7 @@ public class TechCapabilityService {
                 .name(currentTechCapability.getName())
                 .description(currentTechCapability.getDescription())
                 .modifiedDate(new Date())
+                .deletedDate(currentTechCapability.getDeletedDate())
                 .owner(currentTechCapability.getOwner())
                 .status(currentTechCapability.getStatus())
                 .link(currentTechCapability.getLink())
@@ -244,6 +245,7 @@ public class TechCapabilityService {
                 "Sparx EA" : techCapability.getAuthor());
         currentTechCapability.setOwner(techCapability.getOwner());
         currentTechCapability.setLastModifiedDate(new Date());
+        currentTechCapability.setDeletedDate(null);
         currentTechCapability.setLink(techCapability.getLink());
         currentTechCapability.setStatus(techCapability.getStatus());
         techCapabilityRepository.save(currentTechCapability);
