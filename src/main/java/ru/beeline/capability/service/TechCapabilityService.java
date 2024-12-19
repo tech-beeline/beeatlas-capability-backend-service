@@ -158,7 +158,10 @@ public class TechCapabilityService {
             currentTechCapability = currentTechCapabilityOpt.get();
             PutTechCapabilityDTO currentTechCapabilityDTO = techCapabilityMapper.convertToPutTechCapabilityDTO(currentTechCapability);
             log.info("check equals old techCapability and new techCapability");
-            if (equalsDashboardDTO(techCapability, currentTechCapabilityDTO)) {
+            Boolean shouldUpdate = equalsDashboardDTO(techCapability, currentTechCapabilityDTO) ||
+                    (!equalsDashboardDTO(techCapability, currentTechCapabilityDTO) &&
+                            currentTechCapability.getDeletedDate() != null);
+            if (shouldUpdate) {
                 log.info("techCapability from dashboard: " + techCapability + " equals techCapability from BD "
                         + currentTechCapabilityDTO);
                 log.info("old techCapability and new techCapability is not equals, and try update");

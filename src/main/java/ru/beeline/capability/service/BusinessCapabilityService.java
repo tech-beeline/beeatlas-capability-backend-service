@@ -219,7 +219,10 @@ public class BusinessCapabilityService {
         if (businessCapabilityOptional.isPresent()) {
             businessCapability = businessCapabilityOptional.get();
             capabilityDTO.setDescription(UrlWrapper.proxyUrl(capabilityDTO.getDescription()));
-            if (!capabilityDTO.equals(businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability))) {
+            boolean shouldUpdate = !capabilityDTO.equals(businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability)) ||
+                    (capabilityDTO.equals(businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability)) &&
+                            businessCapability.getDeletedDate() != null);
+            if (shouldUpdate) {
                 log.info("businessCapability from BD : " + businessCapability.toString());
                 log.info("capabilityDTO from Dashboard: " + capabilityDTO.toString() + " Capability after Convert to PutCapability from bd: "
                         + businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability).toString());
