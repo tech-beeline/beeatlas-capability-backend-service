@@ -1,9 +1,6 @@
 package ru.beeline.capability.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -187,7 +184,7 @@ public class TechCapabilityService {
                 .code(currentTechCapability.getCode())
                 .name(currentTechCapability.getName())
                 .description(currentTechCapability.getDescription())
-                .modifiedDate(new Date())
+                .modifiedDate(currentTechCapability.getLastModifiedDate())
                 .deletedDate(currentTechCapability.getDeletedDate())
                 .owner(currentTechCapability.getOwner())
                 .status(currentTechCapability.getStatus())
