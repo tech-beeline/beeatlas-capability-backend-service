@@ -148,6 +148,7 @@ public class TechCapabilityService {
                 createRelations(currentTechCapability, businessCapabilityRepository.findAllByCodeIn(techCapability.getParents()));
             }
             log.info("send notify");
+            sendNotify(currentTechCapability.getId(), CREATE, changeTechCapabilityQueueName, techCapability.getName());
             findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode(), ENTITY_TYPE_TECH_CAPABILITY);
         } else {
             log.info("currentTechCapabilityOpt is present");
@@ -172,6 +173,7 @@ public class TechCapabilityService {
                     log.info("create new relations");
                     createRelations(currentTechCapability, businessCapabilityRepository.findAllByCodeIn(techCapability.getParents()));
                 }
+                sendNotify(currentTechCapability.getId(), UPDATE, changeTechCapabilityQueueName, techCapability.getName());
             }
         }
     }
@@ -266,6 +268,23 @@ public class TechCapabilityService {
         return newTechCapability;
     }
 
+    private void sendNotify(Long id, String changeType, String queueName, String name) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            ObjectNode messagePayload = objectMapper.createObjectNode();
+            messagePayload.put("entity_id", id);
+            messagePayload.put("name", name);
+            messagePayload.put("change_type", changeType);
+
+            String message = objectMapper.writeValueAsString(messagePayload);
+
+            sendMessageToTechCapabilityQueue(queueName, message);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void validateTechCapabilityDTO(PutTechCapabilityDTO techCapability) {
         StringBuilder errMsg = new StringBuilder();
         if (techCapability.getCode() == null) {
@@ -277,6 +296,13 @@ public class TechCapabilityService {
         if (!errMsg.toString().isEmpty()) {
             throw new ValidationException(errMsg.toString());
         }
+    }
+
+    public void sendMessageToTechCapabilityQueue(String queue, String message) {
+        rabbitTemplate.convertAndSend(queue, message, messagePostProcessor -> {
+            messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
+            return messagePostProcessor;
+        });
     }
 
     public void calculateTotalTechCapabilitiesCount() {
