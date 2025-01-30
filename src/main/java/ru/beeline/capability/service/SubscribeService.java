@@ -39,7 +39,9 @@ public class SubscribeService {
             return subscribeCapabilityMapper.convert(techCapabilityService.getByIdIn(subscribes));
         } else {
             log.info("convert subscribes To CapabilitySubscribedDTOs");
-            return subscribeCapabilityMapper.convertToCapabilitySubscribedDTOs(businessCapabilityService.getByIdIn(subscribes));
+            List<CapabilitySubscribedDTO> result = subscribeCapabilityMapper.convertToCapabilitySubscribedDTOs(businessCapabilityService.getByIdIn(subscribes));
+            log.info("First CapabilitySubscribedDTO: " + result.get(0).toString());
+            return result;
         }
     }
 }
