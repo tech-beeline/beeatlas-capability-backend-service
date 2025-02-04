@@ -8,12 +8,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class HistoryCapabilityDTO {
+public class HistoryTechCapabilityDTO {
 
     private Long id;
     private String code;
@@ -25,10 +26,8 @@ public class HistoryCapabilityDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date deletedDate;
     private String status;
-    private ParentDTO parent;
     private String author;
     private String link;
-    @JsonProperty("is_domain")
-    private boolean isDomain;
     private Integer version;
+    private List<ParentDTO> parents;
 }

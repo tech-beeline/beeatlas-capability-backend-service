@@ -10,7 +10,7 @@
     </parent>
     <groupId>ru.beeline</groupId>
     <artifactId>capability-backend</artifactId>
-    <version>0.0.54</version>
+    <version>0.0.62</version>
     <name>capability-backend</name>
     <description>capability-backend</description>
     <properties>
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>ru.beeline</groupId>
             <artifactId>fdm-lib</artifactId>
-            <version>0.0.18</version>
+            <version>0.0.19</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

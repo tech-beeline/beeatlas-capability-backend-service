@@ -219,7 +219,10 @@ public class BusinessCapabilityService {
         if (businessCapabilityOptional.isPresent()) {
             businessCapability = businessCapabilityOptional.get();
             capabilityDTO.setDescription(UrlWrapper.proxyUrl(capabilityDTO.getDescription()));
-            if (!capabilityDTO.equals(businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability))) {
+            boolean shouldUpdate = !capabilityDTO.equals(businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability)) ||
+                    (capabilityDTO.equals(businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability)) &&
+                            businessCapability.getDeletedDate() != null);
+            if (shouldUpdate) {
                 log.info("businessCapability from BD : " + businessCapability.toString());
                 log.info("capabilityDTO from Dashboard: " + capabilityDTO.toString() + " Capability after Convert to PutCapability from bd: "
                         + businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability).toString());
@@ -264,13 +267,14 @@ public class BusinessCapabilityService {
                 .code(businessCapability.getCode())
                 .name(businessCapability.getName())
                 .description(businessCapability.getDescription())
-                .modifiedDate(new Date())
+                .modifiedDate(businessCapability.getLastModifiedDate())
                 .parentId(businessCapability.getParentId())
                 .owner(businessCapability.getOwner())
                 .status(businessCapability.getStatus())
                 .link(businessCapability.getLink())
                 .author(businessCapability.getAuthor())
                 .isDomain(businessCapability.isDomain())
+                .deletedDate(businessCapability.getDeletedDate())
                 .build());
     }
 
@@ -292,8 +296,10 @@ public class BusinessCapabilityService {
         businessCapability.setName(capabilityDTO.getName());
         businessCapability.setDescription(UrlWrapper.proxyUrl(capabilityDTO.getDescription()));
         businessCapability.setStatus(capabilityDTO.getStatus());
-        businessCapability.setAuthor(capabilityDTO.getAuthor());
+        businessCapability.setAuthor(capabilityDTO.getAuthor() == null || capabilityDTO.getAuthor().isEmpty() ?
+                "Sparx EA" : capabilityDTO.getAuthor());
         businessCapability.setLastModifiedDate(new Date());
+        businessCapability.setDeletedDate(null);
         businessCapability.setLink(capabilityDTO.getLink());
         businessCapability.setOwner(capabilityDTO.getOwner());
         businessCapability.setParentId(getParentId(capabilityDTO));
@@ -309,7 +315,8 @@ public class BusinessCapabilityService {
                         .name(capability.getName())
                         .description(UrlWrapper.proxyUrl(capability.getDescription()))
                         .status(capability.getStatus())
-                        .author(capability.getAuthor())
+                        .author(capability.getAuthor() == null || capability.getAuthor().isEmpty() ?
+                                "Sparx EA" : capability.getAuthor())
                         .createdDate(new Date()).lastModifiedDate(new Date())
                         .link(capability.getLink())
                         .owner(capability.getOwner())
@@ -409,13 +416,9 @@ public class BusinessCapabilityService {
         if (capabilityDTO.getName() == null) {
             errMsg.append("Отсутствует обязательное поле name\n");
         }
-        if (capabilityDTO.getAuthor() == null) {
-            errMsg.append("Отсутствует обязательное поле author\n");
-        }
         if (capabilityDTO.getCode().equals(capabilityDTO.getParent())) {
             errMsg.append("Возможность не может быть собственным родителем\n");
         }
-
         if (!errMsg.toString().isEmpty()) {
             throw new ValidationException(errMsg.toString());
         }
@@ -522,6 +525,7 @@ public class BusinessCapabilityService {
                         .description(businessCapability.getDescription())
                         .owner(businessCapability.getOwner())
                         .modifiedDate(businessCapability.getLastModifiedDate())
+                        .deletedDate(businessCapability.getDeletedDate())
                         .status(businessCapability.getStatus())
                         .parent(findParentBc(businessCapability.getParentId()))
                         .author(businessCapability.getAuthor())
@@ -570,6 +574,7 @@ public class BusinessCapabilityService {
                 .description(historyBusinessCapability.getDescription())
                 .owner(historyBusinessCapability.getOwner())
                 .modifiedDate(historyBusinessCapability.getModifiedDate())
+                .deletedDate(historyBusinessCapability.getDeletedDate())
                 .status(historyBusinessCapability.getStatus())
                 .parent(parentDTO)
                 .author(historyBusinessCapability.getAuthor())
