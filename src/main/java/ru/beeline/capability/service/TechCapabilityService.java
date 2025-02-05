@@ -158,6 +158,9 @@ public class TechCapabilityService {
             currentTechCapability = currentTechCapabilityOpt.get();
             PutTechCapabilityDTO currentTechCapabilityDTO = techCapabilityMapper.convertToPutTechCapabilityDTO(currentTechCapability);
             log.info("check equals old techCapability and new techCapability");
+            if (techCapability.getAuthor() == null || techCapability.getAuthor().isEmpty()) {
+                techCapability.setAuthor("Sparx EA");
+            }
             Boolean shouldUpdate = equalsDashboardDTO(techCapability, currentTechCapabilityDTO) ||
                     (!equalsDashboardDTO(techCapability, currentTechCapabilityDTO) &&
                             currentTechCapability.getDeletedDate() != null);
