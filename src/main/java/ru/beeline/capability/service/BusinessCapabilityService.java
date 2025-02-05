@@ -219,6 +219,9 @@ public class BusinessCapabilityService {
         if (businessCapabilityOptional.isPresent()) {
             businessCapability = businessCapabilityOptional.get();
             capabilityDTO.setDescription(UrlWrapper.proxyUrl(capabilityDTO.getDescription()));
+            if (capabilityDTO.getAuthor() == null || capabilityDTO.getAuthor().isEmpty()) {
+                capabilityDTO.setAuthor("Sparx EA");
+            }
             boolean shouldUpdate = !capabilityDTO.equals(businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability)) ||
                     (capabilityDTO.equals(businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability)) &&
                             businessCapability.getDeletedDate() != null);
