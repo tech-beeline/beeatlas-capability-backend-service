@@ -213,7 +213,8 @@ public class BusinessCapabilityService {
         return businessCapabilityMapper.convertToBusinessCapabilityShortDTOList(businessCapabilities.toList());
     }
 
-    public void putCapability(PutBusinessCapabilityDTO capabilityDTO, String userId, String productIds, String roles, String permissions) {
+    public void putCapability(PutBusinessCapabilityDTO capabilityDTO, String userId, String productIds, String roles,
+                              String permissions, String source) {
         Optional<BusinessCapability> businessCapabilityOptional = businessCapabilityRepository.findByCode(capabilityDTO.getCode());
         BusinessCapability businessCapability;
         if (businessCapabilityOptional.isPresent()) {
@@ -237,7 +238,7 @@ public class BusinessCapabilityService {
                 putCapabilityToDashboard(capabilityDTO, userId, productIds, roles, permissions);
             }
         } else {
-            businessCapability = createCapabilities(capabilityDTO);
+            businessCapability = createCapabilities(capabilityDTO, source);
             if (!areParametersValid(userId, productIds, roles, permissions)) {
                 sendNotify(businessCapability.getId(), CREATE, changeBusinessCapabilityQueueName, businessCapability.getName());
                 findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
@@ -310,7 +311,7 @@ public class BusinessCapabilityService {
         return businessCapabilityRepository.save(businessCapability);
     }
 
-    private BusinessCapability createCapabilities(PutBusinessCapabilityDTO capability) {
+    private BusinessCapability createCapabilities(PutBusinessCapabilityDTO capability, String source) {
 
         BusinessCapability result = businessCapabilityRepository.save(
                 BusinessCapability.builder()
@@ -325,6 +326,7 @@ public class BusinessCapabilityService {
                         .owner(capability.getOwner())
                         .parentId(getParentId(capability))
                         .isDomain(capability.getIsDomain())
+                        .source(source == null || source.isEmpty() ? "SparxEA" : source)
                         .build());
         return result;
     }
