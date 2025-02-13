@@ -28,6 +28,7 @@ import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
 import java.util.Collections;
 import java.util.List;
 
+import static ru.beeline.capability.utils.Constants.SOURCE;
 import static ru.beeline.capability.utils.Constants.USER_ID_HEADER;
 import static ru.beeline.capability.utils.Constants.USER_PERMISSION_HEADER;
 import static ru.beeline.capability.utils.Constants.USER_PRODUCTS_IDS_HEADER;
@@ -94,10 +95,11 @@ public class BusinessCapabilityController {
                                                 @RequestHeader(value = USER_ID_HEADER, required = false) String userId,
                                                 @RequestHeader(value = USER_PRODUCTS_IDS_HEADER, required = false) String productIds,
                                                 @RequestHeader(value = USER_ROLES_HEADER, required = false) String roles,
-                                                @RequestHeader(value = USER_PERMISSION_HEADER, required = false) String permissions
+                                                @RequestHeader(value = USER_PERMISSION_HEADER, required = false) String permissions,
+                                                @RequestHeader(value = SOURCE, required = false) String source
     ) {
         businessCapabilityService.validateBusinessCapabilityDTO(capability, userId, productIds, roles, permissions);
-        businessCapabilityService.putCapability(capability, userId, productIds, roles, permissions);
+        businessCapabilityService.putCapability(capability, userId, productIds, roles, permissions, source);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

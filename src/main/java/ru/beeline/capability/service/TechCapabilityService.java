@@ -137,14 +137,14 @@ public class TechCapabilityService {
         return result;
     }
 
-    public void createOrUpdate(PutTechCapabilityDTO techCapability) {
+    public void createOrUpdate(PutTechCapabilityDTO techCapability, String source) {
         Optional<TechCapability> currentTechCapabilityOpt = techCapabilityRepository.findByCode(techCapability.getCode());
         boolean techCapabilityHaveParents = techCapability.getParents() != null && !techCapability.getParents().isEmpty();
         log.info("techCapabilityHaveParents:" + techCapabilityHaveParents);
         TechCapability currentTechCapability;
         if (!currentTechCapabilityOpt.isPresent()) {
             log.info("currentTechCapabilityOpt isn't present");
-            currentTechCapability = createTechCapability(techCapability);
+            currentTechCapability = createTechCapability(techCapability, source);
             techCapabilityRelationsRepository.deleteAllByTechCapability(currentTechCapability);
             if (techCapabilityHaveParents) {
                 log.info("create relations");
@@ -257,7 +257,7 @@ public class TechCapabilityService {
         techCapabilityRepository.save(currentTechCapability);
     }
 
-    private TechCapability createTechCapability(PutTechCapabilityDTO techCapability) {
+    private TechCapability createTechCapability(PutTechCapabilityDTO techCapability, String source) {
         TechCapability newTechCapability = TechCapability.builder()
                 .code(techCapability.getCode())
                 .name(techCapability.getName())
@@ -269,6 +269,7 @@ public class TechCapabilityService {
                 .owner(techCapability.getOwner())
                 .link(techCapability.getLink())
                 .status(techCapability.getStatus())
+                .source(source == null || source.isEmpty() ? "SparxEA" : source)
                 .build();
         newTechCapability = techCapabilityRepository.save(newTechCapability);
         return newTechCapability;
