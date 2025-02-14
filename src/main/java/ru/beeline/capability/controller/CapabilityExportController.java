@@ -17,8 +17,14 @@ public class CapabilityExportController {
     CapabilityExportService capabilityExportService;
 
     @PostMapping("/business-capability/{doc_id}")
-    @ApiOperation(value = "get export Business Capabilities")
+    @ApiOperation(value = "Export Business Capabilities")
     public ResponseEntity<CapabilityExportDTO> postExportBusinessCapabilities(@PathVariable(name = "doc_id") Integer docId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(capabilityExportService.postExportBusinessCapabilities(docId));
+    }
+
+    @PostMapping("/tech-capability/{doc_id}")
+    @ApiOperation(value = "Export Tech Capabilities")
+    public ResponseEntity<CapabilityExportDTO> postExportTechCapabilities(@PathVariable(name = "doc_id") Integer docId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(capabilityExportService.postExportTechCapabilities(docId));
     }
 }

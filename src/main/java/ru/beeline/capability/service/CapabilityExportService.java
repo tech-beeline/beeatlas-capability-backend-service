@@ -10,10 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.beeline.capability.cleint.DocumentClient;
 import ru.beeline.capability.domain.BusinessCapability;
+import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.dto.CapabilityExportDTO;
 import ru.beeline.capability.mapper.BusinessCapabilityMapper;
+import ru.beeline.capability.mapper.TechCapabilityMapper;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
+import ru.beeline.capability.repository.TechCapabilityRepository;
 import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
+import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -31,7 +35,13 @@ public class CapabilityExportService {
     BusinessCapabilityRepository businessCapabilityRepository;
 
     @Autowired
+    TechCapabilityRepository techCapabilityRepository;
+
+    @Autowired
     BusinessCapabilityMapper businessCapabilityMapper;
+
+    @Autowired
+    TechCapabilityMapper techCapabilityMapper;
 
     @Autowired
     DocumentClient documentClient;
@@ -95,6 +105,39 @@ public class CapabilityExportService {
             row.createCell(6).setCellValue(dto.getAuthor());
             row.createCell(7).setCellValue(dto.getLink());
             row.createCell(8).setCellValue(dto.getOwner());
+        }
+    }
+
+    public CapabilityExportDTO postExportTechCapabilities(Integer docId) {
+        List<TechCapability> techCapabilities = techCapabilityRepository.findByDeletedDateIsNull();
+        List<PutTechCapabilityDTO> capabilityDTOS = techCapabilities.stream()
+                .map(techCapabilityMapper::convertToPutTechCapabilityDTO)
+                .collect(Collectors.toList());
+        String fileName = "export_tech_capability_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".xlsx";
+        List<String> headers = List.of("code", "name", "description", "parents", "status", "author", "link", "owner");
+        String sheetName = "Tech Capabilities";
+        Workbook workbook = createWorkbookWithHeaders(headers, sheetName);
+        createTcCell(capabilityDTOS, workbook.getSheet(sheetName));
+        File tempFile = writeWorkbookToFile(workbook, fileName);
+        if (tempFile != null) {
+            documentClient.patchExcelFile(docId, tempFile, fileName);
+            tempFile.delete();
+        }
+        return CapabilityExportDTO.builder().docId(docId).build();
+    }
+
+    private void createTcCell(List<PutTechCapabilityDTO> capabilityDTOS, Sheet sheet) {
+        int rowNum = 1;
+        for (PutTechCapabilityDTO dto : capabilityDTOS) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(dto.getCode());
+            row.createCell(1).setCellValue(dto.getName());
+            row.createCell(2).setCellValue(dto.getDescription());
+            row.createCell(3).setCellValue(String.join(". ", dto.getParents()));
+            row.createCell(4).setCellValue(dto.getStatus());
+            row.createCell(5).setCellValue(dto.getAuthor());
+            row.createCell(6).setCellValue(dto.getLink());
+            row.createCell(7).setCellValue(dto.getOwner());
         }
     }
 }
