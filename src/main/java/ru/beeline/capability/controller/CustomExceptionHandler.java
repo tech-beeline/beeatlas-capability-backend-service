@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import ru.beeline.capability.exception.DocumentServerException;
 import ru.beeline.capability.exception.ForbiddenException;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.PackageRegistrationException;
@@ -52,5 +53,14 @@ public class CustomExceptionHandler {
     public ResponseEntity<Object> handleException(TooManyResultsException e) {
         log.error(e.getMessage());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("422 UNPROCESSABLE_ENTITY : " + e.getMessage());
+    }
+
+    @ExceptionHandler(DocumentServerException.class)
+    public ResponseEntity<Object> handleException(DocumentServerException e) {
+        log.error(e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .header("content-type", MediaType.APPLICATION_JSON_VALUE)
+                .body(e.getMessage());
     }
 }
