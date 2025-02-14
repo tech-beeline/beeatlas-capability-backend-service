@@ -31,4 +31,6 @@ public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapa
     BusinessCapability findFirstByOrderByIdDesc();
 
     List<BusinessCapability> findAllByIdInAndDeletedDateIsNull(List<Long> ids);
+
+    List<BusinessCapability> findByDeletedDateIsNull();
 }

@@ -16,6 +16,7 @@ env:
   INTEGRATION_NOTIFICATION_SERVER_URL: "vault:eafdmmart/data/dev/fdm#notificationserver"
   INTEGRATION_AUTH_SERVER_URL: "vault:eafdmmart/data/dev/fdm#authserverurl"
   INTEGRATION_DASHBOARD_SERVER_URL: "vault:eafdmmart/data/dev/fdm#dashboardserver"
+  INTEGRATION_DOCUMENT_SERVER_URL: "vault:eafdmmart/data/dev/fdm#documentserverurl"
   SPRING_RABBITMQ_TEMPLATE_EXCHANGE: "vault:eafdmmart/data/dev/fdm#rabbitmqtemplateexchange"
   SPRING_RABBITMQ_TEMPLATE_ROUTING_KEY: "vault:eafdmmart/data/dev/fdm#rabbitmqtemplateroutingkey"
   SPRING_RABBITMQ_HOST: "vault:eafdmmart/data/dev/fdm#rabbitmqhost"
