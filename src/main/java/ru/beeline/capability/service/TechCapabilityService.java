@@ -138,6 +138,9 @@ public class TechCapabilityService {
     }
 
     public void createOrUpdate(PutTechCapabilityDTO techCapability, String source) {
+        if (source == null || source.isEmpty()) {
+            source = "Sparx";
+        }
         Optional<TechCapability> currentTechCapabilityOpt = techCapabilityRepository.findByCode(techCapability.getCode());
         boolean techCapabilityHaveParents = techCapability.getParents() != null && !techCapability.getParents().isEmpty();
         log.info("techCapabilityHaveParents:" + techCapabilityHaveParents);
@@ -164,12 +167,12 @@ public class TechCapabilityService {
             Boolean shouldUpdate = equalsDashboardDTO(techCapability, currentTechCapabilityDTO) ||
                     (!equalsDashboardDTO(techCapability, currentTechCapabilityDTO) &&
                             currentTechCapability.getDeletedDate() != null);
-            if (shouldUpdate) {
+            if (shouldUpdate || !source.equals(currentTechCapability.getSource())) {
                 log.info("techCapability from dashboard: " + techCapability + " equals techCapability from BD "
                         + currentTechCapabilityDTO);
                 log.info("old techCapability and new techCapability is not equals, and try update");
                 addToHistory(currentTechCapability);
-                updateTechCapability(currentTechCapability, techCapability);
+                updateTechCapability(currentTechCapability, techCapability, source);
                 log.info("delete old relations");
                 techCapabilityRelationsRepository.deleteAllByTechCapability(currentTechCapability);
                 findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode(), ENTITY_TYPE_TECH_CAPABILITY);
@@ -198,6 +201,7 @@ public class TechCapabilityService {
                 .status(currentTechCapability.getStatus())
                 .link(currentTechCapability.getLink())
                 .author(currentTechCapability.getAuthor())
+                .source(currentTechCapability.getSource())
                 .build());
         List<TechCapabilityRelations> relations = techCapabilityRelationsRepository.findByTechCapability(currentTechCapability);
         if (!relations.isEmpty()) {
@@ -244,7 +248,8 @@ public class TechCapabilityService {
         techCapabilityRelationsRepository.saveAll(techCapabilityRelations);
     }
 
-    private void updateTechCapability(TechCapability currentTechCapability, PutTechCapabilityDTO techCapability) {
+    private void updateTechCapability(TechCapability currentTechCapability, PutTechCapabilityDTO techCapability,
+                                      String source) {
         currentTechCapability.setName(techCapability.getName());
         currentTechCapability.setDescription(UrlWrapper.proxyUrl(techCapability.getDescription()));
         currentTechCapability.setAuthor(techCapability.getAuthor() == null || techCapability.getAuthor().isEmpty() ?
@@ -254,6 +259,7 @@ public class TechCapabilityService {
         currentTechCapability.setDeletedDate(null);
         currentTechCapability.setLink(techCapability.getLink());
         currentTechCapability.setStatus(techCapability.getStatus());
+        currentTechCapability.setSource(source);
         techCapabilityRepository.save(currentTechCapability);
     }
 
@@ -269,7 +275,7 @@ public class TechCapabilityService {
                 .owner(techCapability.getOwner())
                 .link(techCapability.getLink())
                 .status(techCapability.getStatus())
-                .source(source == null || source.isEmpty() ? "SparxEA" : source)
+                .source(source == null || source.isEmpty() ? "Sparx" : source)
                 .build();
         newTechCapability = techCapabilityRepository.save(newTechCapability);
         return newTechCapability;
