@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.beeline.capability.cleint.DocumentClient;
 import ru.beeline.capability.domain.BusinessCapability;
+import ru.beeline.capability.dto.CapabilityExportDTO;
 import ru.beeline.capability.mapper.BusinessCapabilityMapper;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
@@ -35,7 +36,7 @@ public class CapabilityExportService {
     @Autowired
     DocumentClient documentClient;
 
-    public String getExportBusinessCapabilities(Integer docId) {
+    public CapabilityExportDTO getExportBusinessCapabilities(Integer docId) {
         List<BusinessCapability> businessCapabilities = businessCapabilityRepository.findByDeletedDateIsNull();
         List<PutBusinessCapabilityDTO> capabilityDTOS = businessCapabilities.stream()
                 .map(businessCapabilityMapper::convertToPutCapabilityDTO)
@@ -50,7 +51,7 @@ public class CapabilityExportService {
             documentClient.patchExcelFile(docId, tempFile, fileName);
             tempFile.delete();
         }
-        return "docId: " + docId.toString();
+        return CapabilityExportDTO.builder().docId(docId).build();
     }
 
     private Workbook createWorkbookWithHeaders(List<String> headers, String sheetName) {
