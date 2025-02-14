@@ -215,6 +215,9 @@ public class BusinessCapabilityService {
 
     public void putCapability(PutBusinessCapabilityDTO capabilityDTO, String userId, String productIds, String roles,
                               String permissions, String source) {
+        if (source == null || source.isEmpty()) {
+            source = "Sparx";
+        }
         Optional<BusinessCapability> businessCapabilityOptional = businessCapabilityRepository.findByCode(capabilityDTO.getCode());
         BusinessCapability businessCapability;
         if (businessCapabilityOptional.isPresent()) {
@@ -226,12 +229,12 @@ public class BusinessCapabilityService {
             boolean shouldUpdate = !capabilityDTO.equals(businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability)) ||
                     (capabilityDTO.equals(businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability)) &&
                             businessCapability.getDeletedDate() != null);
-            if (shouldUpdate) {
+            if (shouldUpdate || !source.equals(businessCapability.getSource())) {
                 log.info("businessCapability from BD : " + businessCapability.toString());
                 log.info("capabilityDTO from Dashboard: " + capabilityDTO.toString() + " Capability after Convert to PutCapability from bd: "
                         + businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability).toString());
                 addToHistory(businessCapability);
-                businessCapability = updateCapability(businessCapability, capabilityDTO);
+                businessCapability = updateCapability(businessCapability, capabilityDTO, source);
                 sendNotify(businessCapability.getId(), UPDATE, changeBusinessCapabilityQueueName, capabilityDTO.getName());
                 findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
                         businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
@@ -279,6 +282,7 @@ public class BusinessCapabilityService {
                 .author(businessCapability.getAuthor())
                 .isDomain(businessCapability.isDomain())
                 .deletedDate(businessCapability.getDeletedDate())
+                .source(businessCapability.getSource())
                 .build());
     }
 
@@ -296,7 +300,8 @@ public class BusinessCapabilityService {
         capabilityDTO.setAuthor(userClient.getEmail(userId));
     }
 
-    private BusinessCapability updateCapability(BusinessCapability businessCapability, PutBusinessCapabilityDTO capabilityDTO) {
+    private BusinessCapability updateCapability(BusinessCapability businessCapability, PutBusinessCapabilityDTO capabilityDTO,
+                                                String source) {
         businessCapability.setName(capabilityDTO.getName());
         businessCapability.setDescription(UrlWrapper.proxyUrl(capabilityDTO.getDescription()));
         businessCapability.setStatus(capabilityDTO.getStatus());
@@ -308,6 +313,7 @@ public class BusinessCapabilityService {
         businessCapability.setOwner(capabilityDTO.getOwner());
         businessCapability.setParentId(getParentId(capabilityDTO));
         businessCapability.setDomain(capabilityDTO.getIsDomain());
+        businessCapability.setSource(source);
         return businessCapabilityRepository.save(businessCapability);
     }
 
@@ -326,7 +332,7 @@ public class BusinessCapabilityService {
                         .owner(capability.getOwner())
                         .parentId(getParentId(capability))
                         .isDomain(capability.getIsDomain())
-                        .source(source == null || source.isEmpty() ? "SparxEA" : source)
+                        .source(source == null || source.isEmpty() ? "Sparx" : source)
                         .build());
         return result;
     }
