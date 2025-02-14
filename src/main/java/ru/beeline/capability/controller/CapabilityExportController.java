@@ -16,9 +16,9 @@ public class CapabilityExportController {
     @Autowired
     CapabilityExportService capabilityExportService;
 
-    @GetMapping("/business-capability/{doc_id}")
+    @PostMapping("/business-capability/{doc_id}")
     @ApiOperation(value = "get export Business Capabilities")
-    public ResponseEntity<CapabilityExportDTO> getExportBusinessCapabilities(@PathVariable(name = "doc_id") Integer docId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(capabilityExportService.getExportBusinessCapabilities(docId));
+    public ResponseEntity<CapabilityExportDTO> postExportBusinessCapabilities(@PathVariable(name = "doc_id") Integer docId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(capabilityExportService.postExportBusinessCapabilities(docId));
     }
 }
