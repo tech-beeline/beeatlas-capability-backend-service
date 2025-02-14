@@ -36,7 +36,7 @@ public class CapabilityExportService {
     @Autowired
     DocumentClient documentClient;
 
-    public CapabilityExportDTO getExportBusinessCapabilities(Integer docId) {
+    public CapabilityExportDTO postExportBusinessCapabilities(Integer docId) {
         List<BusinessCapability> businessCapabilities = businessCapabilityRepository.findByDeletedDateIsNull();
         List<PutBusinessCapabilityDTO> capabilityDTOS = businessCapabilities.stream()
                 .map(businessCapabilityMapper::convertToPutCapabilityDTO)
