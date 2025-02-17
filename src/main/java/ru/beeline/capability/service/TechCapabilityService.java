@@ -300,7 +300,7 @@ public class TechCapabilityService {
 
     public void validateTechCapabilityDTO(PutTechCapabilityDTO techCapability) {
         StringBuilder errMsg = new StringBuilder();
-        if (techCapability.getCode() == null) {
+        if (techCapability.getCode() == null || techCapability.getCode().isEmpty()) {
             errMsg.append("Отсутствует обязательное поле code\n");
         }
         if (techCapability.getName() == null) {
