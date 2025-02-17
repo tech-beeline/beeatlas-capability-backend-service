@@ -133,7 +133,7 @@ public class CapabilityExportService {
             row.createCell(0).setCellValue(dto.getCode());
             row.createCell(1).setCellValue(dto.getName());
             row.createCell(2).setCellValue(dto.getDescription());
-            row.createCell(3).setCellValue(String.join(". ", dto.getParents()));
+            row.createCell(3).setCellValue(String.join(", ", dto.getParents()));
             row.createCell(4).setCellValue(dto.getStatus());
             row.createCell(5).setCellValue(dto.getAuthor());
             row.createCell(6).setCellValue(dto.getLink());
