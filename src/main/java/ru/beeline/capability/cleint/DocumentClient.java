@@ -12,6 +12,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.capability.exception.DocumentServerException;
+import ru.beeline.capability.exception.NotFoundException;
 
 import java.io.File;
 
@@ -47,6 +48,10 @@ public class DocumentClient {
             } else {
                 log.error("Failed to upload file: {}", response.getStatusCode());
             }
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new NotFoundException(e.getMessage());
+        } catch (HttpClientErrorException.BadRequest e) {
+            throw new IllegalArgumentException(e.getMessage());
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             throw new DocumentServerException(e.getMessage());
         } catch (RestClientException e) {
