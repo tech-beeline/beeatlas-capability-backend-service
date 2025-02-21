@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.beeline.capability.cleint.AuthSSOClient;
 import ru.beeline.capability.domain.*;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.dto.GetHistoryByIdDTO;
@@ -82,6 +83,9 @@ public class TechCapabilityService {
 
     @Autowired
     private HistoryTechCapabilityRelationsRepository historyTechCapabilityRelationsRepository;
+
+    @Autowired
+    private AuthSSOClient authSSOClient;
 
     @Value("${queue.change-tech-capability.name}")
     private String changeTechCapabilityQueueName;
@@ -313,6 +317,7 @@ public class TechCapabilityService {
 
     public void sendMessageToTechCapabilityQueue(String queue, String message) {
         rabbitTemplate.convertAndSend(queue, message, messagePostProcessor -> {
+            messagePostProcessor.getMessageProperties().setHeader("Authorization", "Bearer " + authSSOClient.getToken());
             messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
             return messagePostProcessor;
         });

@@ -10,6 +10,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.beeline.capability.cleint.AuthSSOClient;
 import ru.beeline.capability.cleint.PackageClient;
 import ru.beeline.capability.dto.PackageRegistrationResponseDTO;
 import ru.beeline.capability.dto.PostBusinessCapabilityDTO;
@@ -30,10 +31,15 @@ public class PackageCapabilityService {
     @Autowired
     private RabbitTemplate rabbitTemplate;
     @Autowired
+    private AuthSSOClient authSSOClient;
+    @Autowired
     private PackageClient packageClient;
 
-    public PackageCapabilityService(@Value("${queue.package.name}") String queueName) {
+    public PackageCapabilityService(
+            @Value("${queue.package.name}") String queueName,
+            AuthSSOClient authSSOClient) {
         this.queueName = queueName;
+        this.authSSOClient = authSSOClient;
     }
 
     public PackageRegistrationResponseDTO registerTechCapabilitiesPackage(List<PostTechCapabilityDTO> techCapabilities) {
@@ -80,6 +86,7 @@ public class PackageCapabilityService {
 
     private void sendMessageToTechCapabilityQueue(String queue, String message) {
         rabbitTemplate.convertAndSend(queue, message, messagePostProcessor -> {
+            messagePostProcessor.getMessageProperties().setHeader("Authorization", "Bearer " + authSSOClient.getToken());
             messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
             return messagePostProcessor;
         });
