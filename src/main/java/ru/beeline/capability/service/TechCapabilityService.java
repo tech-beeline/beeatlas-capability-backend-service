@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.beeline.capability.cleint.AuthSSOClient;
+import ru.beeline.capability.client.AuthSSOClient;
 import ru.beeline.capability.domain.*;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.dto.GetHistoryByIdDTO;
@@ -70,9 +70,6 @@ public class TechCapabilityService {
     private FindNameSortTableService findNameSortTableService;
 
     @Autowired
-    private RabbitTemplate rabbitTemplate;
-
-    @Autowired
     private EnumCriteriaRepository enumCriteriaRepository;
 
     @Autowired
@@ -85,7 +82,7 @@ public class TechCapabilityService {
     private HistoryTechCapabilityRelationsRepository historyTechCapabilityRelationsRepository;
 
     @Autowired
-    private AuthSSOClient authSSOClient;
+    private RabbitService rabbitService;
 
     @Value("${queue.change-tech-capability.name}")
     private String changeTechCapabilityQueueName;
@@ -296,7 +293,7 @@ public class TechCapabilityService {
 
             String message = objectMapper.writeValueAsString(messagePayload);
 
-            sendMessageToTechCapabilityQueue(queueName, message);
+            rabbitService.sendMessage(queueName, message);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -313,14 +310,6 @@ public class TechCapabilityService {
         if (!errMsg.toString().isEmpty()) {
             throw new ValidationException(errMsg.toString());
         }
-    }
-
-    public void sendMessageToTechCapabilityQueue(String queue, String message) {
-        rabbitTemplate.convertAndSend(queue, message, messagePostProcessor -> {
-            messagePostProcessor.getMessageProperties().setHeader("Authorization", "Bearer " + authSSOClient.getToken());
-            messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
-            return messagePostProcessor;
-        });
     }
 
     public void calculateTotalTechCapabilitiesCount() {

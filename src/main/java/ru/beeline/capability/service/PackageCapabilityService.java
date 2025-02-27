@@ -10,8 +10,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ru.beeline.capability.cleint.AuthSSOClient;
-import ru.beeline.capability.cleint.PackageClient;
+import ru.beeline.capability.client.AuthSSOClient;
+import ru.beeline.capability.client.PackageClient;
 import ru.beeline.capability.dto.PackageRegistrationResponseDTO;
 import ru.beeline.capability.dto.PostBusinessCapabilityDTO;
 import ru.beeline.capability.dto.PostTechCapabilityDTO;
@@ -29,17 +29,15 @@ public class PackageCapabilityService {
     private final String queueName;
 
     @Autowired
-    private RabbitTemplate rabbitTemplate;
-    @Autowired
-    private AuthSSOClient authSSOClient;
+    private RabbitService rabbitService;
     @Autowired
     private PackageClient packageClient;
 
     public PackageCapabilityService(
             @Value("${queue.package.name}") String queueName,
-            AuthSSOClient authSSOClient) {
+            RabbitService rabbitService) {
         this.queueName = queueName;
-        this.authSSOClient = authSSOClient;
+        this.rabbitService = rabbitService;
     }
 
     public PackageRegistrationResponseDTO registerTechCapabilitiesPackage(List<PostTechCapabilityDTO> techCapabilities) {
@@ -81,14 +79,7 @@ public class PackageCapabilityService {
         messagePayload.put("packageId", packageRegistrationResponseDTO.getPackageId());
         messagePayload.set("payload", objectMapper.valueToTree(capabilities));
         String message = objectMapper.writeValueAsString(messagePayload);
-        sendMessageToTechCapabilityQueue(queueName, message);
+        rabbitService.sendMessage(queueName, message);
     }
 
-    private void sendMessageToTechCapabilityQueue(String queue, String message) {
-        rabbitTemplate.convertAndSend(queue, message, messagePostProcessor -> {
-            messagePostProcessor.getMessageProperties().setHeader("Authorization", "Bearer " + authSSOClient.getToken());
-            messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
-            return messagePostProcessor;
-        });
-    }
 }

@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.beeline.capability.EntityType.EntityType;
-import ru.beeline.capability.cleint.NotificationClient;
+import ru.beeline.capability.client.NotificationClient;
 import ru.beeline.capability.dto.CapabilitySubscribedDTO;
 import ru.beeline.capability.mapper.SubscribeCapabilityMapper;
 

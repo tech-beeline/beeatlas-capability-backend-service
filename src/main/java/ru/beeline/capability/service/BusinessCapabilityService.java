@@ -12,9 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.beeline.capability.cleint.AuthSSOClient;
-import ru.beeline.capability.cleint.DashboardClient;
-import ru.beeline.capability.cleint.UserClient;
+import ru.beeline.capability.client.AuthSSOClient;
+import ru.beeline.capability.client.DashboardClient;
+import ru.beeline.capability.client.UserClient;
 import ru.beeline.capability.domain.*;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeCustomDTO;
@@ -68,7 +68,7 @@ public class BusinessCapabilityService {
     private UserClient userClient;
 
     @Autowired
-    private RabbitTemplate rabbitTemplate;
+    private RabbitService rabbitService;
 
     @Autowired
     private BusinessCapabilityMapper businessCapabilityMapper;
@@ -78,9 +78,6 @@ public class BusinessCapabilityService {
 
     @Autowired
     private HistoryBusinessCapabilityRepository historyBusinessCapabilityRepository;
-
-    @Autowired
-    private AuthSSOClient authSSOClient;
 
     public BusinessCapability findById(Long id) {
         return businessCapabilityRepository.findById(id).orElseThrow(() -> new NotFoundException("Business Capability не найдено"));
@@ -357,18 +354,10 @@ public class BusinessCapabilityService {
 
             String message = objectMapper.writeValueAsString(messagePayload);
 
-            sendMessageToTechCapabilityQueue(queueName, message);
+            rabbitService.sendMessage(queueName, message);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public void sendMessageToTechCapabilityQueue(String queue, String message) {
-        rabbitTemplate.convertAndSend(queue, message, messagePostProcessor -> {
-            messagePostProcessor.getMessageProperties().setHeader("Authorization", "Bearer " + authSSOClient.getToken());
-            messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
-            return messagePostProcessor;
-        });
     }
 
     public BusinessCapabilityTreeCustomDTO getBusinessCapabilityTreeById(Long id) {
