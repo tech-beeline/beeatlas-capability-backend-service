@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -48,14 +47,28 @@ public class CapabilityExportService {
 
     public CapabilityExportDTO postExportBusinessCapabilities(Integer docId) {
         List<BusinessCapability> businessCapabilities = businessCapabilityRepository.findByDeletedDateIsNull();
-        List<PutBusinessCapabilityDTO> capabilityDTOS = businessCapabilities.stream()
-                .map(businessCapabilityMapper::convertToPutCapabilityDTO)
-                .collect(Collectors.toList());
         String fileName = "export_business_capability_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".xlsx";
         List<String> headers = List.of("code", "name", "description", "parents", "isDomain", "status", "author", "link", "owner");
         String sheetName = "Business Capabilities";
         Workbook workbook = createWorkbookWithHeaders(headers, sheetName);
-        createBcCell(capabilityDTOS, workbook.getSheet(sheetName));
+        createBcCell(businessCapabilities, workbook.getSheet(sheetName));
+        System.gc();
+        File tempFile = writeWorkbookToFile(workbook, fileName);
+        if (tempFile != null) {
+            documentClient.patchExcelFile(docId, tempFile, fileName);
+            tempFile.delete();
+        }
+        return CapabilityExportDTO.builder().docId(docId).build();
+    }
+
+    public CapabilityExportDTO postExportTechCapabilities(Integer docId) {
+        List<TechCapability> techCapabilities = techCapabilityRepository.findByDeletedDateIsNull();
+        String fileName = "export_tech_capability_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".xlsx";
+        List<String> headers = List.of("code", "name", "description", "parents", "status", "author", "link", "owner");
+        String sheetName = "Tech Capabilities";
+        Workbook workbook = createWorkbookWithHeaders(headers, sheetName);
+        createTcCell(techCapabilities, workbook.getSheet(sheetName));
+        System.gc();
         File tempFile = writeWorkbookToFile(workbook, fileName);
         if (tempFile != null) {
             documentClient.patchExcelFile(docId, tempFile, fileName);
@@ -92,9 +105,10 @@ public class CapabilityExportService {
         return tempFile;
     }
 
-    private void createBcCell(List<PutBusinessCapabilityDTO> capabilityDTOS, Sheet sheet) {
+    private void createBcCell(List<BusinessCapability> businessCapabilities, Sheet sheet) {
         int rowNum = 1;
-        for (PutBusinessCapabilityDTO dto : capabilityDTOS) {
+        for (BusinessCapability businessCapability : businessCapabilities) {
+            PutBusinessCapabilityDTO dto = businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability);
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(dto.getCode());
             row.createCell(1).setCellValue(dto.getName());
@@ -108,27 +122,10 @@ public class CapabilityExportService {
         }
     }
 
-    public CapabilityExportDTO postExportTechCapabilities(Integer docId) {
-        List<TechCapability> techCapabilities = techCapabilityRepository.findByDeletedDateIsNull();
-        List<PutTechCapabilityDTO> capabilityDTOS = techCapabilities.stream()
-                .map(techCapabilityMapper::convertToPutTechCapabilityDTO)
-                .collect(Collectors.toList());
-        String fileName = "export_tech_capability_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".xlsx";
-        List<String> headers = List.of("code", "name", "description", "parents", "status", "author", "link", "owner");
-        String sheetName = "Tech Capabilities";
-        Workbook workbook = createWorkbookWithHeaders(headers, sheetName);
-        createTcCell(capabilityDTOS, workbook.getSheet(sheetName));
-        File tempFile = writeWorkbookToFile(workbook, fileName);
-        if (tempFile != null) {
-            documentClient.patchExcelFile(docId, tempFile, fileName);
-            tempFile.delete();
-        }
-        return CapabilityExportDTO.builder().docId(docId).build();
-    }
-
-    private void createTcCell(List<PutTechCapabilityDTO> capabilityDTOS, Sheet sheet) {
+    private void createTcCell(List<TechCapability> techCapabilities, Sheet sheet) {
         int rowNum = 1;
-        for (PutTechCapabilityDTO dto : capabilityDTOS) {
+        for (TechCapability techCapability : techCapabilities) {
+            PutTechCapabilityDTO dto = techCapabilityMapper.convertToPutTechCapabilityDTO(techCapability);
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(dto.getCode());
             row.createCell(1).setCellValue(dto.getName());
