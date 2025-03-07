@@ -480,7 +480,7 @@ public class TechCapabilityService {
                 }
                 parentDTOS.sort(Comparator.comparingLong(ParentDTO::getId));
                 HistoryTechCapabilityDTO gethistoryTechCapabilityDTO = techCapabilityMapper.toHistoryTechCapabilityDTO(
-                        optionalFindHistoryTcOtherVersion.get(), parentDTOS, id,
+                        techCapability, parentDTOS, id,
                         optionalFindHistoryTcOtherVersion.get().getVersion().intValue() + 1);
                 result.add(gethistoryTechCapabilityDTO);
             } else {
