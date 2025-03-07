@@ -70,7 +70,7 @@ public class TechCapabilityController {
 
     @GetMapping("/history/compare/{id}/{version}")
     @ApiOperation(value = "Получение выбраных версий TC")
-    public List<GetTcHistoryVersionDTO> getBusinessCapabilityHistoryVersion(@PathVariable Long id,
+    public List<GetTcHistoryVersionDTO> getTechCapabilityHistoryVersion(@PathVariable Long id,
                                                                             @PathVariable Integer version,
                                                                             @RequestParam(value = "other_version",
                                                                                     required = false) Integer otherVersion) {
