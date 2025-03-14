@@ -3,8 +3,6 @@ package ru.beeline.capability.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.MessageDeliveryMode;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -12,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.beeline.capability.client.AuthSSOClient;
+import ru.beeline.capability.client.ProductClient;
 import ru.beeline.capability.domain.*;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.dto.GetHistoryByIdDTO;
@@ -84,6 +82,9 @@ public class TechCapabilityService {
     @Autowired
     private RabbitService rabbitService;
 
+    @Autowired
+    private ProductClient productClient;
+
     @Value("${queue.change-tech-capability.name}")
     private String changeTechCapabilityQueueName;
 
@@ -142,13 +143,17 @@ public class TechCapabilityService {
         if (source == null || source.isEmpty()) {
             source = "Sparx";
         }
+        Integer productId = null;
+        if (techCapability.getTargetSystemCode() != null && !techCapability.getTargetSystemCode().isEmpty()) {
+            productId = productClient.getProduct(techCapability.getTargetSystemCode()).getId();
+        }
         Optional<TechCapability> currentTechCapabilityOpt = techCapabilityRepository.findByCode(techCapability.getCode());
         boolean techCapabilityHaveParents = techCapability.getParents() != null && !techCapability.getParents().isEmpty();
         log.info("techCapabilityHaveParents:" + techCapabilityHaveParents);
         TechCapability currentTechCapability;
         if (!currentTechCapabilityOpt.isPresent()) {
             log.info("currentTechCapabilityOpt isn't present");
-            currentTechCapability = createTechCapability(techCapability, source);
+            currentTechCapability = createTechCapability(techCapability, source, productId);
             techCapabilityRelationsRepository.deleteAllByTechCapability(currentTechCapability);
             if (techCapabilityHaveParents) {
                 log.info("create relations");
@@ -168,12 +173,13 @@ public class TechCapabilityService {
             Boolean shouldUpdate = equalsDashboardDTO(techCapability, currentTechCapabilityDTO) ||
                     (!equalsDashboardDTO(techCapability, currentTechCapabilityDTO) &&
                             currentTechCapability.getDeletedDate() != null);
-            if (shouldUpdate || !source.equals(currentTechCapability.getSource())) {
+            if (shouldUpdate || !source.equals(currentTechCapability.getSource()) ||
+                    !Objects.equals(productId, currentTechCapability.getResponsibilityProductId())) {
                 log.info("techCapability from dashboard: " + techCapability + " equals techCapability from BD "
                         + currentTechCapabilityDTO);
                 log.info("old techCapability and new techCapability is not equals, and try update");
                 addToHistory(currentTechCapability);
-                updateTechCapability(currentTechCapability, techCapability, source);
+                updateTechCapability(currentTechCapability, techCapability, source, productId);
                 log.info("delete old relations");
                 techCapabilityRelationsRepository.deleteAllByTechCapability(currentTechCapability);
                 findNameSortTableService.updateVector(currentTechCapability.getId(), currentTechCapability.getName(), currentTechCapability.getDescription(), currentTechCapability.getCode(), ENTITY_TYPE_TECH_CAPABILITY);
@@ -203,6 +209,7 @@ public class TechCapabilityService {
                 .link(currentTechCapability.getLink())
                 .author(currentTechCapability.getAuthor())
                 .source(currentTechCapability.getSource())
+                .responsibilityProductId(currentTechCapability.getResponsibilityProductId())
                 .build());
         List<TechCapabilityRelations> relations = techCapabilityRelationsRepository.findByTechCapability(currentTechCapability);
         if (!relations.isEmpty()) {
@@ -250,7 +257,7 @@ public class TechCapabilityService {
     }
 
     private void updateTechCapability(TechCapability currentTechCapability, PutTechCapabilityDTO techCapability,
-                                      String source) {
+                                      String source, Integer productId) {
         currentTechCapability.setName(techCapability.getName());
         currentTechCapability.setDescription(UrlWrapper.proxyUrl(techCapability.getDescription()));
         currentTechCapability.setAuthor(techCapability.getAuthor() == null || techCapability.getAuthor().isEmpty() ?
@@ -261,10 +268,11 @@ public class TechCapabilityService {
         currentTechCapability.setLink(techCapability.getLink());
         currentTechCapability.setStatus(techCapability.getStatus());
         currentTechCapability.setSource(source);
+        currentTechCapability.setResponsibilityProductId(productId);
         techCapabilityRepository.save(currentTechCapability);
     }
 
-    private TechCapability createTechCapability(PutTechCapabilityDTO techCapability, String source) {
+    private TechCapability createTechCapability(PutTechCapabilityDTO techCapability, String source, Integer productId) {
         TechCapability newTechCapability = TechCapability.builder()
                 .code(techCapability.getCode())
                 .name(techCapability.getName())
@@ -276,6 +284,7 @@ public class TechCapabilityService {
                 .owner(techCapability.getOwner())
                 .link(techCapability.getLink())
                 .status(techCapability.getStatus())
+                .responsibilityProductId(productId)
                 .source(source == null || source.isEmpty() ? "Sparx" : source)
                 .build();
         newTechCapability = techCapabilityRepository.save(newTechCapability);

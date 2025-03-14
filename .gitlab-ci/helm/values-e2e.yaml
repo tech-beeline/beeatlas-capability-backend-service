@@ -24,6 +24,7 @@ env:
   INTEGRATION_AUTH_SERVER_URL: "vault:eafdmmart/data/test/e2e/fdm#authserverurl"
   INTEGRATION_DASHBOARD_SERVER_URL: "vault:eafdmmart/data/test/e2e/fdm#dashboardserver"
   INTEGRATION_DOCUMENT_SERVER_URL: "vault:eafdmmart/data/test/e2e/fdm#documentserverurl"
+  INTEGRATION_PRODUCT_SERVER_URL: "vault:eafdmmart/data/test/e2e/fdm#productsserver"
   SPRING_RABBITMQ_TEMPLATE_EXCHANGE: "vault:eafdmmart/data/test/e2e/fdm#rabbitmqtemplateexchange"
   SPRING_RABBITMQ_TEMPLATE_ROUTING_KEY: "vault:eafdmmart/data/test/e2e/fdm#rabbitmqtemplateroutingkey"
   SPRING_RABBITMQ_TOKEN_URL: "vault:eafdmmart/data/test/e2e/fdm#rabbitmqtokenurl"
