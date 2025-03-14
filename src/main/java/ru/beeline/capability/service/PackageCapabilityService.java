@@ -81,5 +81,4 @@ public class PackageCapabilityService {
         String message = objectMapper.writeValueAsString(messagePayload);
         rabbitService.sendMessage(queueName, message);
     }
-
 }

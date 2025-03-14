@@ -19,4 +19,5 @@ public class PostTechCapabilityDTO {
     private String owner;
     private String status;
     private List<String> parents;
+    private String targetSystemCode;
 }
