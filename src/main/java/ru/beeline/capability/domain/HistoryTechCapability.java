@@ -35,5 +35,7 @@ public class HistoryTechCapability {
     @Column(nullable = false)
     private Integer version;
     private String source;
+    @Column(name = "responsibility_product_id")
+    private Integer responsibilityProductId;
 
 }
