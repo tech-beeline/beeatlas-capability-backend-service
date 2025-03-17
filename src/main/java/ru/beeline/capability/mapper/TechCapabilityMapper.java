@@ -58,6 +58,7 @@ public class TechCapabilityMapper {
                 .link(techCapability.getLink())
                 .createdDate(techCapability.getCreatedDate())
                 .lastModifiedDate(techCapability.getLastModifiedDate())
+                .systemId(techCapability.getResponsibilityProductId())
                 .build();
     }
 
@@ -75,6 +76,7 @@ public class TechCapabilityMapper {
                 .link(historyTechCapability.getLink())
                 .version(version)
                 .parents(parentDTOS)
+                .systemId(historyTechCapability.getResponsibilityProductId())
                 .build();
     }
 
@@ -92,6 +94,7 @@ public class TechCapabilityMapper {
                 .link(techCapability.getLink())
                 .version(version)
                 .parents(parentDTOS)
+                .systemId(techCapability.getResponsibilityProductId())
                 .build();
     }
 }

@@ -30,4 +30,5 @@ public class HistoryTechCapabilityDTO {
     private String link;
     private Integer version;
     private List<ParentDTO> parents;
+    private Integer systemId;
 }
