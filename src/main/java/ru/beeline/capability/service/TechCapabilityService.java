@@ -17,6 +17,7 @@ import ru.beeline.capability.dto.GetHistoryByIdDTO;
 import ru.beeline.capability.dto.GetTcHistoryVersionDTO;
 import ru.beeline.capability.dto.HistoryTechCapabilityDTO;
 import ru.beeline.capability.dto.ParentDTO;
+import ru.beeline.capability.dto.ProductDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.dto.VersionInfoDTO;
 import ru.beeline.capability.exception.NotFoundException;
@@ -145,7 +146,10 @@ public class TechCapabilityService {
         }
         Integer productId = null;
         if (techCapability.getTargetSystemCode() != null && !techCapability.getTargetSystemCode().isEmpty()) {
-            productId = productClient.getProduct(techCapability.getTargetSystemCode()).getId();
+            ProductDTO product = productClient.getProduct(techCapability.getTargetSystemCode());
+            if (product != null) {
+                productId = product.getId();
+            }
         }
         Optional<TechCapability> currentTechCapabilityOpt = techCapabilityRepository.findByCode(techCapability.getCode());
         boolean techCapabilityHaveParents = techCapability.getParents() != null && !techCapability.getParents().isEmpty();
