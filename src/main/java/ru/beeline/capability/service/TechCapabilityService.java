@@ -281,7 +281,6 @@ public class TechCapabilityService {
                 .code(techCapability.getCode())
                 .name(techCapability.getName())
                 .createdDate(new Date())
-                .lastModifiedDate(new Date())
                 .description(UrlWrapper.proxyUrl(techCapability.getDescription()))
                 .author(techCapability.getAuthor() == null || techCapability.getAuthor().isEmpty() ?
                         "Sparx EA" : techCapability.getAuthor())
