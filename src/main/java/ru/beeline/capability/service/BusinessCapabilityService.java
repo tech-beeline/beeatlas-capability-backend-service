@@ -328,7 +328,7 @@ public class BusinessCapabilityService {
                         .status(capability.getStatus())
                         .author(capability.getAuthor() == null || capability.getAuthor().isEmpty() ?
                                 "Sparx EA" : capability.getAuthor())
-                        .createdDate(new Date()).lastModifiedDate(new Date())
+                        .createdDate(new Date())
                         .link(capability.getLink())
                         .owner(capability.getOwner())
                         .parentId(getParentId(capability))
