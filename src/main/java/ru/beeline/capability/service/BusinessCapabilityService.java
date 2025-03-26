@@ -3,8 +3,6 @@ package ru.beeline.capability.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.MessageDeliveryMode;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -12,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.beeline.capability.client.AuthSSOClient;
 import ru.beeline.capability.client.DashboardClient;
 import ru.beeline.capability.client.UserClient;
 import ru.beeline.capability.domain.*;
@@ -198,17 +195,18 @@ public class BusinessCapabilityService {
             offset = 0;
         }
         Pageable pageable = new OffsetBasedPageRequest(offset, limit == null || limit == 0 ? Integer.MAX_VALUE : limit, Sort.by(Sort.Direction.ASC, "name"));
-        Page<BusinessCapability> businessCapabilities = null;
-        switch (FindBy.valueOf(findBy)) {
-            case ALL:
+
+        Page<BusinessCapability> businessCapabilities;
+
+        switch (findBy) {
+            case "ALL":
                 businessCapabilities = businessCapabilityRepository.findCapabilities(pageable);
-                businessCapabilities.stream().filter(сapability -> Objects.nonNull(сapability.getParentEntity()) && Objects.nonNull(сapability.getParentEntity().getDeletedDate())).forEach(сapability -> сapability.setParentEntity(null));
                 break;
-            case CORE:
+            case "CORE":
                 businessCapabilities = businessCapabilityRepository.findCapabilitiesWithoutParent(pageable);
                 break;
             default:
-                throw new IllegalArgumentException("Invalid value for findBy: " + findBy);
+                throw new IllegalArgumentException("Unsupported FindBy value");
         }
 
         return businessCapabilityMapper.convertToBusinessCapabilityShortDTOList(businessCapabilities.toList());

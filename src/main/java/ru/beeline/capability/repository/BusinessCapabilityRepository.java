@@ -16,7 +16,10 @@ public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapa
 
     List<BusinessCapability> findAllByParentIdIsNullAndDeletedDateIsNullAndIsDomainIsTrue();
 
-    @Query("SELECT c FROM BusinessCapability c WHERE c.deletedDate is NULL ORDER BY c.name")
+    @Query(
+            value = "SELECT c FROM BusinessCapability c LEFT JOIN FETCH c.parentEntity p WHERE c.deletedDate IS NULL AND (p.deletedDate IS NULL OR p IS NULL) ORDER BY c.name",
+            countQuery = "SELECT count(c) FROM BusinessCapability c LEFT JOIN c.parentEntity p WHERE c.deletedDate IS NULL AND (p.deletedDate IS NULL OR p IS NULL)"
+    )
     Page<BusinessCapability> findCapabilities(Pageable pageable);
 
     @Query("SELECT c FROM BusinessCapability c WHERE c.deletedDate is NULL and c.parentId is null and c.isDomain is true ORDER BY c.name")
@@ -33,4 +36,8 @@ public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapa
     List<BusinessCapability> findAllByIdInAndDeletedDateIsNull(List<Long> ids);
 
     List<BusinessCapability> findByDeletedDateIsNull();
+    boolean existsByParentIdAndDeletedDateIsNull(Long parentId);
+    @Query("SELECT bc.id FROM BusinessCapability bc WHERE bc.parentId IN :parentIds AND bc.deletedDate IS NULL")
+    List<Long> findActiveBusinessCapabilities(List<Long> parentIds);
+
 }
