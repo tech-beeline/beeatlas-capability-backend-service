@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.TechCapability;
-import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.BCParentDTO;
 import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeCustomDTO;
@@ -103,7 +102,7 @@ public class BusinessCapabilityMapper {
 
         return businessCapabilities.stream()
                 .map(bc -> {
-                    boolean hasActiveChildren = activeBcIds.contains(bc.getId()) || activeTcIds.contains(bc.getId());
+                    boolean hasActiveChildren = !activeBcIds.isEmpty() || !activeTcIds.isEmpty();
                     return convert(bc, hasActiveChildren);
                 })
                 .collect(Collectors.toList());
