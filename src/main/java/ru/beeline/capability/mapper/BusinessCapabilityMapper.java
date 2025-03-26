@@ -56,18 +56,12 @@ public class BusinessCapabilityMapper {
                 .build();
     }
 
-    private Boolean isAnyChildrenTcNotDeleted(BusinessCapability businessCapability) {
-        List<TechCapabilityRelations> techCapabilityRelations = techCapabilityRelationsRepository.findByBusinessCapability(businessCapability);
-        if (!techCapabilityRelations.isEmpty()) {
-            return techCapabilityRelations.stream()
-                    .map(TechCapabilityRelations::getTechCapability)
-                    .anyMatch(tech -> tech.getDeletedDate() == null);
-        }
-        return false;
+    private Boolean isAnyChildrenBcNotDeleted(Long parentId) {
+        return businessCapabilityRepository.existsByParentIdAndDeletedDateIsNull(parentId);
     }
 
-    private Boolean isAnyChildrenBcNotDeleted(Long parentId) {
-        return businessCapabilityRepository.findAllByParentId(parentId).stream().anyMatch(bc -> bc.getDeletedDate() == null);
+    private Boolean isAnyChildrenTcNotDeleted(BusinessCapability businessCapability) {
+        return techCapabilityRelationsRepository.existsByBusinessCapabilityAndTechCapability_DeletedDateIsNull(businessCapability);
     }
 
     public PutBusinessCapabilityDTO convertToPutCapabilityDTO(BusinessCapability businessCapability) {
@@ -100,14 +94,27 @@ public class BusinessCapabilityMapper {
     }
 
     public List<BusinessCapabilityShortDTO> convertToBusinessCapabilityShortDTOList(List<BusinessCapability> businessCapabilities) {
-        List<BusinessCapabilityShortDTO> techCapabilityDTOS = new ArrayList<>();
-        for (BusinessCapability businessCapability : businessCapabilities) {
-            BusinessCapabilityShortDTO techCapabilityDTO = convert(businessCapability,
-                    isAnyChildrenBcNotDeleted(businessCapability.getId())
-                            || isAnyChildrenTcNotDeleted(businessCapability));
-            techCapabilityDTOS.add(techCapabilityDTO);
-        }
-        return techCapabilityDTOS;
+        List<Long> parentIds = businessCapabilities.stream()
+                .map(BusinessCapability::getId)
+                .collect(Collectors.toList());
+
+        List<Long> activeBcIds = findActiveBusinessCapabilityIds(parentIds);
+        List<Long> activeTcIds = findActiveTechCapabilities(parentIds);
+
+        return businessCapabilities.stream()
+                .map(bc -> {
+                    boolean hasActiveChildren = activeBcIds.contains(bc.getId()) || activeTcIds.contains(bc.getId());
+                    return convert(bc, hasActiveChildren);
+                })
+                .collect(Collectors.toList());
+    }
+
+    private List<Long> findActiveBusinessCapabilityIds(List<Long> parentIds) {
+        return businessCapabilityRepository.findActiveBusinessCapabilities(parentIds);
+    }
+
+    private List<Long> findActiveTechCapabilities(List<Long> businessCapabilityIds) {
+        return techCapabilityRelationsRepository.findActiveTechCapabilities(businessCapabilityIds);
     }
 
     public BusinessCapabilityShortDTO convert(BusinessCapability businessCapability, boolean hasKids) {
