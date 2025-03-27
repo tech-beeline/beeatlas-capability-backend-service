@@ -206,7 +206,8 @@ public class TechCapabilityService {
                 .code(currentTechCapability.getCode())
                 .name(currentTechCapability.getName())
                 .description(currentTechCapability.getDescription())
-                .modifiedDate(currentTechCapability.getLastModifiedDate())
+                .modifiedDate(currentTechCapability.getLastModifiedDate() == null ?
+                        currentTechCapability.getCreatedDate() : currentTechCapability.getLastModifiedDate())
                 .deletedDate(currentTechCapability.getDeletedDate())
                 .owner(currentTechCapability.getOwner())
                 .status(currentTechCapability.getStatus())
