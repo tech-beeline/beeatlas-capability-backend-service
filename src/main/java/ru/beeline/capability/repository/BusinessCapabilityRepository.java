@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.beeline.capability.domain.BusinessCapability;
 
@@ -36,8 +37,12 @@ public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapa
     List<BusinessCapability> findAllByIdInAndDeletedDateIsNull(List<Long> ids);
 
     List<BusinessCapability> findByDeletedDateIsNull();
+
     boolean existsByParentIdAndDeletedDateIsNull(Long parentId);
-    @Query("SELECT bc.id FROM BusinessCapability bc WHERE bc.parentId IN :parentIds AND bc.deletedDate IS NULL")
-    List<Long> findActiveBusinessCapabilities(List<Long> parentIds);
+
+    @Query("SELECT bc.id FROM BusinessCapability bc " +
+            "WHERE bc.parentId IN :parentIds " +
+            "AND bc.deletedDate IS NULL")
+    List<Long> findActiveBusinessCapabilities(@Param("parentIds") List<Long> parentIds);
 
 }
