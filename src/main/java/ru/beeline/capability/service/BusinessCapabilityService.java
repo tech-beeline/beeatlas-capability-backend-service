@@ -474,7 +474,8 @@ public class BusinessCapabilityService {
         List<HistoryBusinessCapability> historyBcList = historyBusinessCapabilityRepository.findByIdRef(id);
         VersionInfoDTO versionInfo = VersionInfoDTO.builder()
                 .version(1)
-                .modified_date(businessCapability.getLastModifiedDate())
+                .modified_date(businessCapability.getLastModifiedDate() == null ?
+                        businessCapability.getCreatedDate() : businessCapability.getLastModifiedDate())
                 .author(businessCapability.getAuthor())
                 .build();
         if (historyBcList.isEmpty()) {

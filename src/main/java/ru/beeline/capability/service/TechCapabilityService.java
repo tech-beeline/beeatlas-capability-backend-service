@@ -432,7 +432,8 @@ public class TechCapabilityService {
         List<HistoryTechCapability> historyTCList = historyTechCapabilityRepository.findByIdRef(id);
         VersionInfoDTO versionInfo = VersionInfoDTO.builder()
                 .version(1)
-                .modified_date(techCapability.getLastModifiedDate())
+                .modified_date(techCapability.getLastModifiedDate() == null ?
+                        techCapability.getCreatedDate() : techCapability.getLastModifiedDate())
                 .author(techCapability.getAuthor())
                 .build();
         if (historyTCList.isEmpty()) {
