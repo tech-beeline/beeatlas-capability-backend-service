@@ -273,7 +273,8 @@ public class BusinessCapabilityService {
                 .code(businessCapability.getCode())
                 .name(businessCapability.getName())
                 .description(businessCapability.getDescription())
-                .modifiedDate(businessCapability.getLastModifiedDate())
+                .modifiedDate(businessCapability.getLastModifiedDate() == null ?
+                        businessCapability.getCreatedDate() : businessCapability.getLastModifiedDate())
                 .parentId(businessCapability.getParentId())
                 .owner(businessCapability.getOwner())
                 .status(businessCapability.getStatus())
