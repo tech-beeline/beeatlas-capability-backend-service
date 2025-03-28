@@ -16,6 +16,7 @@ import ru.beeline.fdmlib.dto.capability.BusinessCapabilityDTO;
 import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -92,27 +93,40 @@ public class BusinessCapabilityMapper {
         return businessCapabilityChildrenDTO;
     }
 
-    public List<BusinessCapabilityShortDTO> convertToBusinessCapabilityShortDTOList(List<BusinessCapability> businessCapabilities) {
-        List<Long> parentIds = businessCapabilities.stream()
-                .map(BusinessCapability::getId)
-                .collect(Collectors.toList());
-
+    public List<BusinessCapabilityShortDTO> convertToBusinessCapabilityShortDTOList(
+            List<BusinessCapability> businessCapabilities, String findBy) {
+        List<Long> parentIds;
+        if ("CORE".equals(findBy)) {
+            parentIds = businessCapabilities.stream()
+                    .filter(bc -> bc.getParentId() == null)
+                    .map(BusinessCapability::getId)
+                    .collect(Collectors.toList());
+        } else {
+            parentIds = businessCapabilities.stream()
+                    .map(BusinessCapability::getId)
+                    .collect(Collectors.toList());
+        }
         List<Long> activeBcIds = findActiveBusinessCapabilityIds(parentIds);
         List<Long> activeTcIds = findActiveTechCapabilities(parentIds);
-
         return businessCapabilities.stream()
                 .map(bc -> {
-                    boolean hasActiveChildren = !activeBcIds.isEmpty() || !activeTcIds.isEmpty();
+                    boolean hasActiveChildren = activeBcIds.contains(bc.getId()) || activeTcIds.contains(bc.getId());
                     return convert(bc, hasActiveChildren);
                 })
                 .collect(Collectors.toList());
     }
 
     private List<Long> findActiveBusinessCapabilityIds(List<Long> parentIds) {
+        if (parentIds.isEmpty()) {
+            return Collections.emptyList();
+        }
         return businessCapabilityRepository.findActiveBusinessCapabilities(parentIds);
     }
 
     private List<Long> findActiveTechCapabilities(List<Long> businessCapabilityIds) {
+        if (businessCapabilityIds.isEmpty()) {
+            return Collections.emptyList();
+        }
         return techCapabilityRelationsRepository.findActiveTechCapabilities(businessCapabilityIds);
     }
 

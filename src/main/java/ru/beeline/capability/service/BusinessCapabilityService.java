@@ -194,10 +194,9 @@ public class BusinessCapabilityService {
         if (offset == null) {
             offset = 0;
         }
-        Pageable pageable = new OffsetBasedPageRequest(offset, limit == null || limit == 0 ? Integer.MAX_VALUE : limit, Sort.by(Sort.Direction.ASC, "name"));
-
+        Pageable pageable = new OffsetBasedPageRequest(offset, limit == null || limit == 0 ? Integer.MAX_VALUE : limit,
+                Sort.by(Sort.Direction.ASC, "name"));
         Page<BusinessCapability> businessCapabilities;
-
         switch (findBy) {
             case "ALL":
                 businessCapabilities = businessCapabilityRepository.findCapabilities(pageable);
@@ -208,8 +207,7 @@ public class BusinessCapabilityService {
             default:
                 throw new IllegalArgumentException("Unsupported FindBy value");
         }
-
-        return businessCapabilityMapper.convertToBusinessCapabilityShortDTOList(businessCapabilities.toList());
+        return businessCapabilityMapper.convertToBusinessCapabilityShortDTOList(businessCapabilities.toList(), findBy);
     }
 
     public void putCapability(PutBusinessCapabilityDTO capabilityDTO, String userId, String productIds, String roles,
