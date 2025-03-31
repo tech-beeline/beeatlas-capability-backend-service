@@ -40,7 +40,7 @@ public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapa
 
     boolean existsByParentIdAndDeletedDateIsNull(Long parentId);
 
-    @Query("SELECT bc.id FROM BusinessCapability bc " +
+    @Query("SELECT bc.parentId FROM BusinessCapability bc " +
             "WHERE bc.parentId IN :parentIds " +
             "AND bc.deletedDate IS NULL")
     List<Long> findActiveBusinessCapabilities(@Param("parentIds") List<Long> parentIds);
