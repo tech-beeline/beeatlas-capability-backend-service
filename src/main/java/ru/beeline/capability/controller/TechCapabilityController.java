@@ -15,6 +15,8 @@ import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 
 import java.util.List;
 
+import static ru.beeline.capability.utils.Constants.SOURCE;
+
 @Slf4j
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
@@ -45,10 +47,11 @@ public class TechCapabilityController {
 
     @PutMapping
     @ApiOperation(value = "Создание/Обновление технической возможности")
-    public ResponseEntity putTechCapability(@RequestBody PutTechCapabilityDTO techCapability) {
+    public ResponseEntity putTechCapability(@RequestBody PutTechCapabilityDTO techCapability,
+                                            @RequestHeader(value = SOURCE, required = false) String source) {
         log.info("Receive Tech Capability:" + techCapability.toString());
         techCapabilityService.validateTechCapabilityDTO(techCapability);
-        techCapabilityService.createOrUpdate(techCapability);
+        techCapabilityService.createOrUpdate(techCapability, source);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

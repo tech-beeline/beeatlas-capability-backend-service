@@ -28,6 +28,7 @@ public class TechCapabilityDTO {
     private Date deletedDate;
     private String owner;
     private List<BCParentDTO> parents;
+    private Integer systemId;
 
     public static List<TechCapabilityDTO> convert(List<TechCapability> techCapabilities) {
         List<TechCapabilityDTO> techCapabilityDTOS = new ArrayList<>();
@@ -54,6 +55,7 @@ public class TechCapabilityDTO {
                 .deletedDate(techCapability.getDeletedDate())
                 .owner(techCapability.getOwner())
                 .parents(BCParentDTO.convert(techCapability.getParents()))
+                .systemId(techCapability.getResponsibilityProductId())
                 .build();
     }
 }

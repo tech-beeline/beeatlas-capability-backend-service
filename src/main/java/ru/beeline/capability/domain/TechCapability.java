@@ -19,28 +19,22 @@ public class TechCapability {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tech_capability_id_generator")
     @SequenceGenerator(name = "tech_capability_id_generator", sequenceName = "TC_id_seq", allocationSize = 1)
     private Long id;
-
     private String code;
     private String name;
     private String description;
     private String owner;
-
     @Column(name = "created_date")
     private Date createdDate;
-
     @Column(name = "last_modified_date")
     private Date lastModifiedDate;
-
     @Column(name = "deleted_date")
     private Date deletedDate;
-
     private String status;
-
     private String author;
-
     private String link;
     @Column(name = "responsibility_product_id")
     private Integer responsibilityProductId;
+    private String source;
 
     @OneToMany
     @JoinColumn(name = "id_child")
