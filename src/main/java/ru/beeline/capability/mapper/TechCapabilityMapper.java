@@ -58,6 +58,7 @@ public class TechCapabilityMapper {
                 .link(techCapability.getLink())
                 .createdDate(techCapability.getCreatedDate())
                 .lastModifiedDate(techCapability.getLastModifiedDate())
+                .systemId(techCapability.getResponsibilityProductId())
                 .build();
     }
 
@@ -75,6 +76,25 @@ public class TechCapabilityMapper {
                 .link(historyTechCapability.getLink())
                 .version(version)
                 .parents(parentDTOS)
+                .systemId(historyTechCapability.getResponsibilityProductId())
+                .build();
+    }
+
+    public HistoryTechCapabilityDTO toHistoryTechCapabilityDTO(TechCapability techCapability, List<ParentDTO> parentDTOS, Long id, Integer version) {
+        return HistoryTechCapabilityDTO.builder()
+                .id(id)
+                .code(techCapability.getCode())
+                .name(techCapability.getName())
+                .description(techCapability.getDescription())
+                .owner(techCapability.getOwner())
+                .modifiedDate(techCapability.getLastModifiedDate())
+                .deletedDate(techCapability.getDeletedDate())
+                .status(techCapability.getStatus())
+                .author(techCapability.getAuthor())
+                .link(techCapability.getLink())
+                .version(version)
+                .parents(parentDTOS)
+                .systemId(techCapability.getResponsibilityProductId())
                 .build();
     }
 

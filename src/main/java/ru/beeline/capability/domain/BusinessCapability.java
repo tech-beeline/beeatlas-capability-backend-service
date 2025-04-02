@@ -33,6 +33,7 @@ public class BusinessCapability {
     private String author;
     @Column(name = "parent_id")
     private Long parentId;
+    private String source;
 
     @ManyToOne
     @JoinColumn(name = "parent_id", insertable = false, updatable = false)

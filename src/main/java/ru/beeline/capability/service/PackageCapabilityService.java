@@ -10,7 +10,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ru.beeline.capability.cleint.PackageClient;
+import ru.beeline.capability.client.AuthSSOClient;
+import ru.beeline.capability.client.PackageClient;
 import ru.beeline.capability.dto.PackageRegistrationResponseDTO;
 import ru.beeline.capability.dto.PostBusinessCapabilityDTO;
 import ru.beeline.capability.dto.PostTechCapabilityDTO;
@@ -28,12 +29,15 @@ public class PackageCapabilityService {
     private final String queueName;
 
     @Autowired
-    private RabbitTemplate rabbitTemplate;
+    private RabbitService rabbitService;
     @Autowired
     private PackageClient packageClient;
 
-    public PackageCapabilityService(@Value("${queue.package.name}") String queueName) {
+    public PackageCapabilityService(
+            @Value("${queue.package.name}") String queueName,
+            RabbitService rabbitService) {
         this.queueName = queueName;
+        this.rabbitService = rabbitService;
     }
 
     public PackageRegistrationResponseDTO registerTechCapabilitiesPackage(List<PostTechCapabilityDTO> techCapabilities) {
@@ -75,13 +79,6 @@ public class PackageCapabilityService {
         messagePayload.put("packageId", packageRegistrationResponseDTO.getPackageId());
         messagePayload.set("payload", objectMapper.valueToTree(capabilities));
         String message = objectMapper.writeValueAsString(messagePayload);
-        sendMessageToTechCapabilityQueue(queueName, message);
-    }
-
-    private void sendMessageToTechCapabilityQueue(String queue, String message) {
-        rabbitTemplate.convertAndSend(queue, message, messagePostProcessor -> {
-            messagePostProcessor.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
-            return messagePostProcessor;
-        });
+        rabbitService.sendMessage(queueName, message);
     }
 }
