@@ -97,21 +97,4 @@ public class TechCapabilityMapper {
                 .systemId(techCapability.getResponsibilityProductId())
                 .build();
     }
-
-    public HistoryTechCapabilityDTO toHistoryTechCapabilityDTO(TechCapability techCapability, List<ParentDTO> parentDTOS, Long id, Integer version) {
-        return HistoryTechCapabilityDTO.builder()
-                .id(id)
-                .code(techCapability.getCode())
-                .name(techCapability.getName())
-                .description(techCapability.getDescription())
-                .owner(techCapability.getOwner())
-                .modifiedDate(techCapability.getLastModifiedDate())
-                .deletedDate(techCapability.getDeletedDate())
-                .status(techCapability.getStatus())
-                .author(techCapability.getAuthor())
-                .link(techCapability.getLink())
-                .version(version)
-                .parents(parentDTOS)
-                .build();
-    }
 }
