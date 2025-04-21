@@ -148,9 +148,6 @@ public class BusinessCapabilityService {
     public CapabilityParentDTO getParentsWithoutDeleteDate(Long id) {
         ArrayList<Long> result = new ArrayList<>();
         BusinessCapability businessCapability = findById(id);
-        if (businessCapability.getDeletedDate() != null) {
-            throw new NotFoundException("Business Capability не найдено");
-        }
         while (true) {
             Long parentId = businessCapability.getParentId();
             if (Objects.isNull(parentId)) {
