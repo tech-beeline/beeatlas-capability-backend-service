@@ -6,6 +6,9 @@ resources:
     cpu: 500m
     memory: 500Mi
 
+podAnnotations:
+  vault.security.banzaicloud.io/vault-addr: "https://vault-test.vimpelcom.ru/"
+
 ingress:
   annotations:
     nginx.ingress.kubernetes.io/cors-allow-headers: Content-Type, authorization
