@@ -201,6 +201,9 @@ public class BusinessCapabilityService {
             case "CORE":
                 businessCapabilities = businessCapabilityRepository.findCapabilitiesWithoutParent(pageable);
                 break;
+            case "DOMAIN":
+                businessCapabilities = businessCapabilityRepository.findByIsDomainTrue(pageable);
+                break;
             default:
                 throw new IllegalArgumentException("Unsupported FindBy value");
         }
