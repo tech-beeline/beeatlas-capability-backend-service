@@ -202,7 +202,7 @@ public class BusinessCapabilityService {
                 businessCapabilities = businessCapabilityRepository.findCapabilitiesWithoutParent(pageable);
                 break;
             case "DOMAIN":
-                businessCapabilities = businessCapabilityRepository.findByIsDomainTrue(pageable);
+                businessCapabilities = businessCapabilityRepository.findByIsDomainTrueAndDeletedDateIsNull(pageable);
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported FindBy value");
