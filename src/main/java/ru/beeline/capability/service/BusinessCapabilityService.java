@@ -13,15 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.beeline.capability.client.DashboardClient;
 import ru.beeline.capability.client.UserClient;
 import ru.beeline.capability.domain.*;
-import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
-import ru.beeline.capability.dto.BusinessCapabilityTreeCustomDTO;
-import ru.beeline.capability.dto.BusinessCapabilityTreeDTO;
-import ru.beeline.capability.dto.CapabilityParentDTO;
-import ru.beeline.capability.dto.GetBcHistoryVersionDTO;
-import ru.beeline.capability.dto.GetHistoryByIdDTO;
-import ru.beeline.capability.dto.HistoryCapabilityDTO;
-import ru.beeline.capability.dto.ParentDTO;
-import ru.beeline.capability.dto.VersionInfoDTO;
+import ru.beeline.capability.dto.*;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
@@ -75,6 +67,8 @@ public class BusinessCapabilityService {
 
     @Autowired
     private HistoryBusinessCapabilityRepository historyBusinessCapabilityRepository;
+    @Autowired
+    private OrderBusinessCapabilityRepository orderBusinessCapabilityRepository;
 
     public BusinessCapability findById(Long id) {
         return businessCapabilityRepository.findById(id).orElseThrow(() -> new NotFoundException("Business Capability не найдено"));
@@ -444,8 +438,23 @@ public class BusinessCapabilityService {
         return businessCapabilityRepository.findAllByParentId(businessCapability.getId());
     }
 
-    enum FindBy {
-        ALL, CORE
+    public void postBusinessCapability(Integer id) {
+        OrderBusinessCapability orderBusinessCapability = orderBusinessCapabilityRepository.findById(id).orElseThrow(() -> new NotFoundException("OrderBusinessCapability не найдено"));
+        BusinessCapability businessCapability
+        if (orderBusinessCapability.getMutableBcId() != null) {
+            businessCapability = findById(orderBusinessCapability.getMutableBcId());
+        } else {
+            businessCapability = new BusinessCapability();
+            businessCapability.setCode(orderBusinessCapability.getCode());
+
+        }
+        businessCapability.setName(orderBusinessCapability.getName());
+        businessCapability.setDescription(orderBusinessCapability.getDescription());
+        businessCapability.setParentId(Long.parseLong(orderBusinessCapability.getParentId().toString()));
+        businessCapability.setOwner(orderBusinessCapability.getOwner());
+        businessCapability.setAuthor(orderBusinessCapability.getAuthor());
+        businessCapability.setStatus(orderBusinessCapability.getStatus());
+        businessCapabilityRepository.save(businessCapability);
     }
 
     public void deleteBusinessCapability(String code) {
@@ -464,11 +473,7 @@ public class BusinessCapabilityService {
     }
 
     public List<GetHistoryByIdDTO> getBusinessCapabilityHistory(Long id) {
-        Optional<BusinessCapability> optionalBusinessCapability = businessCapabilityRepository.findById(id);
-        if (optionalBusinessCapability.isEmpty()) {
-            throw new NotFoundException("Business Capability не найдено");
-        }
-        BusinessCapability businessCapability = optionalBusinessCapability.get();
+        BusinessCapability businessCapability = findById(id);
         List<HistoryBusinessCapability> historyBcList = historyBusinessCapabilityRepository.findByIdRef(id);
         VersionInfoDTO versionInfo = VersionInfoDTO.builder()
                 .version(1)
@@ -506,11 +511,8 @@ public class BusinessCapabilityService {
 
     public List<GetBcHistoryVersionDTO> getBusinessCapabilityHistoryVersion(Long id, Integer version,
                                                                             Integer otherVersion) {
-        Optional<BusinessCapability> optionalBusinessCapability = businessCapabilityRepository.findById(id);
-        if (optionalBusinessCapability.isEmpty()) {
-            throw new NotFoundException(String.format("Business Capability с id: %s не найдено", id));
-        }
-        BusinessCapability businessCapability = optionalBusinessCapability.get();
+
+        BusinessCapability businessCapability = findById(id);
         HistoryBusinessCapability historyBcFirstVersion = findHistoryBcVersion(id, version.longValue());
         List<HistoryCapabilityDTO> result = new ArrayList<>();
         result.add(buildBcHistoryVersionDTO(historyBcFirstVersion, id, version));

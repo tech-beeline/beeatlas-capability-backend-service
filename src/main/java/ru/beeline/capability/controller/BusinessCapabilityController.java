@@ -117,4 +117,13 @@ public class BusinessCapabilityController {
                                                                                     required = false) Integer otherVersion) {
         return businessCapabilityService.getBusinessCapabilityHistoryVersion(id, version, otherVersion);
     }
+
+    @PostMapping("/public/{id}")
+    @ApiOperation(value = "Публикация ВС")
+    public ResponseEntity postBusinessCapability(@PathVariable Integer id) {
+        businessCapabilityService.postBusinessCapability(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+
+    }
+
 }
