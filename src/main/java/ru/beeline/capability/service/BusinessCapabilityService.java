@@ -440,7 +440,7 @@ public class BusinessCapabilityService {
 
     public void postBusinessCapability(Integer id) {
         OrderBusinessCapability orderBusinessCapability = orderBusinessCapabilityRepository.findById(id).orElseThrow(() -> new NotFoundException("OrderBusinessCapability не найдено"));
-        BusinessCapability businessCapability
+        BusinessCapability businessCapability;
         if (orderBusinessCapability.getMutableBcId() != null) {
             businessCapability = findById(orderBusinessCapability.getMutableBcId());
         } else {
