@@ -10,6 +10,7 @@ import ru.beeline.capability.client.BpmClient;
 import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.OrderBusinessCapability;
+import ru.beeline.capability.dto.BusinessCapabilityOrderPatchRequestDTO;
 import ru.beeline.capability.dto.BusinessCapabilityOrderRequestDTO;
 import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
@@ -30,8 +31,25 @@ public class BusinessCapabilityOrderService {
     private OrderBusinessCapabilityRepository orderBcRepository;
     @Autowired
     private BpmClient bpmClient;
+    @Autowired
+    private OrderBusinessCapabilityRepository orderBusinessCapabilityRepository;
 
-    @Transactional
+    public void editOrder(Integer id, BusinessCapabilityOrderPatchRequestDTO request, String statusAlias) {
+        OrderBusinessCapability orderBusinessCapability = orderBcRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "OrderBusinessCapability не найдена"));
+        BusinessCapability parentBusinessCapability = bcRepository.findById(Long.parseLong(id.toString()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Родительская BC не найдена или не является доменной"));
+        orderBusinessCapability.setName(request.getName());
+        orderBusinessCapability.setDescription(request.getDescription());
+        orderBusinessCapability.setOwner(request.getOwner());
+        orderBusinessCapability.setParentId(request.getParentId());
+        orderBusinessCapability.setLastModifiedDate(LocalDateTime.now());
+        orderBusinessCapabilityRepository.save(orderBusinessCapability);
+        if (statusAlias != null){
+            bpmClient.editStatusProcess(request.getComment(), orderBusinessCapability.getBusinessKey(), statusAlias);
+        }
+    }
+
     public String createOrder(BusinessCapabilityOrderRequestDTO request) {
         validateRequest(request);
         Long mutableBcId = request.getMutableBcId();
