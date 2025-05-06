@@ -71,7 +71,8 @@ public class BusinessCapabilityService {
     private OrderBusinessCapabilityRepository orderBusinessCapabilityRepository;
 
     public BusinessCapability findById(Long id) {
-        return businessCapabilityRepository.findById(id).orElseThrow(() -> new NotFoundException("Business Capability не найдено"));
+        return businessCapabilityRepository.findById(id).orElseThrow(() ->
+                new NotFoundException("Business Capability с id: " + id + " не найдено"));
     }
 
     public BusinessCapabilityChildrenDTO getChildren(Long id) {
@@ -141,7 +142,8 @@ public class BusinessCapabilityService {
 
     public CapabilityParentDTO getParentsWithoutDeleteDate(Long id) {
         ArrayList<Long> result = new ArrayList<>();
-        BusinessCapability businessCapability = findById(id);
+        BusinessCapability businessCapability = businessCapabilityRepository.findByIdAndDeletedDateIsNull(id).orElseThrow(() ->
+                new NotFoundException("Business Capability с id: " + id + " не найдено"));
         while (true) {
             Long parentId = businessCapability.getParentId();
             if (Objects.isNull(parentId)) {
