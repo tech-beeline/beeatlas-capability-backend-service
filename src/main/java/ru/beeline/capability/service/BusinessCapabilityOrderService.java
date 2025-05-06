@@ -65,7 +65,7 @@ public class BusinessCapabilityOrderService {
             code = String.format("NEW.BC-%06d", nextId);
         }
 
-        bcRepository.findByIdAndDeletedDateIsNullAndIsDomainTrue(request.getParentId())
+        bcRepository.findByIdAndDeletedDateIsNullAndIsDomainTrue(Long.parseLong(request.getParentId().toString()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Родительская BC не найдена или не является доменной"));
 
         String businessKey = code + "_" + System.currentTimeMillis();

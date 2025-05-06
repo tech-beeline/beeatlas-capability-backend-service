@@ -25,6 +25,8 @@ import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenIdsDTO;
 import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -446,6 +448,7 @@ public class BusinessCapabilityService {
         } else {
             businessCapability = new BusinessCapability();
             businessCapability.setCode(orderBusinessCapability.getCode());
+            businessCapability.setCreatedDate(Date.from(Instant.now()));
 
         }
         businessCapability.setName(orderBusinessCapability.getName());
