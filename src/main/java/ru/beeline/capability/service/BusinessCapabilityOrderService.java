@@ -37,15 +37,17 @@ public class BusinessCapabilityOrderService {
     public void editOrder(Integer id, BusinessCapabilityOrderPatchRequestDTO request, String statusAlias) {
         OrderBusinessCapability orderBusinessCapability = orderBcRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "OrderBusinessCapability не найдена"));
-        BusinessCapability parentBusinessCapability = bcRepository.findById(Long.parseLong(id.toString()))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Родительская BC не найдена или не является доменной"));
+        if (request.getParentId() != null) {
+            BusinessCapability parentBusinessCapability = bcRepository.findById(Long.parseLong(id.toString()))
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Родительская BC не найдена или не является доменной"));
+        }
         orderBusinessCapability.setName(request.getName());
         orderBusinessCapability.setDescription(request.getDescription());
         orderBusinessCapability.setOwner(request.getOwner());
         orderBusinessCapability.setParentId(request.getParentId());
         orderBusinessCapability.setLastModifiedDate(LocalDateTime.now());
         orderBusinessCapabilityRepository.save(orderBusinessCapability);
-        if (statusAlias != null){
+        if (statusAlias != null) {
             bpmClient.editStatusProcess(request.getComment(), orderBusinessCapability.getBusinessKey(), statusAlias);
         }
     }

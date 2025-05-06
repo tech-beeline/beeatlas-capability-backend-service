@@ -100,7 +100,7 @@ public class BusinessCapabilityController {
     @ApiOperation(value = "Управление каталогом Capability")
     public ResponseEntity patchOrder(@PathVariable Integer id,
                                      @RequestBody BusinessCapabilityOrderPatchRequestDTO request,
-                                     @RequestParam String statusAlias) {
+                                     @RequestParam(required = false) String statusAlias) {
         orderService.editOrder(id, request, statusAlias);
         return new ResponseEntity(HttpStatus.OK);
     }
