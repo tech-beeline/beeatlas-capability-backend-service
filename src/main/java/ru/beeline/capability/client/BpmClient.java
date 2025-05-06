@@ -1,0 +1,73 @@
+package ru.beeline.capability.client;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import ru.beeline.capability.controller.RequestContext;
+import ru.beeline.capability.dto.CommentDTO;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static ru.beeline.capability.utils.Constants.*;
+
+@Slf4j
+@Service
+public class BpmClient {
+    RestTemplate restTemplate;
+
+    @Value("${integration.bpm-server-url}")
+    private String bpmBaseUrl;
+
+    public void editStatusProcess(String comment, String businessKey, String statusAlias) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(USER_ID_HEADER, RequestContext.getUserId());
+            headers.set(USER_PERMISSION_HEADER, RequestContext.getUserPermissions().toString());
+            headers.set(USER_PRODUCTS_IDS_HEADER, RequestContext.getUserProducts().toString());
+            headers.set(USER_ROLES_HEADER, RequestContext.getRoles().toString());
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<CommentDTO> entity = new HttpEntity<>(CommentDTO.builder()
+                    .comment(comment)
+                    .build(),
+                    headers);
+
+            ResponseEntity response = restTemplate.exchange(bpmBaseUrl + "/application/" + businessKey + "/change-status/" + statusAlias,
+                    HttpMethod.PATCH, entity, ResponseEntity.class).getBody();
+            if (response.getStatusCode().is4xxClientError() || response.getStatusCode().is5xxServerError()) {
+                throw new RuntimeException("editStatusProcess filed");
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new RuntimeException("Error while uploading file");
+        }
+    }
+
+    public void startProcess(String processKey, String businessKey, Map<String, Object> variables) {
+        String url = bpmBaseUrl + "/process-definition/key/" + processKey + "/start?async=true";
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("businessKey", businessKey);
+
+        Map<String, Object> vars = new HashMap<>();
+        variables.forEach((k, v) -> {
+            Map<String, Object> varMap = new HashMap<>();
+            varMap.put("value", v);
+            if (v instanceof Integer) {
+                varMap.put("type", "Integer");
+            } else if (v instanceof String) {
+                varMap.put("type", "String");
+            } else {
+                varMap.put("type", "Object");
+            }
+            vars.put(k, varMap);
+        });
+
+        body.put("variables", vars);
+
+        restTemplate.postForEntity(url, body, Void.class);
+    }
+}

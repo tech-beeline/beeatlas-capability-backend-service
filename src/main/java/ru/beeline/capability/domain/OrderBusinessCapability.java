@@ -49,7 +49,7 @@ public class OrderBusinessCapability {
     private Integer parentId;
 
     @Column(name = "mutable_bc_id")
-    private Integer mutableBcId;
+    private Long mutableBcId;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id", referencedColumnName = "id", insertable = false, updatable = false)
