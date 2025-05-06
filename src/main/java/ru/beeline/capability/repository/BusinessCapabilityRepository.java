@@ -45,8 +45,9 @@ public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapa
             "AND bc.deletedDate IS NULL")
     List<Long> findActiveBusinessCapabilities(@Param("parentIds") List<Long> parentIds);
 
-    Page<BusinessCapability> findByIsDomainTrue(Pageable pageable);
+    Optional<BusinessCapability> findByIdAndDeletedDateIsNull(Long id);
 
     Optional<BusinessCapability> findByIdAndDeletedDateIsNullAndIsDomainTrue(Long id);
 
+    Page<BusinessCapability> findByIsDomainTrueAndDeletedDateIsNull(Pageable pageable);
 }
