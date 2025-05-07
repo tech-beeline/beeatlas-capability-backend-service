@@ -12,6 +12,7 @@ import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.OrderBusinessCapability;
 import ru.beeline.capability.dto.BusinessCapabilityOrderPatchRequestDTO;
 import ru.beeline.capability.dto.BusinessCapabilityOrderRequestDTO;
+import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.OrderBusinessCapabilityRepository;
@@ -36,10 +37,10 @@ public class BusinessCapabilityOrderService {
 
     public void editOrder(Integer id, BusinessCapabilityOrderPatchRequestDTO request, String statusAlias) {
         OrderBusinessCapability orderBusinessCapability = orderBcRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "OrderBusinessCapability не найдена"));
+                .orElseThrow(() -> new NotFoundException("OrderBusinessCapability не найдена"));
         if (request.getParentId() != null) {
             BusinessCapability parentBusinessCapability = bcRepository.findById(Long.parseLong(id.toString()))
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Родительская BC не найдена или не является доменной"));
+                    .orElseThrow(() -> new IllegalArgumentException("Родительская BC не найдена или не является доменной"));
         }
         orderBusinessCapability.setName(request.getName());
         orderBusinessCapability.setDescription(request.getDescription());
@@ -61,7 +62,7 @@ public class BusinessCapabilityOrderService {
         if (mutableBcId != null) {
             log.info("search bc code");
             BusinessCapability mutableBc = bcRepository.findById(mutableBcId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "изменение не существующей BC"));
+                    .orElseThrow(() -> new IllegalArgumentException("изменение не существующей BC"));
             code = mutableBc.getCode();
         } else {
             log.info("search maxId orderBc");
@@ -72,7 +73,7 @@ public class BusinessCapabilityOrderService {
 
         log.info("search bc");
         bcRepository.findByIdAndDeletedDateIsNullAndIsDomainTrue(Long.parseLong(request.getParentId().toString()))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Родительская BC не найдена или не является доменной"));
+                .orElseThrow(() -> new IllegalArgumentException("Родительская BC не найдена или не является доменной"));
 
         String businessKey = code + "_" + System.currentTimeMillis();
 
