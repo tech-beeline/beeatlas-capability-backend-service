@@ -29,8 +29,10 @@ public class HeaderInterceptor implements HandlerInterceptor {
             if (!request.getRequestURI().contains("/capabilities-subscribed") ||
                     !request.getRequestURI().contains("/order")
             ) {
+                logger.info("without check headers");
                 return true;
             }
+            logger.info("check headers");
             Map<String, Object> headers = new HashMap<>();
             Enumeration<String> headerNames = request.getHeaderNames();
             while (headerNames.hasMoreElements()) {
