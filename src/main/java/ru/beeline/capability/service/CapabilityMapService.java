@@ -1,5 +1,6 @@
 package ru.beeline.capability.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -12,8 +13,10 @@ import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.repository.*;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class CapabilityMapService {
 
@@ -412,37 +415,49 @@ public class CapabilityMapService {
                                List<Integer> groupDTOListParentIdNotNullIDS) {
         boolean parent = !groupDTOListParentIdIsNullIDS.isEmpty();
         boolean children = !groupDTOListParentIdNotNullIDS.isEmpty();
+        List<TcGroup> allTcGroups = new ArrayList<>();
         if (parent) {
-            List<TcGroup> tcGroups = tcGroupRepository.findAllByGroupIdIn(groupDTOListParentIdIsNullIDS);
-            for (GroupDTO groupDTO : groups) {
-                groupDTO.setCapability(new ArrayList<>());
-                for (TcGroup tcGroup : tcGroups) {
-                    if (groupDTO.getGroupId().equals(tcGroup.getGroupId())) {
-                        Optional<TechCapability> techCapability = techCapabilityRepository.findById(tcGroup.getTcId().longValue());
-                        techCapability.ifPresent(capability -> groupDTO.getCapability().add(buildTcCapabilityDTO(capability)));
-                    }
-                }
-            }
+            allTcGroups.addAll(tcGroupRepository.findAllByGroupIdIn(groupDTOListParentIdIsNullIDS));
         }
         if (children) {
-            List<TcGroup> tcGroups = tcGroupRepository.findAllByGroupIdIn(groupDTOListParentIdNotNullIDS);
-            for (GroupDTO groupDTO : groups) {
-                for (GetChildrenGroupsDTO childrenGroupDTO : groupDTO.getChildrenGroup()) {
-                    childrenGroupDTO.setCapability(new ArrayList<>());
-                    for (TcGroup tcGroup : tcGroups) {
-                        if (childrenGroupDTO.getGroupId().equals(tcGroup.getGroupId())) {
-                            Optional<TechCapability> techCapability = techCapabilityRepository.findById(tcGroup.getTcId().longValue());
-                            techCapability.ifPresent(capability -> childrenGroupDTO.getCapability().add(buildTcCapabilityDTO(capability)));
-                        }
-                    }
-                }
-            }
+            allTcGroups.addAll(tcGroupRepository.findAllByGroupIdIn(groupDTOListParentIdNotNullIDS));
+        }
+        Set<Long> tcIds = allTcGroups.stream()
+                .map(tcGroup -> tcGroup.getTcId().longValue())
+                .collect(Collectors.toSet());
+        Map<Long, TechCapability> techCapabilityMap = techCapabilityRepository.findAllById(tcIds)
+                .stream()
+                .collect(Collectors.toMap(TechCapability::getId, Function.identity()));
+        if (parent) {
+            groups.forEach(groupDTO ->
+                    groupDTO.setCapability(
+                            allTcGroups.stream()
+                                    .filter(tcGroup -> groupDTO.getGroupId().equals(tcGroup.getGroupId()))
+                                    .map(tcGroup -> techCapabilityMap.get(tcGroup.getTcId().longValue()))
+                                    .filter(Objects::nonNull)
+                                    .map(this::buildTcCapabilityDTO)
+                                    .collect(Collectors.toList())
+                    )
+            );
+        }
+        if (children) {
+            groups.forEach(groupDTO ->
+                    groupDTO.getChildrenGroup().forEach(childrenGroupDTO ->
+                            childrenGroupDTO.setCapability(
+                                    allTcGroups.stream()
+                                            .filter(tcGroup -> childrenGroupDTO.getGroupId().equals(tcGroup.getGroupId()))
+                                            .map(tcGroup -> techCapabilityMap.get(tcGroup.getTcId().longValue()))
+                                            .filter(Objects::nonNull)
+                                            .map(this::buildTcCapabilityDTO)
+                                            .collect(Collectors.toList())
+                            )
+                    )
+            );
         }
     }
 
     private CapabilityDTO buildBcCapabilityDTO(BusinessCapability businessCapability) {
         CriteriasBc criteriasBc = criteriaBcRepository.findByBcId(businessCapability.getId());
-
         return CapabilityDTO.builder()
                 .id(businessCapability.getId())
                 .code(businessCapability.getCode())
@@ -483,7 +498,6 @@ public class CapabilityMapService {
 
     private CapabilityDTO buildTcCapabilityDTO(TechCapability techCapability) {
         CriteriasTc criteriasTc = criteriaTcRepository.findByTcId(techCapability.getId());
-
         return CapabilityDTO.builder()
                 .id(techCapability.getId())
                 .code(techCapability.getCode())
