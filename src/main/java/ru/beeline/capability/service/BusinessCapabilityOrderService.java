@@ -53,20 +53,24 @@ public class BusinessCapabilityOrderService {
     }
 
     public String createOrder(BusinessCapabilityOrderRequestDTO request) {
+        log.info("validate request");
         validateRequest(request);
         Long mutableBcId = request.getMutableBcId();
 
         String code;
         if (mutableBcId != null) {
+            log.info("search bc code");
             BusinessCapability mutableBc = bcRepository.findById(mutableBcId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "изменение не существующей BC"));
             code = mutableBc.getCode();
         } else {
+            log.info("search maxId orderBc");
             Integer maxId = orderBcRepository.findMaxId();
             long nextId = maxId + 1;
             code = String.format("NEW.BC-%06d", nextId);
         }
 
+        log.info("search bc");
         bcRepository.findByIdAndDeletedDateIsNullAndIsDomainTrue(Long.parseLong(request.getParentId().toString()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Родительская BC не найдена или не является доменной"));
 
@@ -86,7 +90,7 @@ public class BusinessCapabilityOrderService {
                 .createdDate(LocalDateTime.now())
                 .businessKey(businessKey)
                 .build();
-
+        log.info("save bc");
         orderBcRepository.save(orderBc);
 
         Map<String, Object> variables = new HashMap<>();
@@ -96,6 +100,7 @@ public class BusinessCapabilityOrderService {
         variables.put("entityId", orderBc.getId().intValue());
         variables.put("name", request.getName());
 
+        log.info("call bpm");
         bpmClient.startProcess("your_process_key", businessKey, variables);
 
         return businessKey;

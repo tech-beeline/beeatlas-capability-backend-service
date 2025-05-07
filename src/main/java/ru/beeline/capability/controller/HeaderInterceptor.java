@@ -26,7 +26,7 @@ public class HeaderInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         try {
-            if (!request.getRequestURI().contains("/capabilities-subscribed") ||
+            if (!request.getRequestURI().contains("/capabilities-subscribed") &&
                     !request.getRequestURI().contains("/order")
             ) {
                 logger.info("without check headers");

@@ -90,7 +90,7 @@ public class BusinessCapabilityController {
     }
 
     @PostMapping("/order")
-    @ApiOperation(value = "Управление каталогом Capability")
+    @ApiOperation(value = "Публикация каталога Capability")
     public ResponseEntity postOrder(@RequestBody BusinessCapabilityOrderRequestDTO request) {
         String businessKey = orderService.createOrder(request);
         return ResponseEntity.ok(new BusinessCapabilityOrderResponseDTO(businessKey));
