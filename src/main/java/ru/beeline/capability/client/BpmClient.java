@@ -16,10 +16,16 @@ import static ru.beeline.capability.utils.Constants.*;
 @Slf4j
 @Service
 public class BpmClient {
-    RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     @Value("${integration.bpm-server-url}")
-    private String bpmBaseUrl;
+    private final String bpmBaseUrl;
+
+    public BpmClient(@Value("${integration.bpm-server-url}") String bpmBaseUrl,
+                     RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+        this.bpmBaseUrl = bpmBaseUrl;
+    }
 
     public void editStatusProcess(String comment, String businessKey, String statusAlias) {
         try {
