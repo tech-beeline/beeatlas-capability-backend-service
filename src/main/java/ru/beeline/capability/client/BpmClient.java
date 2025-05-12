@@ -52,8 +52,8 @@ public class BpmClient {
         }
     }
 
-    public void startProcess(String processKey, String businessKey, Map<String, Object> variables) {
-        String url = bpmBaseUrl + "/process-definition/key/" + processKey + "/start?async=true";
+    public void startProcess(String businessKey, Map<String, Object> variables) {
+        String url = bpmBaseUrl + "/engine-rest/process-definition/key/Process_11grtql/start?async=true";
 
         Map<String, Object> body = new HashMap<>();
         body.put("businessKey", businessKey);

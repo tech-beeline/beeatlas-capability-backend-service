@@ -86,6 +86,7 @@ public class BusinessCapabilityOrderService {
                 .owner(request.getOwner())
                 .author(request.getAuthor())
                 .status("PROPOSED")
+                .isDomain(false)
                 .parentId(request.getParentId())
                 .mutableBcId(mutableBcId)
                 .createdDate(LocalDateTime.now())
@@ -102,7 +103,7 @@ public class BusinessCapabilityOrderService {
         variables.put("name", request.getName());
 
         log.info("call bpm");
-        bpmClient.startProcess("your_process_key", businessKey, variables);
+        bpmClient.startProcess(businessKey, variables);
 
         return businessKey;
     }
