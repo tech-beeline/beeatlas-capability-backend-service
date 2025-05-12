@@ -39,7 +39,7 @@ public class BusinessCapabilityOrderService {
         OrderBusinessCapability orderBusinessCapability = orderBcRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("OrderBusinessCapability не найдена"));
         if (request.getParentId() != null) {
-            BusinessCapability parentBusinessCapability = bcRepository.findById(Long.parseLong(id.toString()))
+            BusinessCapability parentBusinessCapability = bcRepository.findById(Long.parseLong(request.getParentId().toString()))
                     .orElseThrow(() -> new IllegalArgumentException("Родительская BC не найдена или не является доменной"));
         }
         orderBusinessCapability.setName(request.getName());
