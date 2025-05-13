@@ -26,7 +26,6 @@ import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenIdsDTO;
 import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -448,9 +447,14 @@ public class BusinessCapabilityService {
         if (orderBusinessCapability.getMutableBcId() != null) {
             businessCapability = findById(orderBusinessCapability.getMutableBcId());
         } else {
+            Optional<BusinessCapability> bcByCode = businessCapabilityRepository.findByCode(orderBusinessCapability.getCode());
+            if (bcByCode.isPresent()) {
+                throw new IllegalArgumentException("BC уже создана");
+            }
             businessCapability = new BusinessCapability();
             businessCapability.setCode(orderBusinessCapability.getCode());
             businessCapability.setCreatedDate(Date.from(Instant.now()));
+            businessCapability.setSource("FDM");
 
         }
         businessCapability.setName(orderBusinessCapability.getName());
@@ -459,6 +463,8 @@ public class BusinessCapabilityService {
         businessCapability.setOwner(orderBusinessCapability.getOwner());
         businessCapability.setAuthor(orderBusinessCapability.getAuthor());
         businessCapability.setStatus(orderBusinessCapability.getStatus());
+        businessCapability.setLastModifiedDate(new Date());
+        businessCapability.setDeletedDate(null);
         businessCapabilityRepository.save(businessCapability);
     }
 
