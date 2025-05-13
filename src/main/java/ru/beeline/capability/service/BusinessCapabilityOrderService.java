@@ -96,7 +96,7 @@ public class BusinessCapabilityOrderService {
         orderBcRepository.save(orderBc);
 
         Map<String, Object> variables = new HashMap<>();
-        variables.put("authorId", RequestContext.getUserId());
+        variables.put("authorId", Integer.parseInt(RequestContext.getUserId()));
         variables.put("type", mutableBcId == null ? "create_business_capability" : "update_business_capability");
         variables.put("comment", request.getComment() != null ? request.getComment() : "");
         variables.put("entityId", orderBc.getId().intValue());
