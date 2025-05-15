@@ -446,6 +446,7 @@ public class BusinessCapabilityService {
         BusinessCapability businessCapability;
         if (orderBusinessCapability.getMutableBcId() != null) {
             businessCapability = findById(orderBusinessCapability.getMutableBcId());
+            businessCapability.setLastModifiedDate(new Date());
         } else {
             Optional<BusinessCapability> bcByCode = businessCapabilityRepository.findByCode(orderBusinessCapability.getCode());
             if (bcByCode.isPresent()) {
@@ -454,16 +455,15 @@ public class BusinessCapabilityService {
             businessCapability = new BusinessCapability();
             businessCapability.setCode(orderBusinessCapability.getCode());
             businessCapability.setCreatedDate(Date.from(Instant.now()));
-            businessCapability.setSource("FDM");
 
         }
+        businessCapability.setSource("FDM");
         businessCapability.setName(orderBusinessCapability.getName());
         businessCapability.setDescription(orderBusinessCapability.getDescription());
         businessCapability.setParentId(Long.parseLong(orderBusinessCapability.getParentId().toString()));
         businessCapability.setOwner(orderBusinessCapability.getOwner());
         businessCapability.setAuthor(orderBusinessCapability.getAuthor());
         businessCapability.setStatus(orderBusinessCapability.getStatus());
-        businessCapability.setLastModifiedDate(new Date());
         businessCapability.setDeletedDate(null);
         businessCapabilityRepository.save(businessCapability);
     }
