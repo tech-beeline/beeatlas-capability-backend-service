@@ -458,6 +458,7 @@ public class BusinessCapabilityService {
 
         }
         businessCapability.setSource("FDM");
+        businessCapability.setLink(null);
         businessCapability.setName(orderBusinessCapability.getName());
         businessCapability.setDescription(orderBusinessCapability.getDescription());
         businessCapability.setParentId(Long.parseLong(orderBusinessCapability.getParentId().toString()));
