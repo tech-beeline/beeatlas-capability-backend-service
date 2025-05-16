@@ -93,6 +93,7 @@ public class BusinessCapabilityOrderService {
                 .businessKey(businessKey)
                 .build();
         log.info("save bc");
+        orderBc = orderBcRepository.save(orderBc);
         orderBcRepository.save(orderBc);
 
         Map<String, Object> variables = new HashMap<>();
