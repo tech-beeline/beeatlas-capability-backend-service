@@ -37,4 +37,7 @@ public class CriteriasTc {
 
     @Column(name = "tc_id")
     private Long tcId;
+
+    private String comment;
+
 }

@@ -13,6 +13,7 @@ import java.util.List;
 public class GetCapabilityMapByIdDTO {
 
     private String name;
+    private String comment;
     private String description;
     private EntityType type;
     private List<GroupDTO> groups;

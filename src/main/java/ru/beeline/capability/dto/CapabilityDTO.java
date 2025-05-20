@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -29,5 +30,5 @@ public class CapabilityDTO {
     @JsonProperty("responsibilityProductId")
     private Integer responsibilityProductId;
     private Integer parentId;
-    private CriteriaDTO criteria;
+    private List<CriteriaDTO> criteria;
 }

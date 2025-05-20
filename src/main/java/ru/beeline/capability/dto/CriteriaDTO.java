@@ -16,4 +16,5 @@ public class CriteriaDTO {
     private Integer criteriaId;
     private Integer value;
     private Integer grade;
+    private String comment;
 }

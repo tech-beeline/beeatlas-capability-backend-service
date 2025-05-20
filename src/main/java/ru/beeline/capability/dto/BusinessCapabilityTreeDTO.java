@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.beeline.capability.domain.BusinessCapabilityCriteria;
 
 import java.util.Date;
 import java.util.List;

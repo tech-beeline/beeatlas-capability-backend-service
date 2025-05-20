@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Column;
-
 @Setter
 @Getter
 @NoArgsConstructor
@@ -17,8 +15,7 @@ import javax.persistence.Column;
 public class BusinessCapabilityCriteriaDTO {
     @JsonProperty("criterion_id")
     private Long criterionId;
-
     private Integer value;
-
     private Integer grade;
+    private String comment;
 }
