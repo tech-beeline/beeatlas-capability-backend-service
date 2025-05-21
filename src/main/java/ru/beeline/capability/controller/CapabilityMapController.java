@@ -34,7 +34,7 @@ public class CapabilityMapController {
     @Autowired
     private CapabilityMapService capabilityMapService;
 
-    @PostMapping()
+    @PostMapping("/v1/maps")
     @ApiOperation(value = "Создание карты возможностей")
     public ResponseEntity<CreateCapabilityMapResponseDTO> createCapabilityMap(@RequestBody PostCapabilityMapDTO postCapabilityMapDTO,
                                                                               HttpServletRequest request) {
@@ -42,7 +42,7 @@ public class CapabilityMapController {
                 request.getHeader(USER_ID_HEADER)), HttpStatus.CREATED);
     }
 
-    @PatchMapping("/groups/{mapId}")
+    @PatchMapping("/v1/maps/groups/{mapId}")
     @ApiOperation(value = "Обновления карты пользователя")
     public ResponseEntity patchCapabilityMap(@PathVariable Integer mapId,
                                              @RequestBody List<PatchCapabilityMapDTO> patchCapabilityMapDTO,
@@ -51,26 +51,26 @@ public class CapabilityMapController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @DeleteMapping("/{mapId}")
+    @DeleteMapping("/v1/maps/{mapId}")
     @ApiOperation(value = "Удаление карты пользователя")
     public ResponseEntity deleteCapabilityMap(@PathVariable Integer mapId, HttpServletRequest request) {
         capabilityMapService.deleteCapabilityMap(mapId, request.getHeader(USER_ID_HEADER));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/{Id}")
+    @GetMapping("/v1/maps/{Id}")
     @ApiOperation(value = "Получение карты по id")
     public GetCapabilityMapByIdDTO getCapabilityMapById(@PathVariable Integer Id) {
         return capabilityMapService.getCapabilityMapById(Id);
     }
 
-    @GetMapping
+    @GetMapping("/v1/maps")
     @ApiOperation(value = "Получение всех карт пользователя")
     public List<ShortCapabilityMapDTO> getCapabilityMaps(HttpServletRequest request) {
         return capabilityMapService.getCapabilityMaps(request.getHeader(USER_ID_HEADER));
     }
 
-    @PatchMapping("/{mapId}")
+    @PatchMapping("/v1/maps/{mapId}")
     @ApiOperation(value = "Изменение названия и описания карты")
     public ResponseEntity patchNameAndDescriptionCapabilityMap(@PathVariable Integer mapId,
                                                                @RequestBody NameAndDescriptionDTO nameAndDescriptionDTO,

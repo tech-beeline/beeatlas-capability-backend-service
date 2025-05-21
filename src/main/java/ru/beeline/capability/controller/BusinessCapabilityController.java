@@ -96,6 +96,13 @@ public class BusinessCapabilityController {
         return ResponseEntity.ok(new BusinessCapabilityOrderResponseDTO(businessKey));
     }
 
+    @PostMapping("/order/draft")
+    @ApiOperation(value = "Публикация черновика")
+    public ResponseEntity postOrderDraft(@RequestBody BusinessCapabilityOrderDraftRequestDTO request) {
+        orderService.createOrderDraft(request);
+        return ResponseEntity.ok("");
+    }
+
     @PatchMapping("/order/{id}")
     @ApiOperation(value = "Управление каталогом Capability")
     public ResponseEntity patchOrder(@PathVariable Integer id,

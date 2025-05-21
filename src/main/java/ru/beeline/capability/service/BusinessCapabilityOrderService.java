@@ -2,14 +2,13 @@ package ru.beeline.capability.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import ru.beeline.capability.client.BpmClient;
 import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.OrderBusinessCapability;
+import ru.beeline.capability.dto.BusinessCapabilityOrderDraftRequestDTO;
 import ru.beeline.capability.dto.BusinessCapabilityOrderPatchRequestDTO;
 import ru.beeline.capability.dto.BusinessCapabilityOrderRequestDTO;
 import ru.beeline.capability.exception.NotFoundException;
@@ -20,6 +19,7 @@ import ru.beeline.capability.repository.OrderBusinessCapabilityRepository;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -39,8 +39,10 @@ public class BusinessCapabilityOrderService {
         OrderBusinessCapability orderBusinessCapability = orderBcRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("OrderBusinessCapability не найдена"));
         if (request.getParentId() != null) {
-            BusinessCapability parentBusinessCapability = bcRepository.findById(Long.parseLong(request.getParentId().toString()))
-                    .orElseThrow(() -> new IllegalArgumentException("Родительская BC не найдена или не является доменной"));
+            BusinessCapability parentBusinessCapability = bcRepository.findById(Long.parseLong(request.getParentId()
+                                                                                                       .toString()))
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Родительская BC не найдена или не является доменной"));
         }
         orderBusinessCapability.setName(request.getName());
         orderBusinessCapability.setDescription(request.getDescription());
@@ -129,5 +131,54 @@ public class BusinessCapabilityOrderService {
         if (!errMsg.toString().isEmpty()) {
             throw new ValidationException(errMsg.toString());
         }
+    }
+
+    public String createOrderDraft(BusinessCapabilityOrderDraftRequestDTO request) {
+        log.info("validate request");
+        if (Objects.isNull(request.getName()) || request.getName().isEmpty()) {
+            throw new ValidationException("Отсутствует обязательное поле name");
+        }
+
+        Long mutableBcId = request.getMutableBcId();
+
+        String code;
+        if (mutableBcId != null) {
+            log.info("search bc code");
+            BusinessCapability mutableBc = bcRepository.findById(mutableBcId)
+                    .orElseThrow(() -> new IllegalArgumentException("изменение не существующей BC"));
+            code = mutableBc.getCode();
+        } else {
+            log.info("search maxId orderBc");
+            Integer maxId = orderBcRepository.findMaxId();
+            long nextId = maxId + 1;
+            code = String.format("NEW.BC-%06d", nextId);
+        }
+
+        log.info("search bc");
+        bcRepository.findByIdAndDeletedDateIsNullAndIsDomainTrue(Long.parseLong(request.getParentId().toString()))
+                .orElseThrow(() -> new IllegalArgumentException("Родительская BC не найдена или не является доменной"));
+
+        String businessKey = code + "_" + System.currentTimeMillis();
+
+
+        OrderBusinessCapability orderBc = OrderBusinessCapability.builder()
+                .id(orderBcRepository.findMaxId() + 1)
+                .code(code)
+                .name(request.getName())
+                .description(request.getDescription())
+                .owner(request.getOwner())
+                .author(request.getAuthor())
+                .status("PROPOSED")
+                .isDomain(false)
+                .parentId(request.getParentId())
+                .mutableBcId(mutableBcId)
+                .createdDate(LocalDateTime.now())
+                .businessKey(null)
+                .orderBusinessCapability(Integer.parseInt(RequestContext.getUserId()))
+                .build();
+        log.info("save bc");
+        orderBc = orderBcRepository.save(orderBc);
+        orderBcRepository.save(orderBc);
+        return businessKey;
     }
 }
