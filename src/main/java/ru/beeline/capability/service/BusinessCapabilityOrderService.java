@@ -74,7 +74,7 @@ public class BusinessCapabilityOrderService {
         }
 
         log.info("search bc");
-        bcRepository.findByIdAndDeletedDateIsNullAndIsDomainTrue(Long.parseLong(request.getParentId().toString()))
+        bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
                 .orElseThrow(() -> new IllegalArgumentException("Родительская BC не найдена или не является доменной"));
 
         String businessKey = code + "_" + System.currentTimeMillis();
@@ -93,6 +93,7 @@ public class BusinessCapabilityOrderService {
                 .mutableBcId(mutableBcId)
                 .createdDate(LocalDateTime.now())
                 .businessKey(businessKey)
+                .orderBusinessCapability(Integer.parseInt(RequestContext.getUserId()))
                 .build();
         log.info("save bc");
         orderBc = orderBcRepository.save(orderBc);
@@ -155,7 +156,7 @@ public class BusinessCapabilityOrderService {
         }
 
         log.info("search bc");
-        bcRepository.findByIdAndDeletedDateIsNullAndIsDomainTrue(Long.parseLong(request.getParentId().toString()))
+        bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
                 .orElseThrow(() -> new IllegalArgumentException("Родительская BC не найдена или не является доменной"));
 
         String businessKey = code + "_" + System.currentTimeMillis();

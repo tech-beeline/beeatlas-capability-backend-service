@@ -47,7 +47,5 @@ public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapa
 
     Optional<BusinessCapability> findByIdAndDeletedDateIsNull(Long id);
 
-    Optional<BusinessCapability> findByIdAndDeletedDateIsNullAndIsDomainTrue(Long id);
-
     Page<BusinessCapability> findByIsDomainTrueAndDeletedDateIsNull(Pageable pageable);
 }
