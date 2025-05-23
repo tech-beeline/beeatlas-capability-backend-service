@@ -28,8 +28,15 @@ public class BusinessCapabilityOrderController {
 
     @GetMapping("/order/draft")
     @ApiOperation(value = "Получение черновика", response = List.class)
-    public List<BusinessCapabilityOrderDraftResponseDTO> getBusinessCapabilityDraft() {
+    public List<BusinessCapabilityOrderDraftResponseDTO> getBusinessCapabilityOrderDraft() {
         return orderService.getBusinessCapabilityDraft();
+    }
+
+    @GetMapping("/order/{id}")
+    @ApiOperation(value = "Получение данных по идентификатору", response =
+            BusinessCapabilityOrderDraftResponseDTO.class)
+    public BusinessCapabilityOrderDraftResponseDTO getBusinessCapabilityOrderById(@PathVariable Integer id) {
+        return orderService.getBusinessCapabilityOrderById(id);
     }
 
     @PostMapping("/order/draft")

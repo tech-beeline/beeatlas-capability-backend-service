@@ -7,10 +7,14 @@ import ru.beeline.capability.client.BpmClient;
 import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.OrderBusinessCapability;
-import ru.beeline.capability.dto.*;
+import ru.beeline.capability.dto.BusinessCapabilityOrderDraftRequestDTO;
+import ru.beeline.capability.dto.BusinessCapabilityOrderDraftResponseDTO;
+import ru.beeline.capability.dto.BusinessCapabilityOrderPatchRequestDTO;
+import ru.beeline.capability.dto.BusinessCapabilityOrderRequestDTO;
 import ru.beeline.capability.exception.ForbiddenException;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
+import ru.beeline.capability.mapper.BusinessCapabilityOrderMapper;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.OrderBusinessCapabilityRepository;
 
@@ -34,30 +38,18 @@ public class BusinessCapabilityOrderService {
     @Autowired
     private OrderBusinessCapabilityRepository orderBusinessCapabilityRepository;
 
+    public BusinessCapabilityOrderDraftResponseDTO getBusinessCapabilityOrderById(Integer id) {
+        OrderBusinessCapability order = orderBcRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Сущность не найдена"));
+        return BusinessCapabilityOrderMapper.getBusinessCapabilityOrderDraftResponseDTO(order);
+    }
+
     public List<BusinessCapabilityOrderDraftResponseDTO> getBusinessCapabilityDraft() {
         List<OrderBusinessCapability> orderBusinessCapabilities = orderBcRepository.findByOrderOwnerIdAndBusinessKeyIsNull(
                 Integer.parseInt(RequestContext.getUserId()));
-
-        return orderBusinessCapabilities.stream().map(order -> {
-            return BusinessCapabilityOrderDraftResponseDTO.builder()
-                    .name(order.getName())
-                    .description(order.getDescription())
-                    .createdDate(order.getCreatedDate())
-                    .updateDate(order.getLastModifiedDate())
-                    .owner(order.getOwner())
-                    .parent(ParentOrMutableDTO.builder()
-                                    .id(order.getParent().getId())
-                                    .code(order.getParent().getCode())
-                                    .name(order.getParent().getName())
-                                    .build())
-                    .author(order.getAuthor())
-                    .mutable(ParentOrMutableDTO.builder()
-                                     .id(order.getMutableBusinessCapability().getId())
-                                     .code(order.getMutableBusinessCapability().getCode())
-                                     .name(order.getMutableBusinessCapability().getName())
-                                     .build())
-                    .build();
-        }).collect(Collectors.toList());
+        return orderBusinessCapabilities.stream()
+                .map(BusinessCapabilityOrderMapper::getBusinessCapabilityOrderDraftResponseDTO)
+                .collect(Collectors.toList());
     }
 
     public void editOrderDraft(Integer id, BusinessCapabilityOrderRequestDTO request, Boolean publish) {
@@ -287,4 +279,5 @@ public class BusinessCapabilityOrderService {
         orderBcRepository.save(orderBc);
         return businessKey;
     }
+
 }
