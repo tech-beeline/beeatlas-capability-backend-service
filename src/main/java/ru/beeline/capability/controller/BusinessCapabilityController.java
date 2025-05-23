@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.dto.*;
-import ru.beeline.capability.service.BusinessCapabilityOrderService;
 import ru.beeline.capability.service.BusinessCapabilityService;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenIdsDTO;
@@ -24,9 +23,6 @@ public class BusinessCapabilityController {
 
     @Autowired
     private BusinessCapabilityService businessCapabilityService;
-
-    @Autowired
-    private BusinessCapabilityOrderService orderService;
 
     @GetMapping("/{id}/children")
     @ApiOperation(value = "Получение всех дочерних бизнес возможностей", response = BusinessCapabilityChildrenDTO.class)
@@ -68,10 +64,9 @@ public class BusinessCapabilityController {
 
     @GetMapping
     @ApiOperation(value = "Получение бизнес возможностей")
-    public List<BusinessCapabilityShortDTO> getBusinessCapabilities(
-            @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "findBy", required = false, defaultValue = "ALL") String findBy,
-            @RequestParam(value = "offset", required = false) Integer offset) {
+    public List<BusinessCapabilityShortDTO> getBusinessCapabilities(@RequestParam(value = "limit", required = false) Integer limit,
+                                                                    @RequestParam(value = "findBy", required = false, defaultValue = "ALL") String findBy,
+                                                                    @RequestParam(value = "offset", required = false) Integer offset) {
         return businessCapabilityService.getCapabilities(limit, offset, findBy);
     }
 
@@ -82,43 +77,10 @@ public class BusinessCapabilityController {
                                                 @RequestHeader(value = USER_PRODUCTS_IDS_HEADER, required = false) String productIds,
                                                 @RequestHeader(value = USER_ROLES_HEADER, required = false) String roles,
                                                 @RequestHeader(value = USER_PERMISSION_HEADER, required = false) String permissions,
-                                                @RequestHeader(value = SOURCE, required = false) String source
-    ) {
+                                                @RequestHeader(value = SOURCE, required = false) String source) {
         businessCapabilityService.validateBusinessCapabilityDTO(capability, userId, productIds, roles, permissions);
         businessCapabilityService.putCapability(capability, userId, productIds, roles, permissions, source);
         return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @PostMapping("/order")
-    @ApiOperation(value = "Публикация каталога Capability")
-    public ResponseEntity postOrder(@RequestBody BusinessCapabilityOrderRequestDTO request) {
-        String businessKey = orderService.createOrder(request);
-        return ResponseEntity.ok(new BusinessCapabilityOrderResponseDTO(businessKey));
-    }
-
-    @PostMapping("/order/draft")
-    @ApiOperation(value = "Публикация черновика")
-    public ResponseEntity postOrderDraft(@RequestBody BusinessCapabilityOrderDraftRequestDTO request) {
-        orderService.createOrderDraft(request);
-        return ResponseEntity.ok("");
-    }
-
-    @PatchMapping("/order/{id}")
-    @ApiOperation(value = "Управление каталогом Capability")
-    public ResponseEntity patchOrder(@PathVariable Integer id,
-                                     @RequestBody BusinessCapabilityOrderPatchRequestDTO request,
-                                     @RequestParam(required = false) String statusAlias) {
-        orderService.editOrder(id, request, statusAlias);
-        return new ResponseEntity(HttpStatus.OK);
-    }
-
-    @PatchMapping("/order/draft/{id}")
-    @ApiOperation(value = "Управление каталогом Capability")
-    public ResponseEntity patchOrderDraft(@PathVariable Integer id,
-                                     @RequestBody BusinessCapabilityOrderRequestDTO request,
-                                     @RequestParam(required = false) Boolean publish) {
-        orderService.editOrderDraft(id, request, publish);
-        return new ResponseEntity(HttpStatus.OK);
     }
 
     @DeleteMapping("/{code}")
@@ -138,8 +100,7 @@ public class BusinessCapabilityController {
     @ApiOperation(value = "Получение выбраных версий BC")
     public List<GetBcHistoryVersionDTO> getBusinessCapabilityHistoryVersion(@PathVariable Long id,
                                                                             @PathVariable Integer version,
-                                                                            @RequestParam(value = "other_version",
-                                                                                    required = false) Integer otherVersion) {
+                                                                            @RequestParam(value = "other_version", required = false) Integer otherVersion) {
         return businessCapabilityService.getBusinessCapabilityHistoryVersion(id, version, otherVersion);
     }
 
