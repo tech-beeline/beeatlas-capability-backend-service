@@ -48,8 +48,8 @@ public class OrderBusinessCapability {
     @Column(name = "parent_id")
     private Integer parentId;
 
-    @Column(name = "order_business_capability")
-    private Integer orderBusinessCapability;
+    @Column(name = "order_owner_id ")
+    private Integer orderOwnerId;
 
     @Column(name = "mutable_bc_id")
     private Long mutableBcId;

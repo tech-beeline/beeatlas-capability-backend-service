@@ -112,6 +112,15 @@ public class BusinessCapabilityController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    @PatchMapping("/order/draft/{id}")
+    @ApiOperation(value = "Управление каталогом Capability")
+    public ResponseEntity patchOrderDraft(@PathVariable Integer id,
+                                     @RequestBody BusinessCapabilityOrderRequestDTO request,
+                                     @RequestParam(required = false) Boolean publish) {
+        orderService.editOrderDraft(id, request, publish);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
     @DeleteMapping("/{code}")
     @ApiOperation(value = "Удаление записи из таблицы find_name_sort_table со статусом BC")
     public ResponseEntity deleteBusinessCapability(@PathVariable String code) {
