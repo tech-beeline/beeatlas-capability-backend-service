@@ -28,7 +28,7 @@ import static ru.beeline.capability.utils.Constants.USER_ID_HEADER;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
-@RequestMapping("/api/v1/maps")
+@RequestMapping("/api")
 public class CapabilityMapController {
 
     @Autowired
