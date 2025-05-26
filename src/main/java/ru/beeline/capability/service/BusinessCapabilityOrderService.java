@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.beeline.capability.client.BpmClient;
+import ru.beeline.capability.client.UserClient;
 import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.OrderBusinessCapability;
@@ -37,6 +38,8 @@ public class BusinessCapabilityOrderService {
     private BpmClient bpmClient;
     @Autowired
     private OrderBusinessCapabilityRepository orderBusinessCapabilityRepository;
+    @Autowired
+    private UserClient userClient;
 
     public BusinessCapabilityOrderDraftResponseDTO getBusinessCapabilityOrderById(Integer id) {
         OrderBusinessCapability order = orderBcRepository.findById(id)
@@ -266,7 +269,7 @@ public class BusinessCapabilityOrderService {
                 .name(request.getName())
                 .description(request.getDescription())
                 .owner(request.getOwner())
-                .author(request.getAuthor())
+                .author(userClient.getUserProfile(Integer.parseInt(RequestContext.getUserId())).getFullName())
                 .status("PROPOSED")
                 .isDomain(false)
                 .parentId(request.getParentId())

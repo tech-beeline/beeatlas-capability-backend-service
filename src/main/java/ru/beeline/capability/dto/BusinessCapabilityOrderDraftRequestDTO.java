@@ -13,7 +13,6 @@ public class BusinessCapabilityOrderDraftRequestDTO {
     private String description;
     private String owner;
     private Integer parentId;
-    private String author;
     private Long mutableBcId;
 
 }
