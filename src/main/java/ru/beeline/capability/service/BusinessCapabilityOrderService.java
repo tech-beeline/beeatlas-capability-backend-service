@@ -252,10 +252,11 @@ public class BusinessCapabilityOrderService {
             code = String.format("NEW.BC-%06d", nextId);
         }
 
-        log.info("search bc");
-        bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
-                .orElseThrow(() -> new IllegalArgumentException("Указаная несуществующая родительская возможность"));
-
+        if (request.getParentId() != null) {
+            log.info("search bc");
+            bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
+                    .orElseThrow(() -> new IllegalArgumentException("Указана несуществующая родительская возможность"));
+        }
         String businessKey = code + "_" + System.currentTimeMillis();
 
 
