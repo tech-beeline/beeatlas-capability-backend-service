@@ -76,7 +76,7 @@ public class BusinessCapabilityOrderService {
             code = mutableBc.getCode();
         } else if (mutableBcId == null && !Objects.nonNull(orderBusinessCapability.getMutableBcId())) {
             log.info("search maxId orderBc");
-            Integer maxId = orderBcRepository.findMaxId();
+            Integer maxId = orderBcRepository.getNextSequenceValue();
             long nextId = maxId + 1;
             code = String.format("NEW.BC-%06d", nextId);
         }
@@ -96,10 +96,6 @@ public class BusinessCapabilityOrderService {
         }
         if (request.getParentId() != null) {
             orderBusinessCapability.setParentId(request.getParentId());
-            isUpdated = true;
-        }
-        if (request.getAuthor() != null && !request.getAuthor().isEmpty()) {
-            orderBusinessCapability.setAuthor(request.getAuthor());
             isUpdated = true;
         }
         if (request.getMutableBcId() != null) {
@@ -139,8 +135,7 @@ public class BusinessCapabilityOrderService {
         OrderBusinessCapability orderBusinessCapability = orderBcRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("OrderBusinessCapability не найдена"));
         if (request.getParentId() != null) {
-            BusinessCapability parentBusinessCapability = bcRepository.findById(Long.parseLong(request.getParentId()
-                                                                                                       .toString()))
+            bcRepository.findById(Long.parseLong(request.getParentId().toString()))
                     .orElseThrow(() -> new IllegalArgumentException(
                             "Родительская BC не найдена или не является доменной"));
         }
@@ -168,7 +163,7 @@ public class BusinessCapabilityOrderService {
             code = mutableBc.getCode();
         } else {
             log.info("search maxId orderBc");
-            Integer maxId = orderBcRepository.findMaxId();
+            Integer maxId = orderBcRepository.getNextSequenceValue();
             long nextId = maxId + 1;
             code = String.format("NEW.BC-%06d", nextId);
         }
@@ -181,12 +176,12 @@ public class BusinessCapabilityOrderService {
 
 
         OrderBusinessCapability orderBc = OrderBusinessCapability.builder()
-                .id(orderBcRepository.findMaxId() + 1)
+                .id(orderBcRepository.getNextSequenceValue() + 1)
                 .code(code)
                 .name(request.getName())
                 .description(request.getDescription())
                 .owner(request.getOwner())
-                .author(request.getAuthor())
+                .author(userClient.getUserProfile(Integer.parseInt(RequestContext.getUserId())).getFullName())
                 .status("PROPOSED")
                 .isDomain(false)
                 .parentId(request.getParentId())
@@ -226,9 +221,6 @@ public class BusinessCapabilityOrderService {
         if (request.getParentId() == null) {
             errMsg.append("Отсутствует обязательное поле parentId\n");
         }
-        if (request.getAuthor() == null || request.getAuthor().isEmpty()) {
-            errMsg.append("Отсутствует обязательное поле author\n");
-        }
         if (!errMsg.toString().isEmpty()) {
             throw new ValidationException(errMsg.toString());
         }
@@ -250,7 +242,7 @@ public class BusinessCapabilityOrderService {
             code = mutableBc.getCode();
         } else {
             log.info("search maxId orderBc");
-            Integer maxId = orderBcRepository.findMaxId();
+            Integer maxId = orderBcRepository.getNextSequenceValue();
             long nextId = maxId + 1;
             code = String.format("NEW.BC-%06d", nextId);
         }
@@ -264,7 +256,7 @@ public class BusinessCapabilityOrderService {
 
 
         OrderBusinessCapability orderBc = OrderBusinessCapability.builder()
-                .id(orderBcRepository.findMaxId() + 1)
+                .id(orderBcRepository.getNextSequenceValue() + 1)
                 .code(code)
                 .name(request.getName())
                 .description(request.getDescription())
