@@ -76,7 +76,7 @@ public class BusinessCapabilityOrderService {
             code = mutableBc.getCode();
         } else if (mutableBcId == null && !Objects.nonNull(orderBusinessCapability.getMutableBcId())) {
             log.info("search maxId orderBc");
-            Integer maxId = orderBcRepository.getNextSequenceValue();
+            Integer maxId = orderBcRepository.getNextSequenceValue() + 1;
             long nextId = maxId + 1;
             code = String.format("NEW.BC-%06d", nextId);
         }
@@ -170,7 +170,7 @@ public class BusinessCapabilityOrderService {
             code = mutableBc.getCode();
         } else {
             log.info("search maxId orderBc");
-            Integer maxId = orderBcRepository.getNextSequenceValue();
+            Integer maxId = orderBcRepository.getNextSequenceValue() + 1;
             long nextId = maxId + 1;
             code = String.format("NEW.BC-%06d", nextId);
         }
@@ -249,7 +249,7 @@ public class BusinessCapabilityOrderService {
             code = mutableBc.getCode();
         } else {
             log.info("search maxId orderBc");
-            Integer maxId = orderBcRepository.getNextSequenceValue();
+            Integer maxId = orderBcRepository.getNextSequenceValue() + 1;
             long nextId = maxId + 1;
             code = String.format("NEW.BC-%06d", nextId);
         }
