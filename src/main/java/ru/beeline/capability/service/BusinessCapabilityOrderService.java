@@ -3,6 +3,7 @@ package ru.beeline.capability.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.beeline.capability.client.BpmClient;
 import ru.beeline.capability.client.UserClient;
 import ru.beeline.capability.controller.RequestContext;
@@ -18,6 +19,7 @@ import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.mapper.BusinessCapabilityOrderMapper;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.OrderBusinessCapabilityRepository;
+import ru.beeline.fdmlib.dto.bpm.ApplicationExtendedDTO;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -129,6 +131,7 @@ public class BusinessCapabilityOrderService {
         }
     }
 
+    @Transactional
     public void editOrder(Integer id, BusinessCapabilityOrderPatchRequestDTO request, String statusAlias) {
         OrderBusinessCapability orderBusinessCapability = orderBcRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("OrderBusinessCapability не найдена"));
@@ -136,6 +139,12 @@ public class BusinessCapabilityOrderService {
             bcRepository.findById(Long.parseLong(request.getParentId().toString()))
                     .orElseThrow(() -> new IllegalArgumentException(
                             "Родительская BC не найдена или не является доменной"));
+        }
+        ApplicationExtendedDTO app =bpmClient.getApplication(orderBusinessCapability.getBusinessKey());
+        if (Integer.parseInt(RequestContext.getUserId())!=app.getAuthor().getId() &&
+                Integer.parseInt(RequestContext.getUserId())!=app.getExecutor().getId()
+        ) {
+            throw new ForbiddenException("403 Forbidden");
         }
         orderBusinessCapability.setName(request.getName());
         orderBusinessCapability.setDescription(request.getDescription());

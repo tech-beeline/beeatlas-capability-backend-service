@@ -2,11 +2,13 @@ package ru.beeline.capability.client;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.dto.CommentDTO;
+import ru.beeline.fdmlib.dto.bpm.ApplicationExtendedDTO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,8 +23,7 @@ public class BpmClient {
     @Value("${integration.bpm-server-url}")
     private final String bpmBaseUrl;
 
-    public BpmClient(@Value("${integration.bpm-server-url}") String bpmBaseUrl,
-                     RestTemplate restTemplate) {
+    public BpmClient(@Value("${integration.bpm-server-url}") String bpmBaseUrl, RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
         this.bpmBaseUrl = bpmBaseUrl;
     }
@@ -36,13 +37,12 @@ public class BpmClient {
             headers.set(USER_ROLES_HEADER, RequestContext.getRoles().toString());
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            HttpEntity<CommentDTO> entity = new HttpEntity<>(CommentDTO.builder()
-                    .comment(comment)
-                    .build(),
-                    headers);
+            HttpEntity<CommentDTO> entity = new HttpEntity<>(CommentDTO.builder().comment(comment).build(), headers);
 
             ResponseEntity response = restTemplate.exchange(bpmBaseUrl + "/application/" + businessKey + "/change-status/" + statusAlias,
-                    HttpMethod.PATCH, entity, ResponseEntity.class).getBody();
+                                                            HttpMethod.PATCH,
+                                                            entity,
+                                                            ResponseEntity.class).getBody();
             if (response.getStatusCode().is4xxClientError() || response.getStatusCode().is5xxServerError()) {
                 throw new RuntimeException("editStatusProcess filed");
             }
@@ -75,5 +75,18 @@ public class BpmClient {
         body.put("variables", vars);
 
         restTemplate.postForEntity(url, body, Void.class);
+    }
+
+    public ApplicationExtendedDTO getApplication(String businessKey) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        log.info("request to bpm");
+        ResponseEntity<ApplicationExtendedDTO> response = restTemplate.exchange(bpmBaseUrl + "camunda-process/api/v1/application/" + businessKey,
+                                                                                HttpMethod.GET,
+                                                                                new HttpEntity<>(headers),
+                                                                                new ParameterizedTypeReference<ApplicationExtendedDTO>() {});
+        log.info("response from bpm: " + response.getBody());
+        return response.getBody();
     }
 }
