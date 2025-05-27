@@ -20,10 +20,7 @@ import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.OrderBusinessCapabilityRepository;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -51,6 +48,7 @@ public class BusinessCapabilityOrderService {
         List<OrderBusinessCapability> orderBusinessCapabilities = orderBcRepository.findByOrderOwnerIdAndBusinessKeyIsNull(
                 Integer.parseInt(RequestContext.getUserId()));
         return orderBusinessCapabilities.stream()
+                .sorted(Comparator.comparing(OrderBusinessCapability::getCreatedDate).reversed())
                 .map(BusinessCapabilityOrderMapper::getBusinessCapabilityOrderDraftResponseDTO)
                 .collect(Collectors.toList());
     }
