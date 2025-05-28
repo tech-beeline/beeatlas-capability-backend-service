@@ -82,7 +82,8 @@ public class BpmClient {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         log.info("request to bpm");
-        ResponseEntity<ApplicationExtendedDTO> response = restTemplate.exchange(bpmBaseUrl + "camunda-process/api/v1/application/" + businessKey,
+        ResponseEntity<ApplicationExtendedDTO> response = restTemplate.exchange(bpmBaseUrl + "/camunda-process/api/v1" +
+                                                                                        "/application/" + businessKey,
                                                                                 HttpMethod.GET,
                                                                                 new HttpEntity<>(headers),
                                                                                 new ParameterizedTypeReference<ApplicationExtendedDTO>() {});
