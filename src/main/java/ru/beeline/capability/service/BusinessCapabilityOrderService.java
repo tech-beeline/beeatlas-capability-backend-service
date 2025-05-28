@@ -62,7 +62,7 @@ public class BusinessCapabilityOrderService {
         if (orderBusinessCapability.getOrderOwnerId() != Integer.parseInt(RequestContext.getUserId())) {
             throw new ForbiddenException("403 Forbidden");
         }
-        if (orderBusinessCapability.getBusinessKey() == null) {
+        if (orderBusinessCapability.getBusinessKey() != null) {
             throw new IllegalArgumentException("Не является черновиком");
         }
 
