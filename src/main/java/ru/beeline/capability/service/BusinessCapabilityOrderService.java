@@ -79,9 +79,10 @@ public class BusinessCapabilityOrderService {
             BusinessCapability mutableBc = bcRepository.findById(mutableBcId)
                     .orElseThrow(() -> new IllegalArgumentException("изменение не существующей BC"));
             code = mutableBc.getCode();
-        } else if (mutableBcId == null && !Objects.nonNull(orderBusinessCapability.getMutableBcId())) {
+        } else if (mutableBcId == null && Objects.nonNull(orderBusinessCapability.getMutableBcId())) {
             code = String.format("NEW.BC-%06d", id);
         }
+        orderBusinessCapability.setCode(code);
         orderBusinessCapabilityRepository.save(orderBusinessCapability);
         boolean isUpdated = false;
         if (request.getName() != null && !request.getName().isEmpty() && !request.getName().equals(orderBusinessCapability.getName())) {
