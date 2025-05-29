@@ -110,8 +110,11 @@ public class BusinessCapabilityOrderService {
         }
         if (publish) {
             log.info("search bc");
-            bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
-                    .orElseThrow(() -> new IllegalArgumentException("Указана несуществующая родительская возможность"));
+            if(request.getParentId()!= null) {
+                bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "Указана несуществующая родительская возможность"));
+            }
             if (!orderBusinessCapability.getMutableBusinessCapability().getCode().equals(code)) {
                 throw new IllegalArgumentException("изменение не существующей BC");
             }
