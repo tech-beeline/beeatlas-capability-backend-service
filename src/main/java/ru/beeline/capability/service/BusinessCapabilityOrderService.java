@@ -69,15 +69,20 @@ public class BusinessCapabilityOrderService {
         Long mutableBcId = request.getMutableBcId();
 
         String code = null;
+        if(request.getParentId()!= null) {
+            bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Указана несуществующая родительская возможность"));
+        }
         if (mutableBcId != null) {
             log.info("search bc code");
             BusinessCapability mutableBc = bcRepository.findById(mutableBcId)
                     .orElseThrow(() -> new IllegalArgumentException("изменение не существующей BC"));
             code = mutableBc.getCode();
         } else if (mutableBcId == null && !Objects.nonNull(orderBusinessCapability.getMutableBcId())) {
-            log.info("search maxId orderBc");
             code = String.format("NEW.BC-%06d", id);
         }
+        orderBusinessCapabilityRepository.save(orderBusinessCapability);
         boolean isUpdated = false;
         if (request.getName() != null && !request.getName().isEmpty() && !request.getName().equals(orderBusinessCapability.getName())) {
             orderBusinessCapability.setName(request.getName());
@@ -95,11 +100,6 @@ public class BusinessCapabilityOrderService {
         if (request.getParentId() != null && !request.getParentId().equals(orderBusinessCapability.getParentId())) {
             orderBusinessCapability.setParentId(request.getParentId());
             isUpdated = true;
-            if(request.getParentId()!= null) {
-                bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
-                        .orElseThrow(() -> new IllegalArgumentException(
-                                "Указана несуществующая родительская возможность"));
-            }
         }
         if (request.getMutableBcId() != null) {
             orderBusinessCapability.setMutableBcId(request.getMutableBcId());
