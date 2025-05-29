@@ -76,27 +76,30 @@ public class BusinessCapabilityOrderService {
             code = mutableBc.getCode();
         } else if (mutableBcId == null && !Objects.nonNull(orderBusinessCapability.getMutableBcId())) {
             log.info("search maxId orderBc");
-            Integer maxId = orderBcRepository.getLastSequenceValue();
-            long nextId = maxId + 1;
-            code = String.format("NEW.BC-%06d", nextId);
+            code = String.format("NEW.BC-%06d", id);
         }
         boolean isUpdated = false;
-        if (request.getName() != null && !request.getName().isEmpty()) {
+        if (request.getName() != null && !request.getName().isEmpty() && !request.getName().equals(orderBusinessCapability.getName())) {
             orderBusinessCapability.setName(request.getName());
             isUpdated = true;
         }
 
-        if (request.getDescription() != null && !request.getDescription().isEmpty()) {
+        if (request.getDescription() != null && !request.getDescription().isEmpty() && !request.getDescription().equals(orderBusinessCapability.getDescription())) {
             orderBusinessCapability.setDescription(request.getDescription());
             isUpdated = true;
         }
-        if (request.getOwner() != null && !request.getOwner().isEmpty()) {
+        if (request.getOwner() != null && !request.getOwner().isEmpty() && !request.getOwner().equals(orderBusinessCapability.getOwner())) {
             orderBusinessCapability.setOwner(request.getOwner());
             isUpdated = true;
         }
-        if (request.getParentId() != null) {
+        if (request.getParentId() != null && !request.getParentId().equals(orderBusinessCapability.getParentId())) {
             orderBusinessCapability.setParentId(request.getParentId());
             isUpdated = true;
+            if(request.getParentId()!= null) {
+                bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "Указана несуществующая родительская возможность"));
+            }
         }
         if (request.getMutableBcId() != null) {
             orderBusinessCapability.setMutableBcId(request.getMutableBcId());
@@ -110,11 +113,6 @@ public class BusinessCapabilityOrderService {
         }
         if (publish) {
             log.info("search bc");
-            if(request.getParentId()!= null) {
-                bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
-                        .orElseThrow(() -> new IllegalArgumentException(
-                                "Указана несуществующая родительская возможность"));
-            }
             if (!orderBusinessCapability.getMutableBusinessCapability().getCode().equals(code)) {
                 throw new IllegalArgumentException("изменение не существующей BC");
             }
