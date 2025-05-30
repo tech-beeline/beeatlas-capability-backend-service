@@ -6,6 +6,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import ru.beeline.capability.controller.RequestContext;
@@ -41,16 +42,22 @@ public class BpmClient {
 
             HttpEntity<CommentDTO> entity = new HttpEntity<>(CommentDTO.builder().comment(comment).build(), headers);
 
-            ResponseEntity response = restTemplate.exchange(bpmBaseUrl + "/application/" + businessKey + "/change-status/" + statusAlias,
+            restTemplate.exchange(bpmBaseUrl + "/camunda-process/api/v1/application/" + businessKey + "/change-status/" + statusAlias,
                                                             HttpMethod.PATCH,
                                                             entity,
-                                                            ResponseEntity.class).getBody();
-            if (response.getStatusCode().is4xxClientError() || response.getStatusCode().is5xxServerError()) {
-                throw new RuntimeException("editStatusProcess filed");
-            }
+                                                            Void.class).getBody();
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            throw new ResponseStatusException(
+                    e.getStatusCode(), e.getResponseBodyAsString(),
+                    e
+            );
         } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new RuntimeException("Error while uploading file");
+            log.error("Неизвестная ошибка: {}", e.getMessage());
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Внутренняя ошибка при обработке запроса",
+                    e
+            );
         }
     }
 

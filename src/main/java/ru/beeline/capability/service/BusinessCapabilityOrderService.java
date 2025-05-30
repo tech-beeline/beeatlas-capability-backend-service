@@ -145,7 +145,7 @@ public class BusinessCapabilityOrderService {
         if (request.getParentId() != null) {
             bcRepository.findById(Long.parseLong(request.getParentId().toString()))
                     .orElseThrow(() -> new IllegalArgumentException(
-                            "Родительская BC не найдена или не является доменной"));
+                            "Указана несуществующая родительская возможность"));
         }
         ApplicationExtendedDTO app = bpmClient.getApplication(orderBusinessCapability.getBusinessKey());
         if (Integer.parseInt(RequestContext.getUserId()) != app.getAuthor().getId()
@@ -154,12 +154,32 @@ public class BusinessCapabilityOrderService {
         ) {
             throw new ForbiddenException("403 Forbidden");
         }
-        orderBusinessCapability.setName(request.getName());
-        orderBusinessCapability.setDescription(request.getDescription());
-        orderBusinessCapability.setOwner(request.getOwner());
-        orderBusinessCapability.setParentId(request.getParentId());
-        orderBusinessCapability.setLastModifiedDate(LocalDateTime.now());
-        orderBusinessCapabilityRepository.save(orderBusinessCapability);
+
+        boolean isUpdated = false;
+        if (request.getDescription() != null && !request.getDescription().isEmpty() && !request.getDescription()
+                .equals(orderBusinessCapability.getDescription())) {
+            orderBusinessCapability.setDescription(request.getDescription());
+            isUpdated = true;
+        }
+        if (request.getOwner() != null && !request.getOwner().isEmpty() && !request.getOwner()
+                .equals(orderBusinessCapability.getOwner())) {
+            orderBusinessCapability.setOwner(request.getOwner());
+            isUpdated = true;
+        }
+        if (request.getParentId() != null && !request.getParentId().equals(orderBusinessCapability.getParentId())) {
+            orderBusinessCapability.setParentId(request.getParentId());
+            isUpdated = true;
+        }
+        if (request.getName() != null && !request.getName().equals(orderBusinessCapability.getName())) {
+            orderBusinessCapability.setName(request.getName());
+            isUpdated = true;
+        }
+        if (isUpdated) {
+            log.info("save bc");
+            orderBusinessCapability.setLastModifiedDate(LocalDateTime.now());
+            orderBusinessCapability = orderBusinessCapabilityRepository.save(orderBusinessCapability);
+        }
+
         if (statusAlias != null) {
             bpmClient.editStatusProcess(request.getComment(), orderBusinessCapability.getBusinessKey(), statusAlias);
         }
