@@ -59,7 +59,7 @@ public class BusinessCapabilityOrderController {
     @ApiOperation(value = "Управление каталогом Capability")
     public ResponseEntity patchOrderDraft(@PathVariable Integer id,
                                           @RequestBody BusinessCapabilityOrderRequestDTO request,
-                                          @RequestParam(required = false) Boolean publish) {
+                                          @RequestParam(required = false) boolean publish) {
         orderService.editOrderDraft(id, request, publish);
         return new ResponseEntity(HttpStatus.OK);
     }

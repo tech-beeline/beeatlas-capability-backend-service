@@ -69,10 +69,9 @@ public class BusinessCapabilityOrderService {
         Long mutableBcId = request.getMutableBcId();
 
         String code = null;
-        if(request.getParentId()!= null) {
+        if (request.getParentId() != null) {
             bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
-                    .orElseThrow(() -> new IllegalArgumentException(
-                            "Указана несуществующая родительская возможность"));
+                    .orElseThrow(() -> new IllegalArgumentException("Указана несуществующая родительская возможность"));
         }
         if (mutableBcId != null) {
             log.info("search bc code");
@@ -85,16 +84,19 @@ public class BusinessCapabilityOrderService {
         orderBusinessCapability.setCode(code);
         orderBusinessCapabilityRepository.save(orderBusinessCapability);
         boolean isUpdated = false;
-        if (request.getName() != null && !request.getName().isEmpty() && !request.getName().equals(orderBusinessCapability.getName())) {
+        if (request.getName() != null && !request.getName().isEmpty() && !request.getName()
+                .equals(orderBusinessCapability.getName())) {
             orderBusinessCapability.setName(request.getName());
             isUpdated = true;
         }
 
-        if (request.getDescription() != null && !request.getDescription().isEmpty() && !request.getDescription().equals(orderBusinessCapability.getDescription())) {
+        if (request.getDescription() != null && !request.getDescription().isEmpty() && !request.getDescription()
+                .equals(orderBusinessCapability.getDescription())) {
             orderBusinessCapability.setDescription(request.getDescription());
             isUpdated = true;
         }
-        if (request.getOwner() != null && !request.getOwner().isEmpty() && !request.getOwner().equals(orderBusinessCapability.getOwner())) {
+        if (request.getOwner() != null && !request.getOwner().isEmpty() && !request.getOwner()
+                .equals(orderBusinessCapability.getOwner())) {
             orderBusinessCapability.setOwner(request.getOwner());
             isUpdated = true;
         }
@@ -137,14 +139,18 @@ public class BusinessCapabilityOrderService {
     public void editOrder(Integer id, BusinessCapabilityOrderPatchRequestDTO request, String statusAlias) {
         OrderBusinessCapability orderBusinessCapability = orderBcRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("OrderBusinessCapability не найдена"));
+        if (orderBusinessCapability.getBusinessKey() == null) {
+            throw new IllegalArgumentException("Указанная заявка является черновиком");
+        }
         if (request.getParentId() != null) {
             bcRepository.findById(Long.parseLong(request.getParentId().toString()))
                     .orElseThrow(() -> new IllegalArgumentException(
                             "Родительская BC не найдена или не является доменной"));
         }
-        ApplicationExtendedDTO app =bpmClient.getApplication(orderBusinessCapability.getBusinessKey());
-        if (Integer.parseInt(RequestContext.getUserId())!=app.getAuthor().getId() &&
-                Integer.parseInt(RequestContext.getUserId())!=app.getExecutor().getId()
+        ApplicationExtendedDTO app = bpmClient.getApplication(orderBusinessCapability.getBusinessKey());
+        if (Integer.parseInt(RequestContext.getUserId()) != app.getAuthor().getId()
+                && (app.getExecutor() == null
+                || Integer.parseInt(RequestContext.getUserId()) != app.getExecutor().getId())
         ) {
             throw new ForbiddenException("403 Forbidden");
         }

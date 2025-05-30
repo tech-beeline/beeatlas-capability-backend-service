@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.dto.CommentDTO;
 import ru.beeline.fdmlib.dto.bpm.ApplicationExtendedDTO;
@@ -78,7 +80,8 @@ public class BpmClient {
     }
 
     public ApplicationExtendedDTO getApplication(String businessKey) {
-        HttpHeaders headers = new HttpHeaders();
+        try {
+            HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set(USER_ID_HEADER, RequestContext.getUserId());
         headers.set(USER_PERMISSION_HEADER, RequestContext.getUserPermissions().toString());
@@ -93,5 +96,10 @@ public class BpmClient {
                                                                                 new ParameterizedTypeReference<ApplicationExtendedDTO>() {});
         log.info("response from bpm: " + response.getBody());
         return response.getBody();
+        } catch (HttpClientErrorException.NotFound e) {
+            String msg = "Запись с данным businessKey: " + businessKey + " не найдена";
+            log.warn(msg);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, msg, e);
+        }
     }
 }
