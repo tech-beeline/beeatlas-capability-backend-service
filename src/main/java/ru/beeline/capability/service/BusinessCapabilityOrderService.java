@@ -69,10 +69,6 @@ public class BusinessCapabilityOrderService {
         Long mutableBcId = request.getMutableBcId();
 
         String code = null;
-        if (request.getParentId() != null) {
-            bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
-                    .orElseThrow(() -> new IllegalArgumentException("Указана несуществующая родительская возможность"));
-        }
         if (mutableBcId != null) {
             log.info("search bc code");
             BusinessCapability mutableBc = bcRepository.findById(mutableBcId)
@@ -104,7 +100,7 @@ public class BusinessCapabilityOrderService {
             orderBusinessCapability.setParentId(request.getParentId());
             isUpdated = true;
         }
-        if (request.getMutableBcId() != null) {
+        if (request.getMutableBcId() != null || Objects.nonNull(orderBusinessCapability.getMutableBcId())) {
             orderBusinessCapability.setMutableBcId(request.getMutableBcId());
             isUpdated = true;
         }
@@ -116,7 +112,11 @@ public class BusinessCapabilityOrderService {
         }
         if (publish) {
             log.info("search bc");
-            if (!orderBusinessCapability.getMutableBusinessCapability().getCode().equals(code)) {
+            if (request.getParentId() != null) {
+                bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
+                        .orElseThrow(() -> new IllegalArgumentException("Указана несуществующая родительская возможность"));
+            }
+            if (request.getMutableBcId()!=null && orderBusinessCapability.getMutableBusinessCapability()==null) {
                 throw new IllegalArgumentException("изменение не существующей BC");
             }
 
