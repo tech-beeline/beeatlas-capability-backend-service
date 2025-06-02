@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 public class BusinessCapabilityOrderDraftResponseDTO {
 
+    private Integer id;
     private String name;
     private String description;
     private LocalDateTime createdDate;
