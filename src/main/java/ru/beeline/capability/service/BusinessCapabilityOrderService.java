@@ -143,7 +143,7 @@ public class BusinessCapabilityOrderService {
             throw new IllegalArgumentException("Указанная заявка является черновиком");
         }
         if (request.getParentId() != null) {
-            bcRepository.findById(Long.parseLong(request.getParentId().toString()))
+            bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
                     .orElseThrow(() -> new IllegalArgumentException(
                             "Указана несуществующая родительская возможность"));
         }
