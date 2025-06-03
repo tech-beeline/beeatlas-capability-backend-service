@@ -466,7 +466,11 @@ public class BusinessCapabilityService {
         businessCapability.setAuthor(orderBusinessCapability.getAuthor());
         businessCapability.setStatus(orderBusinessCapability.getStatus());
         businessCapability.setDeletedDate(null);
-        businessCapabilityRepository.save(businessCapability);
+        businessCapability = businessCapabilityRepository.save(businessCapability);
+        EntityType entityType = entityTypeRepository.findByName("BUSINESS_CAPABILITY");
+        findNameSortTableRepository.findByRefIdAndType(businessCapability.getId(), entityType);
+        findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
+                                              businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
     }
 
     public void deleteBusinessCapability(String code) {
