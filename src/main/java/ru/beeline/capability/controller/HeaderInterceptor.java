@@ -28,6 +28,7 @@ public class HeaderInterceptor implements HandlerInterceptor {
         try {
             if (!request.getRequestURI().contains("/capabilities-subscribed") &&
                     !request.getRequestURI().contains("/order")
+                    || (request.getRequestURI().contains("/order") && !request.getRequestURI().contains("/draft") && request.getMethod().equals("GET"))
             ) {
                 logger.info("without check headers");
                 return true;
