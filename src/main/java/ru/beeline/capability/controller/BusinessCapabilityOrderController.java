@@ -5,8 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.beeline.capability.dto.*;
+import ru.beeline.capability.dto.BusinessCapabilityOrderDraftRequestDTO;
+import ru.beeline.capability.dto.BusinessCapabilityOrderPatchRequestDTO;
+import ru.beeline.capability.dto.BusinessCapabilityOrderRequestDTO;
+import ru.beeline.capability.dto.BusinessCapabilityOrderResponseDTO;
 import ru.beeline.capability.service.BusinessCapabilityOrderService;
+import ru.beeline.fdmlib.dto.capability.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.util.List;
 
@@ -33,8 +37,7 @@ public class BusinessCapabilityOrderController {
     }
 
     @GetMapping("/order/{id}")
-    @ApiOperation(value = "Получение данных по идентификатору", response =
-            BusinessCapabilityOrderDraftResponseDTO.class)
+    @ApiOperation(value = "Получение данных по идентификатору", response = BusinessCapabilityOrderDraftResponseDTO.class)
     public BusinessCapabilityOrderDraftResponseDTO getBusinessCapabilityOrderById(@PathVariable Integer id) {
         return orderService.getBusinessCapabilityOrderById(id);
     }

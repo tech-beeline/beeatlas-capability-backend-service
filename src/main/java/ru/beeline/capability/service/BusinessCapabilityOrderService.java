@@ -10,7 +10,6 @@ import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.OrderBusinessCapability;
 import ru.beeline.capability.dto.BusinessCapabilityOrderDraftRequestDTO;
-import ru.beeline.capability.dto.BusinessCapabilityOrderDraftResponseDTO;
 import ru.beeline.capability.dto.BusinessCapabilityOrderPatchRequestDTO;
 import ru.beeline.capability.dto.BusinessCapabilityOrderRequestDTO;
 import ru.beeline.capability.exception.ForbiddenException;
@@ -20,6 +19,7 @@ import ru.beeline.capability.mapper.BusinessCapabilityOrderMapper;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.OrderBusinessCapabilityRepository;
 import ru.beeline.fdmlib.dto.bpm.ApplicationExtendedDTO;
+import ru.beeline.fdmlib.dto.capability.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -114,9 +114,10 @@ public class BusinessCapabilityOrderService {
             log.info("search bc");
             if (request.getParentId() != null) {
                 bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
-                        .orElseThrow(() -> new IllegalArgumentException("Указана несуществующая родительская возможность"));
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "Указана несуществующая родительская возможность"));
             }
-            if (request.getMutableBcId()!=null && orderBusinessCapability.getMutableBusinessCapability()==null) {
+            if (request.getMutableBcId() != null && orderBusinessCapability.getMutableBusinessCapability() == null) {
                 throw new IllegalArgumentException("изменение не существующей BC");
             }
 
@@ -144,14 +145,12 @@ public class BusinessCapabilityOrderService {
         }
         if (request.getParentId() != null) {
             bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
-                    .orElseThrow(() -> new IllegalArgumentException(
-                            "Указана несуществующая родительская возможность"));
+                    .orElseThrow(() -> new IllegalArgumentException("Указана несуществующая родительская возможность"));
         }
         ApplicationExtendedDTO app = bpmClient.getApplication(orderBusinessCapability.getBusinessKey());
-        if (Integer.parseInt(RequestContext.getUserId()) != app.getAuthor().getId()
-                && (app.getExecutor() == null
-                || Integer.parseInt(RequestContext.getUserId()) != app.getExecutor().getId())
-        ) {
+        if (Integer.parseInt(RequestContext.getUserId()) != app.getAuthor()
+                .getId() && (app.getExecutor() == null || Integer.parseInt(RequestContext.getUserId()) != app.getExecutor()
+                .getId())) {
             throw new ForbiddenException("403 Forbidden");
         }
 
