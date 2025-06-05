@@ -58,13 +58,7 @@ public class BusinessCapabilityService {
     private UserClient userClient;
 
     @Autowired
-    private RabbitService rabbitService;
-
-    @Autowired
     private BusinessCapabilityMapper businessCapabilityMapper;
-
-    @Value("${queue.change-business-capability.name}")
-    private String changeBusinessCapabilityQueueName;
 
     @Autowired
     private HistoryBusinessCapabilityRepository historyBusinessCapabilityRepository;
@@ -229,7 +223,6 @@ public class BusinessCapabilityService {
                         + businessCapabilityMapper.convertToPutCapabilityDTO(businessCapability).toString());
                 addToHistory(businessCapability);
                 businessCapability = updateCapability(businessCapability, capabilityDTO, source);
-                sendNotify(businessCapability.getId(), UPDATE, changeBusinessCapabilityQueueName, capabilityDTO.getName());
                 findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
                         businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
                 putCapabilityToDashboard(capabilityDTO, userId, productIds, roles, permissions);
@@ -237,13 +230,11 @@ public class BusinessCapabilityService {
         } else {
             businessCapability = createCapabilities(capabilityDTO, source);
             if (!areParametersValid(userId, productIds, roles, permissions)) {
-                sendNotify(businessCapability.getId(), CREATE, changeBusinessCapabilityQueueName, businessCapability.getName());
                 findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
                         businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
                 log.warn("One or more required parameters are null or empty. Business capability  has been preserved.");
             } else {
                 if (putCapabilityToDashboard(capabilityDTO, userId, productIds, roles, permissions) != null) {
-                    sendNotify(businessCapability.getId(), CREATE, changeBusinessCapabilityQueueName, businessCapability.getName());
                     findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
                             businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
                 } else {
@@ -335,23 +326,6 @@ public class BusinessCapabilityService {
     private Long getParentId(PutBusinessCapabilityDTO capability) {
         if (capability == null || capability.getParent() == null) return null;
         return businessCapabilityRepository.findByCode(capability.getParent()).map(BusinessCapability::getId).orElse(null);
-    }
-
-    private void sendNotify(Long id, String changeType, String queueName, String name) {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-
-            ObjectNode messagePayload = objectMapper.createObjectNode();
-            messagePayload.put("entity_id", id);
-            messagePayload.put("name", name);
-            messagePayload.put("change_type", changeType);
-
-            String message = objectMapper.writeValueAsString(messagePayload);
-
-            rabbitService.sendMessage(queueName, message);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public BusinessCapabilityTreeCustomDTO getBusinessCapabilityTreeById(Long id) {
