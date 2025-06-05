@@ -32,6 +32,7 @@ public class BusinessCapabilityOrderMapper {
         return BusinessCapabilityOrderDraftResponseDTO.builder()
                 .id(order.getId())
                 .name(order.getName())
+                .code(order.getCode())
                 .description(order.getDescription())
                 .createdDate(order.getCreatedDate())
                 .updateDate(order.getLastModifiedDate())
