@@ -26,9 +26,14 @@ public class HeaderInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         try {
-            if (!request.getRequestURI().contains("/capabilities-subscribed")) {
+            if (!request.getRequestURI().contains("/capabilities-subscribed") &&
+                    !request.getRequestURI().contains("/order")
+                    || (request.getRequestURI().contains("/order") && !request.getRequestURI().contains("/draft") && request.getMethod().equals("GET"))
+            ) {
+                logger.info("without check headers");
                 return true;
             }
+            logger.info("check headers");
             Map<String, Object> headers = new HashMap<>();
             Enumeration<String> headerNames = request.getHeaderNames();
             while (headerNames.hasMoreElements()) {

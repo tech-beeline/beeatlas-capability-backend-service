@@ -48,7 +48,7 @@ public class BusinessCapability {
     private List<TechCapabilityRelations> children;
 
     @OneToMany(mappedBy = "bcId")
-    private List<BusinessCapabilityCriteria> criteria;
+    private List<CriteriasBc> criteria;
 
     @Transient
     private List<BusinessCapability> childrenOfTree;

@@ -4,22 +4,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import ru.beeline.capability.dto.BusinessCapabilityShortDTO;
-import ru.beeline.capability.dto.BusinessCapabilityTreeCustomDTO;
-import ru.beeline.capability.dto.BusinessCapabilityTreeDTO;
-import ru.beeline.capability.dto.CapabilityParentDTO;
-import ru.beeline.capability.dto.GetBcHistoryVersionDTO;
-import ru.beeline.capability.dto.GetHistoryByIdDTO;
+import org.springframework.web.bind.annotation.*;
+import ru.beeline.capability.dto.*;
 import ru.beeline.capability.service.BusinessCapabilityService;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenIdsDTO;
@@ -28,11 +14,7 @@ import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
 import java.util.Collections;
 import java.util.List;
 
-import static ru.beeline.capability.utils.Constants.SOURCE;
-import static ru.beeline.capability.utils.Constants.USER_ID_HEADER;
-import static ru.beeline.capability.utils.Constants.USER_PERMISSION_HEADER;
-import static ru.beeline.capability.utils.Constants.USER_PRODUCTS_IDS_HEADER;
-import static ru.beeline.capability.utils.Constants.USER_ROLES_HEADER;
+import static ru.beeline.capability.utils.Constants.*;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
@@ -82,10 +64,9 @@ public class BusinessCapabilityController {
 
     @GetMapping
     @ApiOperation(value = "Получение бизнес возможностей")
-    public List<BusinessCapabilityShortDTO> getBusinessCapabilities(
-            @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "findBy", required = false, defaultValue = "ALL") String findBy,
-            @RequestParam(value = "offset", required = false) Integer offset) {
+    public List<BusinessCapabilityShortDTO> getBusinessCapabilities(@RequestParam(value = "limit", required = false) Integer limit,
+                                                                    @RequestParam(value = "findBy", required = false, defaultValue = "ALL") String findBy,
+                                                                    @RequestParam(value = "offset", required = false) Integer offset) {
         return businessCapabilityService.getCapabilities(limit, offset, findBy);
     }
 
@@ -96,8 +77,7 @@ public class BusinessCapabilityController {
                                                 @RequestHeader(value = USER_PRODUCTS_IDS_HEADER, required = false) String productIds,
                                                 @RequestHeader(value = USER_ROLES_HEADER, required = false) String roles,
                                                 @RequestHeader(value = USER_PERMISSION_HEADER, required = false) String permissions,
-                                                @RequestHeader(value = SOURCE, required = false) String source
-    ) {
+                                                @RequestHeader(value = SOURCE, required = false) String source) {
         businessCapabilityService.validateBusinessCapabilityDTO(capability, userId, productIds, roles, permissions);
         businessCapabilityService.putCapability(capability, userId, productIds, roles, permissions, source);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -120,8 +100,16 @@ public class BusinessCapabilityController {
     @ApiOperation(value = "Получение выбраных версий BC")
     public List<GetBcHistoryVersionDTO> getBusinessCapabilityHistoryVersion(@PathVariable Long id,
                                                                             @PathVariable Integer version,
-                                                                            @RequestParam(value = "other_version",
-                                                                                    required = false) Integer otherVersion) {
+                                                                            @RequestParam(value = "other_version", required = false) Integer otherVersion) {
         return businessCapabilityService.getBusinessCapabilityHistoryVersion(id, version, otherVersion);
     }
+
+    @PostMapping("/public/{id}")
+    @ApiOperation(value = "Публикация ВС")
+    public ResponseEntity postBusinessCapability(@PathVariable Integer id) {
+        businessCapabilityService.postBusinessCapability(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+
+    }
+
 }

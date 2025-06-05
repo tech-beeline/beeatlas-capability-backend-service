@@ -37,4 +37,7 @@ public class CriteriasBc {
 
     @Column(name = "bc_id")
     private Long bcId;
+
+    private String comment;
+
 }

@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class BusinessCapabilityMapper {
 
     @Autowired
-    private BusinessCapabilityCriteriaMapper businessCapabilityCriteriaMapper;
+    private CriteriaBcMapper criteriaBcMapper;
 
     @Autowired
     private BusinessCapabilityRepository businessCapabilityRepository;
@@ -168,7 +168,7 @@ public class BusinessCapabilityMapper {
                             .isDomain(businessCapability.isDomain())
                             .owner(businessCapability.getOwner())
                             .parentId(businessCapability.getParentId())
-                            .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
+                            .criteria(criteriaBcMapper.convert(businessCapability.getCriteria()))
                             .children(mapToTree(businessCapability.getChildrenOfTree()))
                             .build();
                 }).collect(Collectors.toList());
@@ -192,7 +192,7 @@ public class BusinessCapabilityMapper {
                 .isDomain(businessCapability.isDomain())
                 .owner(businessCapability.getOwner())
                 .parentId(businessCapability.getParentId())
-                .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
+                .criteria(criteriaBcMapper.convert(businessCapability.getCriteria()))
                 .build();
     }
 
@@ -210,7 +210,7 @@ public class BusinessCapabilityMapper {
                 .isDomain(businessCapability.isDomain())
                 .parentId(businessCapability.getParentId())
                 .owner(businessCapability.getOwner())
-                .criteria(businessCapabilityCriteriaMapper.convert(businessCapability.getCriteria()))
+                .criteria(criteriaBcMapper.convert(businessCapability.getCriteria()))
                 .children(mapToTree(businessCapabilities))
                 .parent(getParentList(businessCapability.getParentEntity(), new ArrayList<BusinessCapabilityTreeInfoDTO>()))
                 .build();

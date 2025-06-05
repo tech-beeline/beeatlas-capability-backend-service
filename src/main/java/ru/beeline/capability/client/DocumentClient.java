@@ -42,7 +42,7 @@ public class DocumentClient {
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-            ResponseEntity response = restTemplate.exchange(url, HttpMethod.PATCH, requestEntity, Object.class);
+            ResponseEntity response = restTemplate.exchange(url, HttpMethod.PATCH, requestEntity, String.class);
             if (response.getStatusCode() == HttpStatus.OK) {
                 log.info("File uploaded successfully");
             } else {

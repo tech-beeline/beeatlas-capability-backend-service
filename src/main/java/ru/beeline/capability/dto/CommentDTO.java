@@ -1,6 +1,6 @@
 package ru.beeline.capability.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,11 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CriteriaDTO {
+public class CommentDTO {
 
-    @JsonProperty("criteria_id")
-    private Integer criteriaId;
-    private Integer value;
-    private Integer grade;
     private String comment;
 }

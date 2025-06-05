@@ -97,4 +97,5 @@ public class TechCapabilityMapper {
                 .systemId(techCapability.getResponsibilityProductId())
                 .build();
     }
+
 }

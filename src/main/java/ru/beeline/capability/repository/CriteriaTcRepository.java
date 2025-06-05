@@ -5,7 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ru.beeline.capability.domain.CriteriasTc;
 
+import java.util.List;
+
 @Repository
 public interface CriteriaTcRepository extends JpaRepository<CriteriasTc, Long> {
-    CriteriasTc findByTcId(Long tcId);
+    List<CriteriasTc> findAllByTcId(Long tcId);
 }
