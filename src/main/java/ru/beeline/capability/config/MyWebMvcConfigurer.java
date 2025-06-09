@@ -21,7 +21,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import ru.beeline.capability.controller.HeaderInterceptor;
 
-import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

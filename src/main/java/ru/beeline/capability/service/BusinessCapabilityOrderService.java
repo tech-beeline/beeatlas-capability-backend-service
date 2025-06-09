@@ -9,6 +9,7 @@ import ru.beeline.capability.client.UserClient;
 import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.OrderBusinessCapability;
+import ru.beeline.capability.dto.BusinessCapabilityOrderDomainDTO;
 import ru.beeline.capability.dto.BusinessCapabilityOrderDraftRequestDTO;
 import ru.beeline.capability.dto.BusinessCapabilityOrderPatchRequestDTO;
 import ru.beeline.capability.dto.BusinessCapabilityOrderRequestDTO;
@@ -310,4 +311,33 @@ public class BusinessCapabilityOrderService {
         return businessKey;
     }
 
+    public List<BusinessCapabilityOrderDomainDTO> getOrderDomains(List<Integer> ids) {
+        List<BusinessCapabilityOrderDomainDTO> result = new ArrayList<>();
+        List<OrderBusinessCapability> orderBusinessCapabilities = orderBusinessCapabilityRepository.findByIdIn(ids);
+        Map<Integer, OrderBusinessCapability> orderBusinessCapabilityMap = orderBusinessCapabilities.stream()
+                .collect(Collectors.toMap(OrderBusinessCapability::getId, orderCapability -> orderCapability));
+        for (Integer id : ids) {
+            if (!orderBusinessCapabilityMap.containsKey(id)) {
+                throw new IllegalArgumentException("не существующая заявка с id: " + id);
+            }
+        }
+        for (Integer key : orderBusinessCapabilityMap.keySet()) {
+            OrderBusinessCapability capability = orderBusinessCapabilityMap.get(key);
+            Long parentId = capability.getParentId().longValue();
+            while (true) {
+                BusinessCapability businessCapability = bcRepository.findById(parentId)
+                        .orElseThrow(() -> new IllegalArgumentException("Указана несуществующая родительская возможность"));
+                if (businessCapability.isDomain()) {
+                    result.add(BusinessCapabilityOrderDomainDTO.builder()
+                            .domainName(businessCapability.getName())
+                            .orderBcId(key)
+                            .build());
+                    break;
+                } else {
+                    parentId = businessCapability.getParentId();
+                }
+            }
+        }
+        return result;
+    }
 }

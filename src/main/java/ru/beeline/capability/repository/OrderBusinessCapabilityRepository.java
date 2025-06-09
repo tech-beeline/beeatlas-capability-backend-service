@@ -11,4 +11,6 @@ public interface OrderBusinessCapabilityRepository extends JpaRepository<OrderBu
     Integer getLastSequenceValue();
 
     List<OrderBusinessCapability> findByOrderOwnerIdAndBusinessKeyIsNull(Integer orderOwnerId);
+
+    List<OrderBusinessCapability> findByIdIn(List<Integer> ids);
 }

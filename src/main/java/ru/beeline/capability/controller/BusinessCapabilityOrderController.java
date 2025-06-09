@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.beeline.capability.dto.BusinessCapabilityOrderDomainDTO;
 import ru.beeline.capability.dto.BusinessCapabilityOrderDraftRequestDTO;
 import ru.beeline.capability.dto.BusinessCapabilityOrderPatchRequestDTO;
 import ru.beeline.capability.dto.BusinessCapabilityOrderRequestDTO;
@@ -47,6 +48,12 @@ public class BusinessCapabilityOrderController {
     public ResponseEntity postOrderDraft(@RequestBody BusinessCapabilityOrderDraftRequestDTO request) {
         orderService.createOrderDraft(request);
         return ResponseEntity.ok("");
+    }
+
+    @PostMapping("/order/domains")
+    @ApiOperation(value = "Информации о доменах по списку id")
+    public List<BusinessCapabilityOrderDomainDTO> postOrderDomains(@RequestBody List<Integer> ids) {
+        return orderService.getOrderDomains(ids);
     }
 
     @PatchMapping("/order/{id}")
