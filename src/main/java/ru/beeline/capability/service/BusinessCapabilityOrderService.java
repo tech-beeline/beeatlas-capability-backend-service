@@ -318,7 +318,7 @@ public class BusinessCapabilityOrderService {
                 .collect(Collectors.toMap(OrderBusinessCapability::getId, orderCapability -> orderCapability));
         for (Integer id : ids) {
             if (!orderBusinessCapabilityMap.containsKey(id)) {
-                throw new IllegalArgumentException("не существующая заявка с id: " + id);
+                throw new IllegalArgumentException("Несуществующая заявка с ID: " + id);
             }
         }
         for (Integer key : orderBusinessCapabilityMap.keySet()) {
@@ -338,6 +338,8 @@ public class BusinessCapabilityOrderService {
                 }
             }
         }
+        Collections.sort(result, Comparator.comparing(BusinessCapabilityOrderDomainDTO::getOrderBcId));
         return result;
+
     }
 }
