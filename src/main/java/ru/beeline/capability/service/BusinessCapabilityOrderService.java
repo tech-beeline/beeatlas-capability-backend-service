@@ -66,7 +66,11 @@ public class BusinessCapabilityOrderService {
         if (orderBusinessCapability.getBusinessKey() != null) {
             throw new IllegalArgumentException("Не является черновиком");
         }
-
+        if (request.getParentId() != null) {
+            bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Указана несуществующая родительская возможность"));
+        }
         Long mutableBcId = request.getMutableBcId();
 
         String code = null;
@@ -113,11 +117,6 @@ public class BusinessCapabilityOrderService {
         }
         if (publish) {
             log.info("search bc");
-            if (request.getParentId() != null) {
-                bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
-                        .orElseThrow(() -> new IllegalArgumentException(
-                                "Указана несуществующая родительская возможность"));
-            }
             if (request.getMutableBcId() != null && orderBusinessCapability.getMutableBusinessCapability() == null) {
                 throw new IllegalArgumentException("изменение не существующей BC");
             }
