@@ -73,7 +73,7 @@ public class BusinessCapabilityOrderService {
         }
         Long mutableBcId = request.getMutableBcId();
 
-        String code = null;
+        String code = orderBusinessCapability.getCode();
         if (mutableBcId != null) {
             log.info("search bc code");
             BusinessCapability mutableBc = bcRepository.findById(mutableBcId)
