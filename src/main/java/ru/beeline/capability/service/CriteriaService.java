@@ -12,7 +12,15 @@ public class CriteriaService {
     @Autowired
     private CriteriaRepository criteriaRepository;
 
-    public List<EnumCriteria> getCriteria() {
-        return criteriaRepository.findAll();
+    public List<EnumCriteria> getCriteria(String filter) {
+        List<EnumCriteria> result = null;
+        if ("bc".equalsIgnoreCase(filter)) {
+            result = criteriaRepository.findAllByBcCriteria();
+        } else if ("tc".equalsIgnoreCase(filter)) {
+            result = criteriaRepository.findAllByTcCriteria();
+        } else {
+            result = criteriaRepository.findAll();
+        }
+        return result;
     }
 }
