@@ -46,6 +46,10 @@ public class BpmClient {
                                                             HttpMethod.PATCH,
                                                             entity,
                                                             Void.class).getBody();
+        } catch (HttpClientErrorException.NotFound e) {
+            String msg = "Для заявки не существует процесса согласования";
+            log.warn(msg);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, msg, e);
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             throw new ResponseStatusException(
                     e.getStatusCode(), e.getResponseBodyAsString(),
