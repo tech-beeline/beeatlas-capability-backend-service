@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.server.ResponseStatusException;
 import ru.beeline.capability.exception.DocumentServerException;
 import ru.beeline.capability.exception.ForbiddenException;
 import ru.beeline.capability.exception.NotFoundException;
@@ -20,6 +21,12 @@ public class CustomExceptionHandler {
     public ResponseEntity<Object> handleException(IllegalArgumentException e) {
         log.error(e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("400 BAD_REQUEST : " + e.getMessage());
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Object> handleException(ResponseStatusException e) {
+        log.error(e.getMessage());
+        return ResponseEntity.status(e.getStatus()).body(e.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)
