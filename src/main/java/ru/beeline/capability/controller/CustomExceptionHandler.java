@@ -6,13 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.server.ResponseStatusException;
-import ru.beeline.capability.exception.DocumentServerException;
-import ru.beeline.capability.exception.ForbiddenException;
-import ru.beeline.capability.exception.NotFoundException;
-import ru.beeline.capability.exception.PackageRegistrationException;
-import ru.beeline.capability.exception.TooManyResultsException;
-import ru.beeline.capability.exception.ValidationException;
+import ru.beeline.capability.exception.*;
 
 @ControllerAdvice
 @Slf4j
@@ -23,8 +17,8 @@ public class CustomExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("400 BAD_REQUEST : " + e.getMessage());
     }
 
-    @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<Object> handleException(ResponseStatusException e) {
+    @ExceptionHandler(ResponseException.class)
+    public ResponseEntity<Object> handleException(ResponseException e) {
         log.error(e.getMessage());
         return ResponseEntity.status(e.getStatus()).body(e.getMessage());
     }

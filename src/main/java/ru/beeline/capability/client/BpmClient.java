@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
 import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.dto.CommentDTO;
+import ru.beeline.capability.exception.ResponseException;
 import ru.beeline.fdmlib.dto.bpm.ApplicationExtendedDTO;
 
 import java.util.HashMap;
@@ -49,18 +49,16 @@ public class BpmClient {
         } catch (HttpClientErrorException.NotFound e) {
             String msg = "Для заявки не существует процесса согласования";
             log.warn(msg);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, msg, e);
+            throw new ResponseException(HttpStatus.NOT_FOUND, msg);
         } catch (HttpClientErrorException | HttpServerErrorException e) {
-            throw new ResponseStatusException(
-                    e.getStatusCode(), e.getResponseBodyAsString(),
-                    e
+            throw new ResponseException(
+                    e.getStatusCode(), e.getResponseBodyAsString()
             );
         } catch (Exception e) {
             log.error("Неизвестная ошибка: {}", e.getMessage());
-            throw new ResponseStatusException(
+            throw new ResponseException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Внутренняя ошибка при обработке запроса",
-                    e
+                    "Внутренняя ошибка при обработке запроса"
             );
         }
     }
@@ -110,7 +108,7 @@ public class BpmClient {
         } catch (HttpClientErrorException.NotFound e) {
             String msg = "Запись с данным businessKey: " + businessKey + " не найдена";
             log.warn(msg);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, msg, e);
+            throw new ResponseException(HttpStatus.NOT_FOUND, msg);
         }
     }
 }
