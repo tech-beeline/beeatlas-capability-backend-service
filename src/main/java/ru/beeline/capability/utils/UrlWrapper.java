@@ -50,6 +50,7 @@ public class UrlWrapper {
                     while (endIndexUrl < description.length()
                             && description.charAt(endIndexUrl) != ' '
                             && description.charAt(endIndexUrl) != '\"'
+                            && description.charAt(endIndexUrl) != '\''
                             && description.charAt(endIndexUrl) != '\n'
                             && description.charAt(endIndexUrl) != '<') {
                         endIndexUrl++;
@@ -90,6 +91,7 @@ public class UrlWrapper {
                     while (endIndexUrl < description.length()
                             && description.charAt(endIndexUrl) != ' '
                             && description.charAt(endIndexUrl) != '\"'
+                            && description.charAt(endIndexUrl) != '\''
                             && description.charAt(endIndexUrl) != '\n'
                             && description.charAt(endIndexUrl) != '<') {
                         endIndexUrl++;
@@ -145,6 +147,7 @@ public class UrlWrapper {
                         while (endIndexUrl < urlWithTags.length()
                                 && urlWithTags.charAt(endIndexUrl) != ' '
                                 && urlWithTags.charAt(endIndexUrl) != '\"'
+                                && urlWithTags.charAt(endIndexUrl) != '\''
                                 && urlWithTags.charAt(endIndexUrl) != '\n'
                                 && urlWithTags.charAt(endIndexUrl) != '<') {
                             endIndexUrl++;
