@@ -15,5 +15,4 @@ public class BusinessCapabilityOrderRequestDTO {
     private Integer parentId;
     private Long mutableBcId;
     private String comment;
-
 }
