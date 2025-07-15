@@ -188,7 +188,6 @@ public class BusinessCapabilityOrderService {
         log.info("validate request");
         validateRequest(request);
         Long mutableBcId = request.getMutableBcId();
-
         String code;
         if (mutableBcId != null) {
             log.info("search bc code");
@@ -248,9 +247,6 @@ public class BusinessCapabilityOrderService {
         }
         if (request.getDescription() == null || request.getDescription().isEmpty()) {
             errMsg.append("Отсутствует обязательное поле description\n");
-        }
-        if (request.getOwner() == null || request.getOwner().isEmpty()) {
-            errMsg.append("Отсутствует обязательное поле owner\n");
         }
         if (request.getParentId() == null) {
             errMsg.append("Отсутствует обязательное поле parentId\n");
