@@ -176,7 +176,7 @@ public class BusinessCapabilityOrderService {
         if (isUpdated) {
             log.info("save bc");
             orderBusinessCapability.setLastModifiedDate(LocalDateTime.now());
-            orderBusinessCapability = orderBusinessCapabilityRepository.save(orderBusinessCapability);
+            orderBusinessCapability = orderBusinessCapabilityRepository.saveAndFlush(orderBusinessCapability);
         }
 
         if (statusAlias != null) {
