@@ -25,6 +25,7 @@ public class AIToolClient {
         JsonNode result = null;
         while (count < 3) {
             result = request(jsonBody);
+
             if(result != null) {
                 break;
             }
@@ -39,13 +40,16 @@ public class AIToolClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
-
+            log.info("url=" + aiToolServerUrl);
+            log.info("jsonBody=" + jsonBody);
             ResponseEntity<String> response = restTemplate.exchange(aiToolServerUrl,
                                                                     HttpMethod.POST,
                                                                     entity,
                                                                     String.class);
 
             String responseBody = response.getBody();
+            log.info("response=" + response);
+            log.info("responseBody=" + responseBody);
             if (responseBody != null) {
                 return cleanAndValidateJson(extractContentFromResponse(responseBody));
             }
@@ -62,6 +66,7 @@ public class AIToolClient {
             JsonNode contentNode = root.path("choices").get(0).path("message").path("content");
 
             if (!contentNode.isMissingNode()) {
+                log.info("contentNode.asText()=" + contentNode.asText());
                 return contentNode.asText();
             } else {
                 return null;
@@ -74,20 +79,25 @@ public class AIToolClient {
 
 
     public static JsonNode cleanAndValidateJson(String rawContent) {
+        log.info("rawContent" + rawContent);
         if (rawContent == null) {
             return null;
         }
 
         String cleaned = rawContent.replace("\\n", "")
+                .replace("```json", "")
+                .replace("```", "")
                 .replace("\\r", "")
                 .replace("\\t", "")
                 .replace("\\\"", "\"")
+
                 .trim();
+        log.info("cleaned" + cleaned);
 
         try {
             JsonNode jsonNode = mapper.readTree(cleaned);
 
-            if (jsonNode.has("raiting") && jsonNode.has("destr")) {
+            if (jsonNode.has("rating") && jsonNode.has("descr")) {
                 return jsonNode;
             } else {
                 return null;
