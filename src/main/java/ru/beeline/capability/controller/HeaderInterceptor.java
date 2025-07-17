@@ -26,10 +26,13 @@ public class HeaderInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         try {
-            if (!request.getRequestURI().contains("/capabilities-subscribed") && !request.getRequestURI().contains("/order") ||
-                    (request.getRequestURI().contains("/order") && !request.getRequestURI().contains("/draft")
-                            && request.getMethod().equals("GET"))
-                    || request.getRequestURI().contains("/order/domains")
+            String uri = request.getRequestURI();
+            if (
+                    (!uri.contains("/recount-quality")) && (
+                            (!uri.contains("/capabilities-subscribed") && !uri.contains("/order"))
+                                    || (uri.contains("/order") && !uri.contains("/draft") && request.getMethod().equals("GET"))
+                                    || uri.contains("/order/domains")
+                    )
             ) {
                 logger.info("without check headers");
                 return true;
@@ -54,7 +57,7 @@ public class HeaderInterceptor implements HandlerInterceptor {
             logger.info("Set headers complete");
             return true;
         } catch (Exception e) {
-            throw new ForbiddenException("Отсутсвуют необходимые хэдеры. " + e.getMessage());
+            throw new ForbiddenException("Отсутсвуют необходимые хэдеры. ");
         }
     }
 

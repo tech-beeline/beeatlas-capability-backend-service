@@ -43,9 +43,9 @@ public class BpmClient {
             HttpEntity<CommentDTO> entity = new HttpEntity<>(CommentDTO.builder().comment(comment).build(), headers);
 
             restTemplate.exchange(bpmBaseUrl + "/camunda-process/api/v1/application/" + businessKey + "/change-status/" + statusAlias,
-                                                            HttpMethod.PATCH,
-                                                            entity,
-                                                            Void.class).getBody();
+                    HttpMethod.PATCH,
+                    entity,
+                    Void.class).getBody();
         } catch (HttpClientErrorException.NotFound e) {
             String msg = "Для заявки не существует процесса согласования";
             log.warn(msg);
@@ -88,23 +88,31 @@ public class BpmClient {
         restTemplate.postForEntity(url, body, Void.class);
     }
 
+    public void startProcess(String businessKey, String processKey) {
+        String url = bpmBaseUrl + "/engine-rest/process-definition/key/" + processKey + "/start?async=true";
+        Map<String, Object> body = new HashMap<>();
+        body.put("businessKey", businessKey);
+        restTemplate.postForEntity(url, body, Void.class);
+    }
+
     public ApplicationExtendedDTO getApplication(String businessKey) {
         try {
             HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set(USER_ID_HEADER, RequestContext.getUserId());
-        headers.set(USER_PERMISSION_HEADER, RequestContext.getUserPermissions().toString());
-        headers.set(USER_PRODUCTS_IDS_HEADER, RequestContext.getUserProducts().toString());
-        headers.set(USER_ROLES_HEADER, RequestContext.getRoles().toString());
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set(USER_ID_HEADER, RequestContext.getUserId());
+            headers.set(USER_PERMISSION_HEADER, RequestContext.getUserPermissions().toString());
+            headers.set(USER_PRODUCTS_IDS_HEADER, RequestContext.getUserProducts().toString());
+            headers.set(USER_ROLES_HEADER, RequestContext.getRoles().toString());
 
-        log.info("request to bpm");
-        ResponseEntity<ApplicationExtendedDTO> response = restTemplate.exchange(bpmBaseUrl + "/camunda-process/api/v1" +
-                                                                                        "/application/" + businessKey,
-                                                                                HttpMethod.GET,
-                                                                                new HttpEntity<>(headers),
-                                                                                new ParameterizedTypeReference<ApplicationExtendedDTO>() {});
-        log.info("response from bpm: " + response.getBody());
-        return response.getBody();
+            log.info("request to bpm");
+            ResponseEntity<ApplicationExtendedDTO> response = restTemplate.exchange(bpmBaseUrl + "/camunda-process/api/v1" +
+                            "/application/" + businessKey,
+                    HttpMethod.GET,
+                    new HttpEntity<>(headers),
+                    new ParameterizedTypeReference<ApplicationExtendedDTO>() {
+                    });
+            log.info("response from bpm: " + response.getBody());
+            return response.getBody();
         } catch (HttpClientErrorException.NotFound e) {
             String msg = "Запись с данным businessKey: " + businessKey + " не найдена";
             log.warn(msg);

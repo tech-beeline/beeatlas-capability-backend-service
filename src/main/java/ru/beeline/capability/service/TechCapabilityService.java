@@ -1,16 +1,15 @@
 package ru.beeline.capability.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.beeline.capability.client.BpmClient;
 import ru.beeline.capability.client.ProductClient;
+import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.domain.*;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.dto.GetHistoryByIdDTO;
@@ -20,6 +19,7 @@ import ru.beeline.capability.dto.ParentDTO;
 import ru.beeline.capability.dto.ProductDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.dto.VersionInfoDTO;
+import ru.beeline.capability.exception.ForbiddenException;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
@@ -31,16 +31,20 @@ import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static ru.beeline.capability.utils.Constants.*;
+import static ru.beeline.capability.utils.Constants.ENTITY_TYPE_TECH_CAPABILITY;
 
 @Slf4j
 @Service
 @Transactional
 public class TechCapabilityService {
+
+    @Autowired
+    private BpmClient bpmClient;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -514,5 +518,14 @@ public class TechCapabilityService {
         }
         parentDTOS.sort(Comparator.comparingLong(ParentDTO::getId));
         return techCapabilityMapper.toHistoryTechCapabilityDTO(historyTechCapability, parentDTOS, id, version);
+    }
+
+    public void getTechRecalculationProcess() {
+        if (!RequestContext.getRoles().contains("ADMINISTRATOR")) {
+            throw new ForbiddenException("403 Forbidden.");
+        }
+        String businessKey = "tc_desc_quality_" + LocalDateTime.now();
+        String processKey = "Process_17o9bfd";
+        bpmClient.startProcess(businessKey, processKey);
     }
 }
