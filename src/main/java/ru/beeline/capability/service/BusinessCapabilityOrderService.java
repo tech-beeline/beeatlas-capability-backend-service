@@ -195,18 +195,16 @@ public class BusinessCapabilityOrderService {
                 orderBusinessCapability.setParentId(oldOrderBusinessCapability.getParentId());
                 orderBusinessCapability.setName(oldOrderBusinessCapability.getName());
                 orderBusinessCapability.setLastModifiedDate(oldOrderBusinessCapability.getLastModifiedDate());
-                orderBusinessCapabilityRepository.save()
+                orderBusinessCapabilityRepository.save(orderBusinessCapability);
             }
         }
     }
 
     public String createOrder(BusinessCapabilityOrderRequestDTO request) {
-        log.info("validate request");
         validateRequest(request);
         Long mutableBcId = request.getMutableBcId();
         String code;
         if (mutableBcId != null) {
-            log.info("search bc code");
             BusinessCapability mutableBc = bcRepository.findById(mutableBcId)
                     .orElseThrow(() -> new IllegalArgumentException("изменение не существующей BC"));
             code = mutableBc.getCode();
