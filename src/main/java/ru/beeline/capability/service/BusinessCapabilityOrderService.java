@@ -155,6 +155,13 @@ public class BusinessCapabilityOrderService {
         }
 
         boolean isUpdated = false;
+        OrderBusinessCapability oldOrderBusinessCapability = new OrderBusinessCapability();
+        oldOrderBusinessCapability.setOwner(orderBusinessCapability.getOwner());
+        oldOrderBusinessCapability.setDescription(orderBusinessCapability.getDescription());
+        oldOrderBusinessCapability.setParentId(new Integer(orderBusinessCapability.getParentId()));
+        oldOrderBusinessCapability.setName(orderBusinessCapability.getName());
+        oldOrderBusinessCapability.setLastModifiedDate(orderBusinessCapability.getLastModifiedDate());
+
         if (request.getDescription() != null && !request.getDescription().isEmpty() && !request.getDescription()
                 .equals(orderBusinessCapability.getDescription())) {
             orderBusinessCapability.setDescription(request.getDescription());
@@ -176,11 +183,20 @@ public class BusinessCapabilityOrderService {
         if (isUpdated) {
             log.info("save bc");
             orderBusinessCapability.setLastModifiedDate(LocalDateTime.now());
-            orderBusinessCapability = orderBusinessCapabilityRepository.saveAndFlush(orderBusinessCapability);
+            orderBusinessCapability = orderBusinessCapabilityRepository.save(orderBusinessCapability);
         }
 
         if (statusAlias != null) {
-            bpmClient.editStatusProcess(request.getComment(), orderBusinessCapability.getBusinessKey(), statusAlias);
+            try {
+                bpmClient.editStatusProcess(request.getComment(), orderBusinessCapability.getBusinessKey(), statusAlias);
+            } catch (Exception e){
+                orderBusinessCapability.setOwner(oldOrderBusinessCapability.getOwner());
+                orderBusinessCapability.setDescription(oldOrderBusinessCapability.getDescription());
+                orderBusinessCapability.setParentId(oldOrderBusinessCapability.getParentId());
+                orderBusinessCapability.setName(oldOrderBusinessCapability.getName());
+                orderBusinessCapability.setLastModifiedDate(oldOrderBusinessCapability.getLastModifiedDate());
+                orderBusinessCapabilityRepository.save()
+            }
         }
     }
 
