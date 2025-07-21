@@ -72,7 +72,11 @@ class MyWebMvcConfigurer implements WebMvcConfigurer {
     public RestTemplate restTemplate() {
         RestTemplate restTemplate = new RestTemplate();
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        factory.setConnectTimeout(10_000);
+        factory.setReadTimeout(60_000);
+
+        restTemplate.setRequestFactory(factory);
         return restTemplate;
     }
 }
