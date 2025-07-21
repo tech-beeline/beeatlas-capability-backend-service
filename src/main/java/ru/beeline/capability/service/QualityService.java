@@ -45,17 +45,16 @@ public class QualityService {
                     "}";
             log.info("call AITool");
             JsonNode message = aiConclusion.aiConclusion(jsonBody);
-            if(message !=null){
+            if (message != null) {
                 Long enumCriteriaId = enumCriteriaRepository.findByName("Качество описания TC").getId();
-                CriteriasTc criteriasTc = criteriaTcRepository.findByCriterionIdAndTcId(
-                        enumCriteriaId,
-                        techCapability.getId());
-                if(criteriasTc!=null){
+                CriteriasTc criteriasTc = criteriaTcRepository.findByCriterionIdAndTcId(enumCriteriaId,
+                                                                                        techCapability.getId());
+                if (criteriasTc != null) {
                     criteriasTc.setGrade(message.get("rating").asInt());
                     criteriasTc.setValue(message.get("rating").asInt());
                     criteriasTc.setComment(message.get("descr").asText());
                     criteriaTcRepository.save(criteriasTc);
-                }else{
+                } else {
                     criteriaTcRepository.save(CriteriasTc.builder()
                                                       .criterionId(enumCriteriaId)
                                                       .tcId(techCapability.getId())
