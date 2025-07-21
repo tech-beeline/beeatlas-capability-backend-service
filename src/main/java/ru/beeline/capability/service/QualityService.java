@@ -1,6 +1,7 @@
 package ru.beeline.capability.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.beeline.capability.client.AIToolClient;
@@ -12,6 +13,7 @@ import ru.beeline.capability.repository.EnumCriteriaRepository;
 import ru.beeline.capability.repository.PromtRepository;
 import ru.beeline.capability.repository.TechCapabilityRepository;
 
+@Slf4j
 @Service
 public class QualityService {
     @Autowired
@@ -25,7 +27,7 @@ public class QualityService {
     @Autowired
     private AIToolClient aiConclusion;
 
-    public void checkQuality(Long entityId, String changeType, String name) {
+    public void checkQuality(Long entityId) {
         TechCapability techCapability = techCapabilityRepository.findAllByIdAndDeletedDateIsNull(entityId);
         if(techCapability!=null){
             Promt promt = promtRepository.findByAlias("tc_quality_description");
@@ -41,6 +43,7 @@ public class QualityService {
                     "  \"stream\": false,\n" +
                     "  \"add_generation_prompt\": false\n" +
                     "}";
+            log.info("call AITool");
             JsonNode message = aiConclusion.aiConclusion(jsonBody);
             if(message !=null){
                 Long enumCriteriaId = enumCriteriaRepository.findByName("Качество описания TC").getId();

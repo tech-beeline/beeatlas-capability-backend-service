@@ -40,7 +40,7 @@ public class DescriptionQualityConsumer {
             Long entityId = jsonNode.get("entityId").asLong();
             String name = jsonNode.has("name") ? jsonNode.get("name").asText() : null;
 
-            qualityService.checkQuality(entityId, changeType, name);
+            qualityService.checkQuality(entityId);
         }
     }
 }
