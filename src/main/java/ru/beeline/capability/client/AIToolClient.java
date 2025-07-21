@@ -50,7 +50,7 @@ public class AIToolClient {
                 return cleanAndValidateJson(extractContentFromResponse(responseBody));
             }
         } catch (Exception e) {
-            log.error("Ошибка в aiConclusion: " + e.getMessage(), e);
+            log.error("Ошибка в aiConclusion: " + e.getMessage());
         }
         return null;
     }
