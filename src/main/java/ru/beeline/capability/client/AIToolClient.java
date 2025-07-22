@@ -58,7 +58,6 @@ public class AIToolClient {
     public String extractContentFromResponse(String responseBody) {
         try {
             JsonNode root = mapper.readTree(responseBody);
-
             JsonNode contentNode = root.path("choices").get(0).path("message").path("content");
 
             if (!contentNode.isMissingNode()) {
