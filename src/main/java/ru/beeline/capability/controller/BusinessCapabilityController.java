@@ -70,6 +70,20 @@ public class BusinessCapabilityController {
         return businessCapabilityService.getCapabilities(limit, offset, findBy);
     }
 
+    @GetMapping("/history/{id}")
+    @ApiOperation(value = "Получение списка версий ВС")
+    public List<GetHistoryByIdDTO> getBusinessCapabilityHistory(@PathVariable Long id) {
+        return businessCapabilityService.getBusinessCapabilityHistory(id);
+    }
+
+    @GetMapping("/history/compare/{id}/{version}")
+    @ApiOperation(value = "Получение выбраных версий BC")
+    public List<GetBcHistoryVersionDTO> getBusinessCapabilityHistoryVersion(@PathVariable Long id,
+                                                                            @PathVariable Integer version,
+                                                                            @RequestParam(value = "other_version", required = false) Integer otherVersion) {
+        return businessCapabilityService.getBusinessCapabilityHistoryVersion(id, version, otherVersion);
+    }
+
     @PutMapping
     @ApiOperation(value = "Создание/Обновление бизнес возможности")
     public ResponseEntity putBusinessCapability(@RequestBody PutBusinessCapabilityDTO capability,
@@ -90,19 +104,7 @@ public class BusinessCapabilityController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/history/{id}")
-    @ApiOperation(value = "Получение списка версий ВС")
-    public List<GetHistoryByIdDTO> getBusinessCapabilityHistory(@PathVariable Long id) {
-        return businessCapabilityService.getBusinessCapabilityHistory(id);
-    }
 
-    @GetMapping("/history/compare/{id}/{version}")
-    @ApiOperation(value = "Получение выбраных версий BC")
-    public List<GetBcHistoryVersionDTO> getBusinessCapabilityHistoryVersion(@PathVariable Long id,
-                                                                            @PathVariable Integer version,
-                                                                            @RequestParam(value = "other_version", required = false) Integer otherVersion) {
-        return businessCapabilityService.getBusinessCapabilityHistoryVersion(id, version, otherVersion);
-    }
 
     @PostMapping("/public/{id}")
     @ApiOperation(value = "Публикация ВС")
@@ -111,5 +113,4 @@ public class BusinessCapabilityController {
         return new ResponseEntity<>(HttpStatus.OK);
 
     }
-
 }

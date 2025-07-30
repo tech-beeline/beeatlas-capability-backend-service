@@ -21,7 +21,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import ru.beeline.capability.controller.HeaderInterceptor;
 
-import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -73,7 +72,11 @@ class MyWebMvcConfigurer implements WebMvcConfigurer {
     public RestTemplate restTemplate() {
         RestTemplate restTemplate = new RestTemplate();
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        factory.setConnectTimeout(20_000);
+        factory.setReadTimeout(120_000);
+
+        restTemplate.setRequestFactory(factory);
         return restTemplate;
     }
 }

@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
 import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.dto.CommentDTO;
+import ru.beeline.capability.exception.ResponseException;
 import ru.beeline.fdmlib.dto.bpm.ApplicationExtendedDTO;
 
 import java.util.HashMap;
@@ -43,20 +43,22 @@ public class BpmClient {
             HttpEntity<CommentDTO> entity = new HttpEntity<>(CommentDTO.builder().comment(comment).build(), headers);
 
             restTemplate.exchange(bpmBaseUrl + "/camunda-process/api/v1/application/" + businessKey + "/change-status/" + statusAlias,
-                                                            HttpMethod.PATCH,
-                                                            entity,
-                                                            Void.class).getBody();
+                    HttpMethod.PATCH,
+                    entity,
+                    Void.class).getBody();
+        } catch (HttpClientErrorException.NotFound e) {
+            String msg = "Для заявки не существует процесса согласования";
+            log.warn(msg);
+            throw new ResponseException(HttpStatus.NOT_FOUND, msg);
         } catch (HttpClientErrorException | HttpServerErrorException e) {
-            throw new ResponseStatusException(
-                    e.getStatusCode(), e.getResponseBodyAsString(),
-                    e
+            throw new ResponseException(
+                    e.getStatusCode(), e.getResponseBodyAsString()
             );
         } catch (Exception e) {
             log.error("Неизвестная ошибка: {}", e.getMessage());
-            throw new ResponseStatusException(
+            throw new ResponseException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Внутренняя ошибка при обработке запроса",
-                    e
+                    "Внутренняя ошибка при обработке запроса"
             );
         }
     }
@@ -86,27 +88,35 @@ public class BpmClient {
         restTemplate.postForEntity(url, body, Void.class);
     }
 
+    public void startProcess(String businessKey, String processKey) {
+        String url = bpmBaseUrl + "/engine-rest/process-definition/key/" + processKey + "/start?async=true";
+        Map<String, Object> body = new HashMap<>();
+        body.put("businessKey", businessKey);
+        restTemplate.postForEntity(url, body, Void.class);
+    }
+
     public ApplicationExtendedDTO getApplication(String businessKey) {
         try {
             HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set(USER_ID_HEADER, RequestContext.getUserId());
-        headers.set(USER_PERMISSION_HEADER, RequestContext.getUserPermissions().toString());
-        headers.set(USER_PRODUCTS_IDS_HEADER, RequestContext.getUserProducts().toString());
-        headers.set(USER_ROLES_HEADER, RequestContext.getRoles().toString());
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set(USER_ID_HEADER, RequestContext.getUserId());
+            headers.set(USER_PERMISSION_HEADER, RequestContext.getUserPermissions().toString());
+            headers.set(USER_PRODUCTS_IDS_HEADER, RequestContext.getUserProducts().toString());
+            headers.set(USER_ROLES_HEADER, RequestContext.getRoles().toString());
 
-        log.info("request to bpm");
-        ResponseEntity<ApplicationExtendedDTO> response = restTemplate.exchange(bpmBaseUrl + "/camunda-process/api/v1" +
-                                                                                        "/application/" + businessKey,
-                                                                                HttpMethod.GET,
-                                                                                new HttpEntity<>(headers),
-                                                                                new ParameterizedTypeReference<ApplicationExtendedDTO>() {});
-        log.info("response from bpm: " + response.getBody());
-        return response.getBody();
+            log.info("request to bpm");
+            ResponseEntity<ApplicationExtendedDTO> response = restTemplate.exchange(bpmBaseUrl + "/camunda-process/api/v1" +
+                            "/application/" + businessKey,
+                    HttpMethod.GET,
+                    new HttpEntity<>(headers),
+                    new ParameterizedTypeReference<ApplicationExtendedDTO>() {
+                    });
+            log.info("response from bpm: " + response.getBody());
+            return response.getBody();
         } catch (HttpClientErrorException.NotFound e) {
             String msg = "Запись с данным businessKey: " + businessKey + " не найдена";
             log.warn(msg);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, msg, e);
+            throw new ResponseException(HttpStatus.NOT_FOUND, msg);
         }
     }
 }
