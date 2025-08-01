@@ -138,6 +138,7 @@ public class BusinessCapabilityOrderService {
 
     @Transactional
     public void editOrder(Integer id, BusinessCapabilityOrderPatchRequestDTO request, String statusAlias) {
+        log.info("start edit order");
         OrderBusinessCapability orderBusinessCapability = orderBcRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("OrderBusinessCapability не найдена"));
         if (orderBusinessCapability.getBusinessKey() == null) {
@@ -188,8 +189,10 @@ public class BusinessCapabilityOrderService {
 
         if (statusAlias != null) {
             try {
+                log.info("call camunda editStatusProcess");
                 bpmClient.editStatusProcess(request.getComment(), orderBusinessCapability.getBusinessKey(), statusAlias);
             } catch (Exception e){
+                log.info("roll back orderBusinessCapability");
                 orderBusinessCapability.setOwner(oldOrderBusinessCapability.getOwner());
                 orderBusinessCapability.setDescription(oldOrderBusinessCapability.getDescription());
                 orderBusinessCapability.setParentId(oldOrderBusinessCapability.getParentId());
