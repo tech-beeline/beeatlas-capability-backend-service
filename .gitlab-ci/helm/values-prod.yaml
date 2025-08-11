@@ -14,7 +14,7 @@ env:
   INTEGRATION_PACK_LOADER_SERVER_URL: "vault:eafdmmart/data/prod/fdm#packloaderserver"
   INTEGRATION_NOTIFICATION_SERVER_URL: "vault:eafdmmart/data/prod/fdm#notificationserver"
   INTEGRATION_AUTH_SERVER_URL: "vault:eafdmmart/data/prod/fdm#authserverurl"
-  INTEGRATION_DASHBOARD_SERVER_URL: "vault:eafdmmart/data/prod/fdm#dashboardserver"
+  INTEGRATION_DASHBOARD_SERVER_URL: "http://dashboard-prod-service:8080"
   INTEGRATION_DOCUMENT_SERVER_URL: "vault:eafdmmart/data/prod/fdm#documentserverurl"
   INTEGRATION_PRODUCT_SERVER_URL: "vault:eafdmmart/data/prod/fdm#productsserver"
   SPRING_RABBITMQ_TEMPLATE_EXCHANGE: "vault:eafdmmart/data/prod/fdm#rabbitmqtemplateexchange"
