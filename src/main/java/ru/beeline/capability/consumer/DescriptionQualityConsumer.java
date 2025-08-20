@@ -16,8 +16,8 @@ import ru.beeline.capability.service.QualityService;
 @EnableRabbit
 public class DescriptionQualityConsumer {
 
-    @Value("${integration.bpm-server-url}")
-    private final int delayConsumer;
+    @Value("${rabbit.delay}")
+    private final Integer delayConsumer;
 
     @Autowired
     QualityService qualityService;
