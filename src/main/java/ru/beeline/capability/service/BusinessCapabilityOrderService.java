@@ -2,6 +2,7 @@ package ru.beeline.capability.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.beeline.capability.client.BpmClient;
@@ -15,6 +16,7 @@ import ru.beeline.capability.dto.BusinessCapabilityOrderPatchRequestDTO;
 import ru.beeline.capability.dto.BusinessCapabilityOrderRequestDTO;
 import ru.beeline.capability.exception.ForbiddenException;
 import ru.beeline.capability.exception.NotFoundException;
+import ru.beeline.capability.exception.ResponseException;
 import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.mapper.BusinessCapabilityOrderMapper;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
@@ -120,7 +122,6 @@ public class BusinessCapabilityOrderService {
             if (request.getMutableBcId() != null && orderBusinessCapability.getMutableBusinessCapability() == null) {
                 throw new IllegalArgumentException("изменение не существующей BC");
             }
-
             Map<String, Object> variables = new HashMap<>();
             variables.put("authorId", Integer.parseInt(RequestContext.getUserId()));
             variables.put("type", mutableBcId == null ? "create_business_capability" : "update_business_capability");
@@ -154,12 +155,11 @@ public class BusinessCapabilityOrderService {
                 .getId())) {
             throw new ForbiddenException("403 Forbidden");
         }
-
         boolean isUpdated = false;
         OrderBusinessCapability oldOrderBusinessCapability = new OrderBusinessCapability();
         oldOrderBusinessCapability.setOwner(orderBusinessCapability.getOwner());
         oldOrderBusinessCapability.setDescription(orderBusinessCapability.getDescription());
-        oldOrderBusinessCapability.setParentId(new Integer(orderBusinessCapability.getParentId()));
+        oldOrderBusinessCapability.setParentId(orderBusinessCapability.getParentId());
         oldOrderBusinessCapability.setName(orderBusinessCapability.getName());
         oldOrderBusinessCapability.setLastModifiedDate(orderBusinessCapability.getLastModifiedDate());
 
@@ -186,21 +186,27 @@ public class BusinessCapabilityOrderService {
             orderBusinessCapability.setLastModifiedDate(LocalDateTime.now());
             orderBusinessCapability = orderBusinessCapabilityRepository.save(orderBusinessCapability);
         }
-
         if (statusAlias != null) {
             try {
                 log.info("call camunda editStatusProcess");
                 bpmClient.editStatusProcess(request.getComment(), orderBusinessCapability.getBusinessKey(), statusAlias);
-            } catch (Exception e){
-                log.info("roll back orderBusinessCapability");
-                orderBusinessCapability.setOwner(oldOrderBusinessCapability.getOwner());
-                orderBusinessCapability.setDescription(oldOrderBusinessCapability.getDescription());
-                orderBusinessCapability.setParentId(oldOrderBusinessCapability.getParentId());
-                orderBusinessCapability.setName(oldOrderBusinessCapability.getName());
-                orderBusinessCapability.setLastModifiedDate(oldOrderBusinessCapability.getLastModifiedDate());
-                orderBusinessCapabilityRepository.save(orderBusinessCapability);
+            } catch (ResponseException e) {
+                rollbackOrderChanges(orderBusinessCapability, oldOrderBusinessCapability);
+                throw e;
+            } catch (Exception e) {
+                rollbackOrderChanges(orderBusinessCapability, oldOrderBusinessCapability);
+                throw new ResponseException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error");
             }
         }
+    }
+
+    private void rollbackOrderChanges(OrderBusinessCapability current, OrderBusinessCapability backup) {
+        current.setOwner(backup.getOwner());
+        current.setDescription(backup.getDescription());
+        current.setParentId(backup.getParentId());
+        current.setName(backup.getName());
+        current.setLastModifiedDate(backup.getLastModifiedDate());
+        orderBusinessCapabilityRepository.save(current);
     }
 
     public String createOrder(BusinessCapabilityOrderRequestDTO request) {
