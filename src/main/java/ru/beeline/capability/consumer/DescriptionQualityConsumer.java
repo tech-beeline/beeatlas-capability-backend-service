@@ -23,7 +23,8 @@ public class DescriptionQualityConsumer {
     QualityService qualityService;
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    public DescriptionQualityConsumer(int delayConsumer) {this.delayConsumer = delayConsumer;}
+    public DescriptionQualityConsumer(@Value("${rabbit.delay}") Integer delayConsumer) {this.delayConsumer =
+            delayConsumer;}
 
     @RabbitListener(queues = "${queue.tc-description-quality.name}")
     public void techQueue(String message) {
