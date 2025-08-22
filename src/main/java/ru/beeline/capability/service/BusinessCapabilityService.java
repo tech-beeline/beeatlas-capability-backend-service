@@ -602,7 +602,7 @@ public class BusinessCapabilityService {
         String source = jsonNode.get("source").asText();
         String changeType = jsonNode.get("changeType").asText();
         Long entityId = jsonNode.get("entityId").asLong();
-        if ((source.equals("Sparx") || source.equals("SparxEA")) && !changeType.equals("DELETE")) {
+        if (!source.equals("Sparx") && !source.equals("SparxEA") && !changeType.equals("DELETE")) {
             Optional<BusinessCapability> capabilityOpt = businessCapabilityRepository.findById(entityId);
             if (capabilityOpt.isEmpty()) {
                 log.error("BusinessCapability с id {} не найдено", entityId);
