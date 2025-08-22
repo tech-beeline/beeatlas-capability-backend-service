@@ -1,7 +1,6 @@
 package ru.beeline.capability.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,18 +28,36 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ru.beeline.capability.utils.Constants.*;
+import static ru.beeline.capability.utils.Constants.ENTITY_TYPE_BUSINESS_CAPABILITY;
 
 @Slf4j
 @Service
 @Transactional
 public class BusinessCapabilityService {
 
+    @Value("${queue.error-bc-queue.name}")
+    private String errorBcQueueName;
+
     @Autowired
-    private FindNameSortTableRepository findNameSortTableRepository;
+    RabbitService rabbitService;
+
+    @Autowired
+    private UserClient userClient;
+
+    @Autowired
+    private DashboardClient dashboardClient;
 
     @Autowired
     private EntityTypeRepository entityTypeRepository;
+
+    @Autowired
+    private FindNameSortTableService findNameSortTableService;
+
+    @Autowired
+    private BusinessCapabilityMapper businessCapabilityMapper;
+
+    @Autowired
+    private FindNameSortTableRepository findNameSortTableRepository;
 
     @Autowired
     private BusinessCapabilityRepository businessCapabilityRepository;
@@ -49,21 +66,10 @@ public class BusinessCapabilityService {
     private TechCapabilityRelationsRepository techCapabilityRelationsRepository;
 
     @Autowired
-    private FindNameSortTableService findNameSortTableService;
-
-    @Autowired
-    private DashboardClient dashboardClient;
-
-    @Autowired
-    private UserClient userClient;
-
-    @Autowired
-    private BusinessCapabilityMapper businessCapabilityMapper;
+    private OrderBusinessCapabilityRepository orderBusinessCapabilityRepository;
 
     @Autowired
     private HistoryBusinessCapabilityRepository historyBusinessCapabilityRepository;
-    @Autowired
-    private OrderBusinessCapabilityRepository orderBusinessCapabilityRepository;
 
     public BusinessCapability findById(Long id) {
         return businessCapabilityRepository.findById(id).orElseThrow(() ->
@@ -444,7 +450,7 @@ public class BusinessCapabilityService {
         EntityType entityType = entityTypeRepository.findByName("BUSINESS_CAPABILITY");
         findNameSortTableRepository.findByRefIdAndType(businessCapability.getId(), entityType);
         findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
-                                              businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
+                businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
     }
 
     public void deleteBusinessCapability(String code) {
@@ -591,4 +597,30 @@ public class BusinessCapabilityService {
             throw new NotFoundException(String.format("Business Capability с parentId: %s не найдено", parentId));
         }
     }
+
+    public void processMessage(JsonNode jsonNode) {
+        String source = jsonNode.get("source").asText();
+        String changeType = jsonNode.get("changeType").asText();
+        Long entityId = jsonNode.get("entityId").asLong();
+        if ((source.equals("Sparx") || source.equals("SparxEA")) && !changeType.equals("DELETE")) {
+            Optional<BusinessCapability> capabilityOpt = businessCapabilityRepository.findById(entityId);
+            if (capabilityOpt.isEmpty()) {
+                log.error("BusinessCapability с id {} не найдено", entityId);
+                return;
+            }
+            BusinessCapability BusinessCapability = capabilityOpt.get();
+            PutBusinessCapabilityDTO putBusinessCapabilityDTO = businessCapabilityMapper.convertToPutCapabilityDTO(BusinessCapability);
+
+            if (dashboardClient.putCapability(putBusinessCapabilityDTO) != null) {
+                log.info("BusinessCapability: {} успешно отправлено в Dashboard", BusinessCapability.getCode());
+            } else {
+                log.error("Ошибка при отправке BusinessCapability: {} в Dashboard", BusinessCapability.getCode());
+                log.info("Сообщение ,будет отправлено в очередь error_bc_entry_in_sparx");
+                rabbitService.sendMessage(errorBcQueueName, jsonNode);
+            }
+        } else {
+            log.info("Сообщение не прошло по условию.");
+        }
+    }
 }
+
