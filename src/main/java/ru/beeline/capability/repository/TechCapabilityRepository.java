@@ -22,4 +22,6 @@ public interface TechCapabilityRepository extends JpaRepository<TechCapability, 
     TechCapability findAllByIdAndDeletedDateIsNull(Long id);
 
     List<TechCapability> findByDeletedDateIsNull();
+
+    List<TechCapability> findAllByIdIn(List<Long> ids);
 }

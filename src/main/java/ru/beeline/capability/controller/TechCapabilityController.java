@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.dto.GetHistoryByIdDTO;
 import ru.beeline.capability.dto.GetTcHistoryVersionDTO;
+import ru.beeline.capability.dto.ParentDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.service.TechCapabilityService;
 import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
@@ -45,6 +46,27 @@ public class TechCapabilityController {
         return techCapabilityService.getParents(id);
     }
 
+    @GetMapping("/history/{id}")
+    @ApiOperation(value = "Получение списка версий TC")
+    public List<GetHistoryByIdDTO> getTechCapabilityHistory(@PathVariable Long id) {
+        return techCapabilityService.getTechCapabilityHistory(id);
+    }
+
+    @GetMapping("/history/compare/{id}/{version}")
+    @ApiOperation(value = "Получение выбраных версий TC")
+    public List<GetTcHistoryVersionDTO> getTechCapabilityHistoryVersion(@PathVariable Long id,
+                                                                        @PathVariable Integer version,
+                                                                        @RequestParam(value = "other_version",
+                                                                                required = false) Integer otherVersion) {
+        return techCapabilityService.getTechCapabilityHistoryVersion(id, version, otherVersion);
+    }
+
+    @GetMapping("/list/by-ids")
+    @ApiOperation(value = "получение списка технических возможностей", response = TechCapabilityDTO.class)
+    public ResponseEntity<List<ParentDTO>> getArrayTech(@RequestParam List<Long> ids) {
+        return ResponseEntity.status(HttpStatus.OK).body(techCapabilityService.getArrayCapability(ids));
+    }
+
     @PutMapping
     @ApiOperation(value = "Создание/Обновление технической возможности")
     public ResponseEntity putTechCapability(@RequestBody PutTechCapabilityDTO techCapability,
@@ -60,20 +82,5 @@ public class TechCapabilityController {
     public ResponseEntity deleteTechCapability(@PathVariable String code) {
         techCapabilityService.deleteTechCapability(code);
         return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @GetMapping("/history/{id}")
-    @ApiOperation(value = "Получение списка версий TC")
-    public List<GetHistoryByIdDTO> getTechCapabilityHistory(@PathVariable Long id) {
-        return techCapabilityService.getTechCapabilityHistory(id);
-    }
-
-    @GetMapping("/history/compare/{id}/{version}")
-    @ApiOperation(value = "Получение выбраных версий TC")
-    public List<GetTcHistoryVersionDTO> getTechCapabilityHistoryVersion(@PathVariable Long id,
-                                                                            @PathVariable Integer version,
-                                                                            @RequestParam(value = "other_version",
-                                                                                    required = false) Integer otherVersion) {
-        return techCapabilityService.getTechCapabilityHistoryVersion(id, version, otherVersion);
     }
 }
