@@ -528,4 +528,14 @@ public class TechCapabilityService {
         String processKey = "Process_17o9bfd";
         bpmClient.startProcess(businessKey, processKey);
     }
+
+    public  List<ParentDTO> getArrayCapability( List<Long> ids ){
+        return techCapabilityRepository.findAllByIdIn(ids).stream()
+                .map(techCapability -> ParentDTO.builder()
+                        .name(techCapability.getName())
+                        .id(techCapability.getId())
+                        .code(techCapability.getCode())
+                        .build())
+                .collect(Collectors.toList());
+    }
 }
