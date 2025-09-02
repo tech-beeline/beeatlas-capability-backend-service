@@ -4,10 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static ru.beeline.capability.utils.Constants.USER_ID_HEADER;
-import static ru.beeline.capability.utils.Constants.USER_PERMISSION_HEADER;
-import static ru.beeline.capability.utils.Constants.USER_PRODUCTS_IDS_HEADER;
-import static ru.beeline.capability.utils.Constants.USER_ROLES_HEADER;
+import static ru.beeline.capability.utils.Constants.*;
 
 public class RequestContext {
     private static final ThreadLocal<Map<String, Object>> headersThreadLocal = new ThreadLocal<>();
@@ -34,9 +31,12 @@ public class RequestContext {
 
     public static List<Long> getUserProducts() {
         List<String> stringList = (List<String>) getHeaders().get(USER_PRODUCTS_IDS_HEADER);
-        List<Long> longList = stringList.stream()
+        if (stringList == null || stringList.isEmpty()) {
+            return List.of();
+        }
+        return stringList.stream()
+                .filter(str -> str != null && !str.trim().isEmpty())
                 .map(Long::parseLong)
                 .collect(Collectors.toList());
-        return longList;
     }
 }
