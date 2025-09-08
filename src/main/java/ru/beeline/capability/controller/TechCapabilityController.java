@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.dto.CapabilityParentDTO;
 import ru.beeline.capability.dto.GetHistoryByIdDTO;
 import ru.beeline.capability.dto.GetTcHistoryVersionDTO;
+import ru.beeline.capability.dto.IdCodeDTO;
 import ru.beeline.capability.dto.ParentDTO;
 import ru.beeline.capability.dto.TechCapabilityDTO;
 import ru.beeline.capability.service.TechCapabilityService;
@@ -62,9 +63,15 @@ public class TechCapabilityController {
     }
 
     @GetMapping("/list/by-ids")
-    @ApiOperation(value = "получение списка технических возможностей", response = TechCapabilityDTO.class)
+    @ApiOperation(value = "получение списка технических возможностей")
     public ResponseEntity<List<ParentDTO>> getArrayTech(@RequestParam List<Long> ids) {
         return ResponseEntity.status(HttpStatus.OK).body(techCapabilityService.getArrayCapability(ids));
+    }
+
+    @GetMapping("/by-code")
+    @ApiOperation(value = "получение списка id технической возможности по списку code")
+    public List<IdCodeDTO> getAllTechIdsByCodes(@RequestParam List<String> codes) {
+        return techCapabilityService.getAllTechIdsByCodes(codes);
     }
 
     @PutMapping

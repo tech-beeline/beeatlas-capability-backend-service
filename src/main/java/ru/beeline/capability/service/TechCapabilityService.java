@@ -11,14 +11,7 @@ import ru.beeline.capability.client.BpmClient;
 import ru.beeline.capability.client.ProductClient;
 import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.domain.*;
-import ru.beeline.capability.dto.CapabilityParentDTO;
-import ru.beeline.capability.dto.GetHistoryByIdDTO;
-import ru.beeline.capability.dto.GetTcHistoryVersionDTO;
-import ru.beeline.capability.dto.HistoryTechCapabilityDTO;
-import ru.beeline.capability.dto.ParentDTO;
-import ru.beeline.capability.dto.ProductDTO;
-import ru.beeline.capability.dto.TechCapabilityDTO;
-import ru.beeline.capability.dto.VersionInfoDTO;
+import ru.beeline.capability.dto.*;
 import ru.beeline.capability.exception.ForbiddenException;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
@@ -529,7 +522,7 @@ public class TechCapabilityService {
         bpmClient.startProcess(businessKey, processKey);
     }
 
-    public  List<ParentDTO> getArrayCapability( List<Long> ids ){
+    public List<ParentDTO> getArrayCapability(List<Long> ids) {
         return techCapabilityRepository.findAllByIdIn(ids).stream()
                 .map(techCapability -> ParentDTO.builder()
                         .name(techCapability.getName())
@@ -537,5 +530,18 @@ public class TechCapabilityService {
                         .code(techCapability.getCode())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    public List<IdCodeDTO> getAllTechIdsByCodes(List<String> codes) {
+        List<IdCodeDTO> result = new ArrayList<>();
+        if (codes != null && !codes.isEmpty()) {
+            List<TechCapability> techCapabilities = techCapabilityRepository.findAllByCodeIn(codes);
+            result = techCapabilities.stream().map(tc -> IdCodeDTO.builder()
+                            .id(tc.getId())
+                            .code(tc.getCode())
+                            .build())
+                    .toList();
+        }
+        return result;
     }
 }
