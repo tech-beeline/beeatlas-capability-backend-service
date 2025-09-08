@@ -533,15 +533,18 @@ public class TechCapabilityService {
     }
 
     public List<IdCodeDTO> getAllTechIdsByCodes(List<String> codes) {
-        List<IdCodeDTO> result = new ArrayList<>();
-        if (codes != null && !codes.isEmpty()) {
-            List<TechCapability> techCapabilities = techCapabilityRepository.findAllByCodeIn(codes);
-            result = techCapabilities.stream().map(tc -> IdCodeDTO.builder()
-                            .id(tc.getId())
-                            .code(tc.getCode())
-                            .build())
-                    .toList();
+        if (codes == null || codes.isEmpty()) {
+            return Collections.emptyList();
         }
-        return result;
+        List<String> lowerCodes = codes.stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toList());
+        List<TechCapability> techCapabilities = techCapabilityRepository.findAllByCodeInIgnoreCase(lowerCodes);
+        return techCapabilities.stream()
+                .map(tc -> IdCodeDTO.builder()
+                        .id(tc.getId())
+                        .code(tc.getCode())
+                        .build())
+                .toList();
     }
 }
