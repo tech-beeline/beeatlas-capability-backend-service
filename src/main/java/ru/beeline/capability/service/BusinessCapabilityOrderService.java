@@ -137,7 +137,6 @@ public class BusinessCapabilityOrderService {
         }
     }
 
-    @Transactional
     public void editOrder(Integer id, BusinessCapabilityOrderPatchRequestDTO request, String statusAlias) {
         log.info("start edit order");
         OrderBusinessCapability orderBusinessCapability = orderBcRepository.findById(id)
