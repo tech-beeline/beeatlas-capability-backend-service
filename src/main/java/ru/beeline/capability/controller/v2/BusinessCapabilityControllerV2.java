@@ -9,7 +9,7 @@ import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTOV2;
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/v2/business-capability")
-public class BusinessCapabilityController {
+public class BusinessCapabilityControllerV2 {
 
     @Autowired
     private BusinessCapabilityService businessCapabilityService;
