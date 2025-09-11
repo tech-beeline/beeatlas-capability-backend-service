@@ -7,8 +7,11 @@ import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.HistoryTechCapabilityDTO;
 import ru.beeline.capability.dto.ParentDTO;
+import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
 import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTO;
+import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTOV2;
+import ru.beeline.fdmlib.dto.product.GetProductsByIdsDTO;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -36,6 +39,17 @@ public class TechCapabilityMapper {
                 .collect(Collectors.toList());
     }
 
+    public static List<TechCapabilityShortDTOV2> convertToTechCapabilityShortDTOList(List<TechCapability> techCapabilities,
+                                                                                     List<GetProductsByIdsDTO> products) {
+        List<TechCapabilityShortDTOV2> techCapabilityDTOS = new ArrayList<>();
+        for (TechCapability techCapability : techCapabilities) {
+            TechCapabilityShortDTOV2 techCapabilityDTO = convertToTechCapabilityShortDTO(techCapability, products);
+            techCapabilityDTOS.add(techCapabilityDTO);
+        }
+        techCapabilityDTOS.sort(Comparator.comparing(TechCapabilityShortDTOV2::getName));
+        return techCapabilityDTOS;
+    }
+
 
     public static List<TechCapabilityShortDTO> convertToTechCapabilityShortDTOList(List<TechCapability> techCapabilities) {
         List<TechCapabilityShortDTO> techCapabilityDTOS = new ArrayList<>();
@@ -45,6 +59,23 @@ public class TechCapabilityMapper {
         }
         techCapabilityDTOS.sort(Comparator.comparing(TechCapabilityShortDTO::getName));
         return techCapabilityDTOS;
+    }
+
+    public static TechCapabilityShortDTOV2 convertToTechCapabilityShortDTO(TechCapability techCapability,
+                                                                         List<GetProductsByIdsDTO> products) {
+        return TechCapabilityShortDTOV2.builder()
+                .id(techCapability.getId())
+                .code(techCapability.getCode())
+                .name(techCapability.getName())
+                .description(techCapability.getDescription())
+                .owner(techCapability.getOwner())
+                .product(products.stream().filter(product-> product.getId().equals(techCapability.getResponsibilityProductId())).findFirst().get())
+                .author(techCapability.getAuthor())
+                .link(techCapability.getLink())
+                .createdDate(techCapability.getCreatedDate())
+                .lastModifiedDate(techCapability.getLastModifiedDate())
+                .systemId(techCapability.getResponsibilityProductId())
+                .build();
     }
 
     public static TechCapabilityShortDTO convertToTechCapabilityShortDTO(TechCapability techCapability) {
