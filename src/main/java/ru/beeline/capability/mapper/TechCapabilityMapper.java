@@ -7,7 +7,6 @@ import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.HistoryTechCapabilityDTO;
 import ru.beeline.capability.dto.ParentDTO;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
 import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTO;
 import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTOV2;
@@ -62,14 +61,21 @@ public class TechCapabilityMapper {
     }
 
     public static TechCapabilityShortDTOV2 convertToTechCapabilityShortDTO(TechCapability techCapability,
-                                                                         List<GetProductsByIdsDTO> products) {
+                                                                           List<GetProductsByIdsDTO> products) {
+        GetProductsByIdsDTO product = null;
+        if (products != null && !products.isEmpty()) {
+            product = products.stream()
+                    .filter(productElement -> productElement.getId().equals(techCapability.getResponsibilityProductId()))
+                    .findFirst()
+                    .get();
+        }
         return TechCapabilityShortDTOV2.builder()
                 .id(techCapability.getId())
                 .code(techCapability.getCode())
                 .name(techCapability.getName())
                 .description(techCapability.getDescription())
                 .owner(techCapability.getOwner())
-                .product(products.stream().filter(product-> product.getId().equals(techCapability.getResponsibilityProductId())).findFirst().get())
+                .product(product)
                 .author(techCapability.getAuthor())
                 .link(techCapability.getLink())
                 .createdDate(techCapability.getCreatedDate())
@@ -93,7 +99,10 @@ public class TechCapabilityMapper {
                 .build();
     }
 
-    public HistoryTechCapabilityDTO toHistoryTechCapabilityDTO(HistoryTechCapability historyTechCapability, List<ParentDTO> parentDTOS, Long id, Integer version) {
+    public HistoryTechCapabilityDTO toHistoryTechCapabilityDTO(HistoryTechCapability historyTechCapability,
+                                                               List<ParentDTO> parentDTOS,
+                                                               Long id,
+                                                               Integer version) {
         return HistoryTechCapabilityDTO.builder()
                 .id(id)
                 .code(historyTechCapability.getCode())
@@ -111,7 +120,10 @@ public class TechCapabilityMapper {
                 .build();
     }
 
-    public HistoryTechCapabilityDTO toHistoryTechCapabilityDTO(TechCapability techCapability, List<ParentDTO> parentDTOS, Long id, Integer version) {
+    public HistoryTechCapabilityDTO toHistoryTechCapabilityDTO(TechCapability techCapability,
+                                                               List<ParentDTO> parentDTOS,
+                                                               Long id,
+                                                               Integer version) {
         return HistoryTechCapabilityDTO.builder()
                 .id(id)
                 .code(techCapability.getCode())
