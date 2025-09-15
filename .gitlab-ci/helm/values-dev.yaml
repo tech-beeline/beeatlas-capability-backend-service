@@ -40,5 +40,7 @@ env:
   INTEGRATION_AUTHSSO_SERVER_URL: "vault:eafdmmart/data/dev/ambassador#authsso"
   INTEGRATION_AI_TOOL_SERVER_URL: "vault:eafdmmart/data/dev/ambassador#aitool"
   INTEGRATION_BPM_SERVER_URL: "vault:eafdmmart/data/dev/fdm#camundaserverurl"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "vault:eafdmmart/data/dev/fdm#opentelemetry"
+
 
 
