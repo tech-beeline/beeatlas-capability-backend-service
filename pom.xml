@@ -19,6 +19,7 @@
         <sonar.jacoco.reportPath>${project.basedir}/target/jacoco_analysis/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.language>java</sonar.language>
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/jacoco_analysis/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <kotlin.version>1.8.22</kotlin.version>
     </properties>
     <dependencyManagement>
         <dependencies>
