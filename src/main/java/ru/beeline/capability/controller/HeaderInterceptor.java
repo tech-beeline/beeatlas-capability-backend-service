@@ -7,11 +7,7 @@ import ru.beeline.capability.exception.ForbiddenException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.beeline.capability.utils.Constants.USER_ID_HEADER;
@@ -21,19 +17,22 @@ import static ru.beeline.capability.utils.Constants.USER_ROLES_HEADER;
 
 public class HeaderInterceptor implements HandlerInterceptor {
     private Logger logger = LoggerFactory.getLogger(HeaderInterceptor.class);
-
+    private static final Set<String> HEADERS_PATHS = Set.of(
+            "/maps",
+            "/v2/business-capability",
+            "/capabilities-subscribed",
+            "/v1/business-capability/order",
+            "/recount-quality"
+    );
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         try {
             String uri = request.getRequestURI();
-            if (
-                    (!uri.contains("/recount-quality")) && (
-                            (!uri.contains("/capabilities-subscribed") && !uri.contains("/order"))
-                                    || (uri.contains("/order") && !uri.contains("/draft") && request.getMethod().equals("GET"))
-                                    || uri.contains("/order/domains")
-                    ) && (!uri.contains("/v2"))
-            ) {
+            if (!isHeaderPath(uri)
+                    || uri.contains("/api/v1/business-capability/order/domains")
+            )
+            {
                 logger.info("without check headers");
                 return true;
             }
@@ -69,5 +68,9 @@ public class HeaderInterceptor implements HandlerInterceptor {
                 .map(str -> str.replaceAll("\\[", ""))
                 .map(String::trim)
                 .collect(Collectors.toList());
+    }
+
+    private boolean isHeaderPath(String path) {
+        return HEADERS_PATHS.stream().anyMatch(path::contains);
     }
 }
