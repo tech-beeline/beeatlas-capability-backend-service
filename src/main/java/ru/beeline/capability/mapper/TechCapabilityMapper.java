@@ -80,7 +80,6 @@ public class TechCapabilityMapper {
                 .link(techCapability.getLink())
                 .createdDate(techCapability.getCreatedDate())
                 .lastModifiedDate(techCapability.getLastModifiedDate())
-                .systemId(techCapability.getResponsibilityProductId())
                 .build();
     }
 
