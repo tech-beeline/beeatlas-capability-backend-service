@@ -1,0 +1,45 @@
+package ru.beeline.capability.config;
+
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.context.propagation.TextMapSetter;
+import io.opentelemetry.context.propagation.W3CTraceContextPropagator;
+@Component
+public class TraceIdResponseFilter implements Filter {
+
+    private static final String TRACE_ID_HEADER = "traceparent";
+    private final W3CTraceContextPropagator propagator = W3CTraceContextPropagator.getInstance();
+
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+            throws IOException, ServletException {
+        if (servletResponse instanceof HttpServletResponse httpServletResponse) {
+            SpanContext spanContext = Span.current().getSpanContext();
+            if (spanContext.isValid()) {
+                propagator.inject(
+                        io.opentelemetry.context.Context.current(),
+                        httpServletResponse,
+                        new HttpServletResponseSetter()
+                );
+            }
+        }
+        filterChain.doFilter(servletRequest, servletResponse);
+    }
+
+    private static class HttpServletResponseSetter implements TextMapSetter<HttpServletResponse> {
+        @Override
+        public void set(HttpServletResponse response, String key, String value) {
+            response.setHeader(TRACE_ID_HEADER, value);
+        }
+    }
+}
