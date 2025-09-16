@@ -1,11 +1,7 @@
 package ru.beeline.capability.config;
 
-import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletResponse;
+
+import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -13,7 +9,10 @@ import java.io.IOException;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.context.propagation.TextMapSetter;
-import io.opentelemetry.context.propagation.W3CTraceContextPropagator;
+
+import javax.servlet.*;
+import javax.servlet.http.HttpServletResponse;
+
 @Component
 public class TraceIdResponseFilter implements Filter {
 
