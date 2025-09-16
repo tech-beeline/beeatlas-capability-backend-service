@@ -32,7 +32,7 @@ public class HeaderInterceptor implements HandlerInterceptor {
                             (!uri.contains("/capabilities-subscribed") && !uri.contains("/order"))
                                     || (uri.contains("/order") && !uri.contains("/draft") && request.getMethod().equals("GET"))
                                     || uri.contains("/order/domains")
-                    )
+                    ) && (!uri.contains("/children"))
             ) {
                 logger.info("without check headers");
                 return true;

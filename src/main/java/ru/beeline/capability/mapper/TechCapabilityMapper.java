@@ -1,6 +1,7 @@
 package ru.beeline.capability.mapper;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.beeline.capability.domain.HistoryTechCapability;
 import ru.beeline.capability.domain.TechCapability;
@@ -17,6 +18,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class TechCapabilityMapper {
     public PutTechCapabilityDTO convertToPutTechCapabilityDTO(TechCapability techCapability) {

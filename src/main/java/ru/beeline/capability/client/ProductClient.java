@@ -66,10 +66,11 @@ public class ProductClient {
             log.info("response from Product ServerUrl: " + response.getBody());
             return response.getBody();
         } catch (HttpClientErrorException.NotFound e) {
+            log.error("Exception - NotFound 404 " + e.getMessage());
             return null;
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("call's Exception " + e.getMessage());
+            return null;
         }
-        return null;
     }
 }
