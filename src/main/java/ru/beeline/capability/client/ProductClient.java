@@ -13,6 +13,7 @@ import ru.beeline.fdmlib.dto.product.GetProductsByIdsDTO;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ru.beeline.capability.utils.Constants.*;
 
@@ -57,9 +58,10 @@ public class ProductClient {
             headers.set(USER_PRODUCTS_IDS_HEADER, RequestContext.getUserProducts().toString());
             headers.set(USER_ROLES_HEADER, RequestContext.getRoles().toString());
             headers.setContentType(MediaType.APPLICATION_JSON);
-
-            ResponseEntity<List<GetProductsByIdsDTO>> response = restTemplate.exchange(productServerUrl + "/api/v1/product/by-ids?ids=" + Arrays.toString(
-                                                                                               ids.toArray()),
+            String idsParam = ids.stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(","));
+            ResponseEntity<List<GetProductsByIdsDTO>> response = restTemplate.exchange(productServerUrl + "/api/v1/product/by-ids?ids=" + idsParam,
                                                                                        HttpMethod.GET,
                                                                                        new HttpEntity<>(headers),
                                                                                        new ParameterizedTypeReference<List<GetProductsByIdsDTO>>() {});
