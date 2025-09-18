@@ -31,6 +31,7 @@ public class HeaderInterceptor implements HandlerInterceptor {
             String uri = request.getRequestURI();
             if (!isHeaderPath(uri)
                     || uri.contains("/api/v1/business-capability/order/domains")
+                    || (uri.contains("/api/v1/business-capability/order") && !uri.contains("/draft") && request.getMethod().equals("GET"))
             )
             {
                 logger.info("without check headers");
