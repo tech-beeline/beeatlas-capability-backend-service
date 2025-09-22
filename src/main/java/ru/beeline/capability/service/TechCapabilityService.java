@@ -11,14 +11,7 @@ import ru.beeline.capability.client.BpmClient;
 import ru.beeline.capability.client.ProductClient;
 import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.domain.*;
-import ru.beeline.capability.dto.CapabilityParentDTO;
-import ru.beeline.capability.dto.GetHistoryByIdDTO;
-import ru.beeline.capability.dto.GetTcHistoryVersionDTO;
-import ru.beeline.capability.dto.HistoryTechCapabilityDTO;
-import ru.beeline.capability.dto.ParentDTO;
-import ru.beeline.capability.dto.ProductDTO;
-import ru.beeline.capability.dto.TechCapabilityDTO;
-import ru.beeline.capability.dto.VersionInfoDTO;
+import ru.beeline.capability.dto.*;
 import ru.beeline.capability.exception.ForbiddenException;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
@@ -527,5 +520,31 @@ public class TechCapabilityService {
         String businessKey = "tc_desc_quality_" + LocalDateTime.now();
         String processKey = "Process_17o9bfd";
         bpmClient.startProcess(businessKey, processKey);
+    }
+
+    public List<ParentDTO> getArrayCapability(List<Long> ids) {
+        return techCapabilityRepository.findAllByIdIn(ids).stream()
+                .map(techCapability -> ParentDTO.builder()
+                        .name(techCapability.getName())
+                        .id(techCapability.getId())
+                        .code(techCapability.getCode())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public List<IdCodeDTO> getAllTechIdsByCodes(List<String> codes) {
+        if (codes == null || codes.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<String> lowerCodes = codes.stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toList());
+        List<TechCapability> techCapabilities = techCapabilityRepository.findAllByCodeInIgnoreCase(lowerCodes);
+        return techCapabilities.stream()
+                .map(tc -> IdCodeDTO.builder()
+                        .id(tc.getId())
+                        .code(tc.getCode())
+                        .build())
+                .toList();
     }
 }

@@ -12,8 +12,10 @@ import ru.beeline.capability.dto.BusinessCapabilityTreeInfoDTO;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
+import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTOV2;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityDTO;
 import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
+import ru.beeline.fdmlib.dto.product.GetProductsByIdsDTO;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -89,6 +91,15 @@ public class BusinessCapabilityMapper {
     public BusinessCapabilityChildrenDTO convert(List<TechCapability> children, List<BusinessCapability> businessCapabilities) {
         BusinessCapabilityChildrenDTO businessCapabilityChildrenDTO = new BusinessCapabilityChildrenDTO();
         businessCapabilityChildrenDTO.setTechCapabilities(TechCapabilityMapper.convertToTechCapabilityShortDTOList(children));
+        businessCapabilityChildrenDTO.setBusinessCapabilities(convert(businessCapabilities));
+        return businessCapabilityChildrenDTO;
+    }
+
+    public BusinessCapabilityChildrenDTOV2 convert(List<TechCapability> children,
+                                                   List<GetProductsByIdsDTO> products,
+                                                   List<BusinessCapability> businessCapabilities) {
+        BusinessCapabilityChildrenDTOV2 businessCapabilityChildrenDTO = new BusinessCapabilityChildrenDTOV2();
+        businessCapabilityChildrenDTO.setTechCapabilities(TechCapabilityMapper.convertToTechCapabilityShortDTOList(children, products));
         businessCapabilityChildrenDTO.setBusinessCapabilities(convert(businessCapabilities));
         return businessCapabilityChildrenDTO;
     }

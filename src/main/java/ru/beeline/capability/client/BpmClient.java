@@ -51,6 +51,7 @@ public class BpmClient {
             log.warn(msg);
             throw new ResponseException(HttpStatus.NOT_FOUND, msg);
         } catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.error(e.getMessage());
             throw new ResponseException(
                     e.getStatusCode(), e.getResponseBodyAsString()
             );

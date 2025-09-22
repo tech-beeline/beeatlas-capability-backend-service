@@ -1,6 +1,7 @@
 package ru.beeline.capability.mapper;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.beeline.capability.domain.HistoryTechCapability;
 import ru.beeline.capability.domain.TechCapability;
@@ -9,12 +10,15 @@ import ru.beeline.capability.dto.HistoryTechCapabilityDTO;
 import ru.beeline.capability.dto.ParentDTO;
 import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTO;
+import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTOV2;
+import ru.beeline.fdmlib.dto.product.GetProductsByIdsDTO;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class TechCapabilityMapper {
     public PutTechCapabilityDTO convertToPutTechCapabilityDTO(TechCapability techCapability) {
@@ -36,6 +40,17 @@ public class TechCapabilityMapper {
                 .collect(Collectors.toList());
     }
 
+    public static List<TechCapabilityShortDTOV2> convertToTechCapabilityShortDTOList(List<TechCapability> techCapabilities,
+                                                                                     List<GetProductsByIdsDTO> products) {
+        List<TechCapabilityShortDTOV2> techCapabilityDTOS = new ArrayList<>();
+        for (TechCapability techCapability : techCapabilities) {
+            TechCapabilityShortDTOV2 techCapabilityDTO = convertToTechCapabilityShortDTO(techCapability, products);
+            techCapabilityDTOS.add(techCapabilityDTO);
+        }
+        techCapabilityDTOS.sort(Comparator.comparing(TechCapabilityShortDTOV2::getName));
+        return techCapabilityDTOS;
+    }
+
 
     public static List<TechCapabilityShortDTO> convertToTechCapabilityShortDTOList(List<TechCapability> techCapabilities) {
         List<TechCapabilityShortDTO> techCapabilityDTOS = new ArrayList<>();
@@ -45,6 +60,29 @@ public class TechCapabilityMapper {
         }
         techCapabilityDTOS.sort(Comparator.comparing(TechCapabilityShortDTO::getName));
         return techCapabilityDTOS;
+    }
+
+    public static TechCapabilityShortDTOV2 convertToTechCapabilityShortDTO(TechCapability techCapability,
+                                                                           List<GetProductsByIdsDTO> products) {
+        GetProductsByIdsDTO product = null;
+        if (products != null && !products.isEmpty()) {
+            product = products.stream()
+                    .filter(productElement -> productElement.getId().equals(techCapability.getResponsibilityProductId()))
+                    .findFirst()
+                    .get();
+        }
+        return TechCapabilityShortDTOV2.builder()
+                .id(techCapability.getId())
+                .code(techCapability.getCode())
+                .name(techCapability.getName())
+                .description(techCapability.getDescription())
+                .owner(techCapability.getOwner())
+                .product(product)
+                .author(techCapability.getAuthor())
+                .link(techCapability.getLink())
+                .createdDate(techCapability.getCreatedDate())
+                .lastModifiedDate(techCapability.getLastModifiedDate())
+                .build();
     }
 
     public static TechCapabilityShortDTO convertToTechCapabilityShortDTO(TechCapability techCapability) {
@@ -62,7 +100,10 @@ public class TechCapabilityMapper {
                 .build();
     }
 
-    public HistoryTechCapabilityDTO toHistoryTechCapabilityDTO(HistoryTechCapability historyTechCapability, List<ParentDTO> parentDTOS, Long id, Integer version) {
+    public HistoryTechCapabilityDTO toHistoryTechCapabilityDTO(HistoryTechCapability historyTechCapability,
+                                                               List<ParentDTO> parentDTOS,
+                                                               Long id,
+                                                               Integer version) {
         return HistoryTechCapabilityDTO.builder()
                 .id(id)
                 .code(historyTechCapability.getCode())
@@ -80,7 +121,10 @@ public class TechCapabilityMapper {
                 .build();
     }
 
-    public HistoryTechCapabilityDTO toHistoryTechCapabilityDTO(TechCapability techCapability, List<ParentDTO> parentDTOS, Long id, Integer version) {
+    public HistoryTechCapabilityDTO toHistoryTechCapabilityDTO(TechCapability techCapability,
+                                                               List<ParentDTO> parentDTOS,
+                                                               Long id,
+                                                               Integer version) {
         return HistoryTechCapabilityDTO.builder()
                 .id(id)
                 .code(techCapability.getCode())
