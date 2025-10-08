@@ -29,4 +29,6 @@ public interface TechCapabilityRepository extends JpaRepository<TechCapability, 
 
     @Query("SELECT tc FROM TechCapability tc WHERE LOWER(tc.code) IN :lowerCodes")
     List<TechCapability> findAllByCodeInIgnoreCase(@Param("lowerCodes") List<String> lowerCodes);
+
+    List<TechCapability> findAllByResponsibilityProductId(Integer id);
 }

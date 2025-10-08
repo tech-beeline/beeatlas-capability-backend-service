@@ -11,7 +11,6 @@ import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.dto.ProductDTO;
 import ru.beeline.fdmlib.dto.product.GetProductsByIdsDTO;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,6 +49,26 @@ public class ProductClient {
         return null;
     }
 
+    public List<Long> getTCIdsByProductId(Integer id) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            log.info("getTCIdsByProductId from Product ServerUrl with id: " + id);
+            ResponseEntity<List<Long>> response = restTemplate.exchange(productServerUrl + "/api/v1/product/" + id + "/tc-implementation",
+                                                                        HttpMethod.GET,
+                                                                        new HttpEntity<>(headers),
+                                                                        new ParameterizedTypeReference<List<Long>>() {});
+            log.info("response from Product ServerUrl: " + response.getBody());
+            return response.getBody();
+        } catch (HttpClientErrorException.NotFound e) {
+            return null;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
+    }
+
     public List<GetProductsByIdsDTO> getProductsByIds(List<Integer> ids) {
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -58,9 +77,7 @@ public class ProductClient {
             headers.set(USER_PRODUCTS_IDS_HEADER, RequestContext.getUserProducts().toString());
             headers.set(USER_ROLES_HEADER, RequestContext.getRoles().toString());
             headers.setContentType(MediaType.APPLICATION_JSON);
-            String idsParam = ids.stream()
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(","));
+            String idsParam = ids.stream().map(String::valueOf).collect(Collectors.joining(","));
             ResponseEntity<List<GetProductsByIdsDTO>> response = restTemplate.exchange(productServerUrl + "/api/v1/product/by-ids?ids=" + idsParam,
                                                                                        HttpMethod.GET,
                                                                                        new HttpEntity<>(headers),
