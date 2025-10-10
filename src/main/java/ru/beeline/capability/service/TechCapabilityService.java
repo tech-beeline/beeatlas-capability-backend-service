@@ -584,7 +584,7 @@ public class TechCapabilityService {
     }
 
     public ResponsibilityTcDTO getTechCapabilityResp(Integer id) {
-        List<TechCapability> techCapabilities = techCapabilityRepository.findAllByResponsibilityProductId(id);
+        List<TechCapability> techCapabilities = techCapabilityRepository.findAllByResponsibilityProductIdAndDeletedDateIsNull(id);
         List<Long> tcIds = productClient.getTCIdsByProductId(id);
         List<TechCapability> implemented = tcIds != null && tcIds.size() > 0 ?
                 techCapabilityRepository.findAllByIdIn(tcIds) : new ArrayList<>();
