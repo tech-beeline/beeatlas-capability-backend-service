@@ -640,11 +640,11 @@ public class BusinessCapabilityService {
     public void processMessage(JsonNode jsonNode) {
         String source = jsonNode.get("source").asText();
         String changeType = jsonNode.get("changeType").asText();
-        Long entityId = jsonNode.get("entityId").asLong();
+        Long id = jsonNode.get("id").asLong();
         if (!source.equals("Sparx") && !source.equals("SparxEA") && !changeType.equals("DELETE")) {
-            Optional<BusinessCapability> capabilityOpt = businessCapabilityRepository.findById(entityId);
+            Optional<BusinessCapability> capabilityOpt = businessCapabilityRepository.findById(id);
             if (capabilityOpt.isEmpty()) {
-                log.error("BusinessCapability с id {} не найдено", entityId);
+                log.error("BusinessCapability с id {} не найдено", id);
                 return;
             }
             BusinessCapability BusinessCapability = capabilityOpt.get();
