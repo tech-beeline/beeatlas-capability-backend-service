@@ -37,7 +37,7 @@ public class SparxConsumer {
 
     private boolean isValidMessage(JsonNode jsonNode) {
         return jsonNode.has("name") &&
-                jsonNode.has("entityId") &&
+                jsonNode.has("id") &&
                 jsonNode.has("changeType") &&
                 jsonNode.has("source");
     }

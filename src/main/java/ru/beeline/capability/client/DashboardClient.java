@@ -28,7 +28,7 @@ public class DashboardClient {
     }
 
 
-    public String putCapability(PutBusinessCapabilityDTO capabilityDTO) {
+    public String putCapability(PutBusinessCapabilityDTO capabilityDTO, Boolean consumer) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -40,6 +40,9 @@ public class DashboardClient {
             requestBody.put("parent", capabilityDTO.getParent());
             requestBody.put("owner", capabilityDTO.getOwner());
             requestBody.put("author", capabilityDTO.getAuthor());
+            if (consumer) {
+                requestBody.put("status", capabilityDTO.getStatus());
+            }
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 

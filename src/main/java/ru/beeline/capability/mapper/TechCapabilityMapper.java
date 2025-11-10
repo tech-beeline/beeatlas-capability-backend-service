@@ -8,6 +8,7 @@ import ru.beeline.capability.domain.TechCapability;
 import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.HistoryTechCapabilityDTO;
 import ru.beeline.capability.dto.ParentDTO;
+import ru.beeline.capability.dto.ResponsibilityCapabilityDTO;
 import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
 import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTO;
 import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTOV2;
@@ -31,6 +32,14 @@ public class TechCapabilityMapper {
                 .link(techCapability.getLink())
                 .owner(techCapability.getOwner())
                 .parents(getParentsCodes(techCapability.getParents()))
+                .build();
+    }
+    public static ResponsibilityCapabilityDTO convertToResponsibilityDTO(TechCapability techCapability) {
+        return ResponsibilityCapabilityDTO.builder()
+                .id(techCapability.getId())
+                .code(techCapability.getCode())
+                .name(techCapability.getName())
+                .description(techCapability.getDescription())
                 .build();
     }
 

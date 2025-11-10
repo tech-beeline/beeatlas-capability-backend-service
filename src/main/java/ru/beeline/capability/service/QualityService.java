@@ -27,8 +27,8 @@ public class QualityService {
     @Autowired
     private AIToolClient aiConclusion;
 
-    public void checkQuality(Long entityId) {
-        TechCapability techCapability = techCapabilityRepository.findAllByIdAndDeletedDateIsNull(entityId);
+    public void checkQuality(Long id) {
+        TechCapability techCapability = techCapabilityRepository.findAllByIdAndDeletedDateIsNull(id);
         if(techCapability!=null){
             Promt promt = promtRepository.findByAlias("tc_quality_description");
             String content = promt.getPromt().replace("<!!!>", techCapability.getDescription());
