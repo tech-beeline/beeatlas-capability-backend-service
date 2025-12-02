@@ -33,7 +33,7 @@ public class DescriptionQualityConsumer {
         try {
             Thread.sleep(delayConsumer);
             jsonNode = objectMapper.readTree(message);
-            if (!jsonNode.has("changeType") || !jsonNode.has("id")) {
+            if (!jsonNode.has("changeType") || !jsonNode.has("entityId")) {
                 log.error("Message does not match the required format: " + message);
                 throw new IllegalArgumentException("Message does not match the required format: " + message);
             }
@@ -44,7 +44,7 @@ public class DescriptionQualityConsumer {
 
         String changeType = jsonNode.get("changeType").asText();
         if(!changeType.equals("DELETE")) {
-            Long id = jsonNode.get("id").asLong();
+            Long id = jsonNode.get("entityId").asLong();
             String name = jsonNode.has("name") ? jsonNode.get("name").asText() : null;
 
             qualityService.checkQuality(id);
