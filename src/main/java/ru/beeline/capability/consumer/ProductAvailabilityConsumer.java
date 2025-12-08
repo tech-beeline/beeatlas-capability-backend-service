@@ -31,7 +31,7 @@ public class ProductAvailabilityConsumer {
                 qualityService.calculationCriterias(jsonNode);
             }
         } catch (Exception e) {
-            log.error("Ошибка валидации сообщения: " + e.getMessage());
+            log.error("Ошибка обработки сообщения: " + e.getMessage());
         }
     }
 
