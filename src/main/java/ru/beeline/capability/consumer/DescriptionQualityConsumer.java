@@ -23,8 +23,9 @@ public class DescriptionQualityConsumer {
     QualityService qualityService;
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    public DescriptionQualityConsumer(@Value("${rabbit.delay}") Integer delayConsumer) {this.delayConsumer =
-            delayConsumer;}
+    public DescriptionQualityConsumer(@Value("${rabbit.delay}") Integer delayConsumer) {
+        this.delayConsumer = delayConsumer;
+    }
 
     @RabbitListener(queues = "${queue.tc-description-quality.name}")
     public void techQueue(String message) {
@@ -34,7 +35,7 @@ public class DescriptionQualityConsumer {
             Thread.sleep(delayConsumer);
             jsonNode = objectMapper.readTree(message);
             if (!jsonNode.has("changeType") || !jsonNode.has("id")) {
-                log.error("Message does not match the required format: " + message);
+                log.error("Сообщение не соответствует требуемому формату: " + message);
                 throw new IllegalArgumentException("Message does not match the required format: " + message);
             }
         } catch (Exception e) {
@@ -43,7 +44,7 @@ public class DescriptionQualityConsumer {
         }
 
         String changeType = jsonNode.get("changeType").asText();
-        if(!changeType.equals("DELETE")) {
+        if (!changeType.equals("DELETE")) {
             Long id = jsonNode.get("id").asLong();
             String name = jsonNode.has("name") ? jsonNode.get("name").asText() : null;
 
