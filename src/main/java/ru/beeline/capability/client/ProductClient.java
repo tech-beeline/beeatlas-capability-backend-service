@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.capability.controller.RequestContext;
+import ru.beeline.capability.dto.ProductAvailableDTO;
 import ru.beeline.capability.dto.ProductDTO;
+import ru.beeline.capability.exception.ResponseException;
 import ru.beeline.fdmlib.dto.product.GetProductsByIdsDTO;
 
 import java.util.List;
@@ -36,9 +38,10 @@ public class ProductClient {
 
             log.info("request to Product ServerUrl with targetSystemCode: " + targetSystemCode);
             ResponseEntity<ProductDTO> response = restTemplate.exchange(productServerUrl + "/api/v1/product/" + targetSystemCode,
-                                                                        HttpMethod.GET,
-                                                                        new HttpEntity<>(headers),
-                                                                        new ParameterizedTypeReference<ProductDTO>() {});
+                    HttpMethod.GET,
+                    new HttpEntity<>(headers),
+                    new ParameterizedTypeReference<ProductDTO>() {
+                    });
             log.info("response from Product ServerUrl: " + response.getBody());
             return response.getBody();
         } catch (HttpClientErrorException.NotFound e) {
@@ -56,9 +59,10 @@ public class ProductClient {
 
             log.info("getTCIdsByProductId from Product ServerUrl with id: " + id);
             ResponseEntity<List<Long>> response = restTemplate.exchange(productServerUrl + "/api/v1/product/" + id + "/tc-implementation",
-                                                                        HttpMethod.GET,
-                                                                        new HttpEntity<>(headers),
-                                                                        new ParameterizedTypeReference<List<Long>>() {});
+                    HttpMethod.GET,
+                    new HttpEntity<>(headers),
+                    new ParameterizedTypeReference<List<Long>>() {
+                    });
             log.info("response from Product ServerUrl: " + response.getBody());
             return response.getBody();
         } catch (HttpClientErrorException.NotFound e) {
@@ -79,9 +83,10 @@ public class ProductClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
             String idsParam = ids.stream().map(String::valueOf).collect(Collectors.joining(","));
             ResponseEntity<List<GetProductsByIdsDTO>> response = restTemplate.exchange(productServerUrl + "/api/v1/product/by-ids?ids=" + idsParam,
-                                                                                       HttpMethod.GET,
-                                                                                       new HttpEntity<>(headers),
-                                                                                       new ParameterizedTypeReference<List<GetProductsByIdsDTO>>() {});
+                    HttpMethod.GET,
+                    new HttpEntity<>(headers),
+                    new ParameterizedTypeReference<List<GetProductsByIdsDTO>>() {
+                    });
             log.info("response from Product ServerUrl: " + response.getBody());
             return response.getBody();
         } catch (HttpClientErrorException.NotFound e) {
@@ -90,6 +95,38 @@ public class ProductClient {
         } catch (Exception e) {
             log.error("call's Exception " + e.getMessage());
             return null;
+        }
+    }
+
+    public ProductAvailableDTO getAvailability(String entityId) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            log.info("Запрос в сервис продуктов, /api/v1/product/{}/availability", entityId);
+            return restTemplate.exchange(productServerUrl + "/api/v1/product/" + entityId + "/availability",
+                    HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<ProductAvailableDTO>() {
+                    }).getBody();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
+    }
+
+    public List<Integer> getTcImplementationIds(Integer id) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            log.info("Запрос в сервис продуктов, /api/v1/product/{}/tc-implementation", id);
+            ResponseEntity<List<Integer>> response =
+                    restTemplate.exchange(productServerUrl + "/api/v1/product/" + id + "/tc-implementation",
+                            HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
+                            });
+            log.info("response from Product ServerUrl: " + response.getBody());
+            return response.getBody();
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new ResponseException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (Exception e) {
+            throw new ResponseException(HttpStatus.INTERNAL_SERVER_ERROR, "Внутренняя ошибка при обработке запроса");
         }
     }
 }
