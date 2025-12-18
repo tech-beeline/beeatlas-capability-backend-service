@@ -275,7 +275,6 @@ public class BusinessCapabilityService {
                 businessCapability = updateCapability(businessCapability, capabilityDTO, source);
                 findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
                         businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
-                putCapabilityToDashboard(capabilityDTO, userId, productIds, roles, permissions);
             }
         } else {
             businessCapability = createCapabilities(capabilityDTO, source);
@@ -284,12 +283,8 @@ public class BusinessCapabilityService {
                         businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
                 log.warn("One or more required parameters are null or empty. Business capability  has been preserved.");
             } else {
-                if (putCapabilityToDashboard(capabilityDTO, userId, productIds, roles, permissions) != null) {
-                    findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
-                            businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
-                } else {
-                    businessCapabilityRepository.delete(businessCapability);
-                }
+                findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
+                        businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
             }
         }
     }
@@ -318,22 +313,6 @@ public class BusinessCapabilityService {
                 .deletedDate(businessCapability.getDeletedDate())
                 .source(businessCapability.getSource())
                 .build());
-    }
-
-    private String putCapabilityToDashboard(PutBusinessCapabilityDTO capabilityDTO, String userId, String productIds,
-                                            String roles, String permissions) {
-        if (Objects.nonNull(userId) && Objects.nonNull(productIds) && Objects.nonNull(roles) && Objects.nonNull(
-                permissions)) {
-            if (capabilityDTO.getAuthor() == null || capabilityDTO.getAuthor().isEmpty()) {
-                fillAuthor(capabilityDTO, userId);
-            }
-            return dashboardClient.putCapability(capabilityDTO, false);
-        }
-        return null;
-    }
-
-    private void fillAuthor(PutBusinessCapabilityDTO capabilityDTO, String userId) {
-        capabilityDTO.setAuthor(userClient.getEmail(userId));
     }
 
     private BusinessCapability updateCapability(BusinessCapability businessCapability, PutBusinessCapabilityDTO capabilityDTO,
