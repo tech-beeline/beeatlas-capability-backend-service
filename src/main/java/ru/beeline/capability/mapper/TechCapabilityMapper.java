@@ -34,6 +34,7 @@ public class TechCapabilityMapper {
                 .parents(getParentsCodes(techCapability.getParents()))
                 .build();
     }
+
     public static ResponsibilityCapabilityDTO convertToResponsibilityDTO(TechCapability techCapability) {
         return ResponsibilityCapabilityDTO.builder()
                 .id(techCapability.getId())
