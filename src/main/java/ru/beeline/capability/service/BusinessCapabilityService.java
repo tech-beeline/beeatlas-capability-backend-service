@@ -24,11 +24,14 @@ import ru.beeline.capability.utils.UrlWrapper;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTOV2;
 import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenIdsDTO;
+import ru.beeline.fdmlib.dto.capability.CriteriaDTO;
 import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
+import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTO;
 import ru.beeline.fdmlib.dto.product.GetProductsByIdsDTO;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static ru.beeline.capability.utils.Constants.ENTITY_TYPE_BUSINESS_CAPABILITY;
@@ -63,6 +66,9 @@ public class BusinessCapabilityService {
     private BusinessCapabilityMapper businessCapabilityMapper;
 
     @Autowired
+    private CriteriaTcRepository criteriaTcRepository;
+
+    @Autowired
     private FindNameSortTableRepository findNameSortTableRepository;
 
     @Autowired
@@ -87,9 +93,51 @@ public class BusinessCapabilityService {
         if (businessCapability.getDeletedDate() != null) {
             throw new NotFoundException("Business Capability не найдено");
         }
-        List<TechCapability> techCapabilities = businessCapability.getChildren().stream().map(TechCapabilityRelations::getTechCapability).filter(techCapability -> Objects.isNull(techCapability.getDeletedDate())).collect(Collectors.toList());
+        List<TechCapability> techCapabilities = businessCapability.getChildren().stream()
+                .map(TechCapabilityRelations::getTechCapability)
+                .filter(techCapability -> Objects.isNull(techCapability.getDeletedDate())).collect(Collectors.toList());
         List<BusinessCapability> businessCapabilitiesKids = businessCapabilityRepository.findAllByParentIdAndDeletedDateIsNull(id);
-        return businessCapabilityMapper.convert(techCapabilities, businessCapabilitiesKids);
+        BusinessCapabilityChildrenDTO result =
+                businessCapabilityMapper.convert(techCapabilities, businessCapabilitiesKids);
+        List<Integer> systemIds = new ArrayList<>();
+        systemIds = techCapabilities.stream().map(TechCapability::getResponsibilityProductId)
+                .filter(Objects::nonNull).distinct().toList();
+        List<Long> tcIds = techCapabilities.stream().map(TechCapability::getId).toList();
+        List<GetProductsByIdsDTO> getProductsByIdsDTOS = productClient.getProductsByIds(systemIds);
+        if (getProductsByIdsDTOS != null && !getProductsByIdsDTOS.isEmpty()) {
+            Map<Integer, GetProductsByIdsDTO> tcMap = getProductsByIdsDTOS.stream()
+                    .collect(Collectors.toMap(
+                            GetProductsByIdsDTO::getId,
+                            Function.identity()));
+            for (TechCapabilityShortDTO obj : result.getTechCapabilities()) {
+                obj.setSystem(tcMap.get(obj.getSystemId()));
+            }
+        }
+        List<CriteriasTc> criteriasTcs = criteriaTcRepository.findAllByTcIdIn(tcIds);
+        if (criteriasTcs != null && !criteriasTcs.isEmpty()) {
+            Map<Long, List<CriteriasTc>> criteriaMap = criteriasTcs.stream()
+                    .collect(Collectors.groupingBy(
+                            CriteriasTc::getTcId));
+            for (TechCapabilityShortDTO obj : result.getTechCapabilities()) {
+                obj.setCriteria(buildCriteriaTcDTO(criteriaMap.get(obj.getId())));
+            }
+        }
+        return result;
+    }
+
+    private List<CriteriaDTO> buildCriteriaTcDTO(List<CriteriasTc> criterias) {
+        List<CriteriaDTO> result = new ArrayList<>();
+        if (criterias != null && !criterias.isEmpty()) {
+            for (CriteriasTc c : criterias) {
+                result.add(CriteriaDTO.builder()
+                        .criteriaId(c.getCriterionId().intValue())
+                        .value(c.getValue())
+                        .grade(c.getGrade())
+                        .comment(c.getComment())
+                        .build());
+            }
+        }
+        return result;
     }
 
     public BusinessCapabilityChildrenDTOV2 getChildrenV2(Long id) {
@@ -275,7 +323,6 @@ public class BusinessCapabilityService {
                 businessCapability = updateCapability(businessCapability, capabilityDTO, source);
                 findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
                         businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
-                putCapabilityToDashboard(capabilityDTO, userId, productIds, roles, permissions);
             }
         } else {
             businessCapability = createCapabilities(capabilityDTO, source);
@@ -284,12 +331,8 @@ public class BusinessCapabilityService {
                         businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
                 log.warn("One or more required parameters are null or empty. Business capability  has been preserved.");
             } else {
-                if (putCapabilityToDashboard(capabilityDTO, userId, productIds, roles, permissions) != null) {
-                    findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
-                            businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
-                } else {
-                    businessCapabilityRepository.delete(businessCapability);
-                }
+                findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
+                        businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
             }
         }
     }
@@ -318,22 +361,6 @@ public class BusinessCapabilityService {
                 .deletedDate(businessCapability.getDeletedDate())
                 .source(businessCapability.getSource())
                 .build());
-    }
-
-    private String putCapabilityToDashboard(PutBusinessCapabilityDTO capabilityDTO, String userId, String productIds,
-                                            String roles, String permissions) {
-        if (Objects.nonNull(userId) && Objects.nonNull(productIds) && Objects.nonNull(roles) && Objects.nonNull(
-                permissions)) {
-            if (capabilityDTO.getAuthor() == null || capabilityDTO.getAuthor().isEmpty()) {
-                fillAuthor(capabilityDTO, userId);
-            }
-            return dashboardClient.putCapability(capabilityDTO, false);
-        }
-        return null;
-    }
-
-    private void fillAuthor(PutBusinessCapabilityDTO capabilityDTO, String userId) {
-        capabilityDTO.setAuthor(userClient.getEmail(userId));
     }
 
     private BusinessCapability updateCapability(BusinessCapability businessCapability, PutBusinessCapabilityDTO capabilityDTO,

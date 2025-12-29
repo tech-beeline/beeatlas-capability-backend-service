@@ -20,6 +20,8 @@ public interface TechCapabilityRelationsRepository extends JpaRepository<TechCap
 
     List<TechCapabilityRelations> findByTechCapability(TechCapability techCapability);
 
+    List<TechCapabilityRelations> findByTechCapability_IdIn(List<Long> techCapabilityIds);
+
     List<TechCapabilityRelations> findByBusinessCapability(BusinessCapability businessCapability);
 
     boolean existsByBusinessCapabilityAndTechCapability_DeletedDateIsNull(BusinessCapability businessCapability);

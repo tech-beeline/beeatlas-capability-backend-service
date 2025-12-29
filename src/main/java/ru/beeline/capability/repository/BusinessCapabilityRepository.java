@@ -48,4 +48,10 @@ public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapa
     Optional<BusinessCapability> findByIdAndDeletedDateIsNull(Long id);
 
     Page<BusinessCapability> findByIsDomainTrueAndDeletedDateIsNull(Pageable pageable);
+
+    @Query("SELECT DISTINCT bc FROM BusinessCapability bc " +
+            "LEFT JOIN FETCH bc.children tcr " +
+            "LEFT JOIN FETCH tcr.techCapability " +
+            "WHERE bc.id = :id")
+    Optional<BusinessCapability> findByIdWithChildrenAndTech(@Param("id") Long id);
 }
