@@ -21,12 +21,14 @@ import ru.beeline.capability.repository.*;
 import ru.beeline.capability.utils.Node;
 import ru.beeline.capability.utils.UrlWrapper;
 import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
+import ru.beeline.fdmlib.dto.product.GetProductsByIdsDTO;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static ru.beeline.capability.utils.Constants.ENTITY_TYPE_TECH_CAPABILITY;
@@ -82,14 +84,26 @@ public class TechCapabilityService {
 
 
     public List<TechCapabilityDTO> getCapabilities(Integer limit, Integer offset) {
+        List<TechCapabilityDTO> result = new ArrayList<>();
         if (offset == null) {
             offset = 0;
         }
         Pageable pageable = new OffsetBasedPageRequest(offset,
-                                                       limit == null || limit == 0 ? Integer.MAX_VALUE : limit,
-                                                       Sort.by(Sort.Direction.ASC, "name"));
+                limit == null || limit == 0 ? Integer.MAX_VALUE : limit,
+                Sort.by(Sort.Direction.ASC, "name"));
         Page<TechCapability> techCapabilities = techCapabilityRepository.findCapabilities(pageable);
-        return TechCapabilityDTO.convert(techCapabilities.toList());
+        List<Integer> systemIds;
+        systemIds = techCapabilities.stream().map(TechCapability::getResponsibilityProductId)
+                .filter(Objects::nonNull).distinct().toList();
+        List<GetProductsByIdsDTO> getProductsByIdsDTOS = productClient.getProductsByIds(systemIds);
+        if (getProductsByIdsDTOS != null && !getProductsByIdsDTOS.isEmpty()) {
+            Map<Integer, GetProductsByIdsDTO> tcMap = getProductsByIdsDTOS.stream()
+                    .collect(Collectors.toMap(
+                            GetProductsByIdsDTO::getId,
+                            Function.identity()));
+            result = TechCapabilityDTO.convert(techCapabilities.toList(), tcMap);
+        }
+        return result;
     }
 
     public List<TechCapability> getByIdIn(List<Long> ids) {
@@ -102,14 +116,23 @@ public class TechCapabilityService {
         if (techCapability.getDeletedDate() != null) {
             throw new NotFoundException("Tech Capability не найдено");
         }
-        techCapability.getParents().get(0);
+        if (techCapability.getParents() != null && !techCapability.getParents().isEmpty()) {
+            techCapability.getParents().get(0);
+        }
         entityManager.detach(techCapability);
         techCapability.setParents(techCapability.getParents()
-                                          .stream()
-                                          .filter(businessCapability -> Objects.isNull(businessCapability.getBusinessCapability()
-                                                                                               .getDeletedDate()))
-                                          .collect(Collectors.toList()));
-        return TechCapabilityDTO.convert(techCapability);
+                .stream()
+                .filter(businessCapability -> Objects.isNull(businessCapability.getBusinessCapability()
+                        .getDeletedDate()))
+                .collect(Collectors.toList()));
+        List<Integer> systemIds = new ArrayList<>();
+        systemIds.add(techCapability.getResponsibilityProductId());
+        List<GetProductsByIdsDTO> getProductsByIdsDTOS = productClient.getProductsByIds(systemIds);
+        GetProductsByIdsDTO system = null;
+        if (getProductsByIdsDTOS != null && !getProductsByIdsDTOS.isEmpty()) {
+            system = getProductsByIdsDTOS.get(0);
+        }
+        return TechCapabilityDTO.convert(techCapability, system);
     }
 
     public CapabilityParentDTO getParents(Long id) {
@@ -120,9 +143,9 @@ public class TechCapabilityService {
                 techCapability);
         if (!techCapabilityRelations.isEmpty()) {
             parents.add(new CapabilityParentDTO(techCapabilityRelations.stream()
-                                                        .map(TechCapabilityRelations::getBusinessCapability)
-                                                        .map(BusinessCapability::getId)
-                                                        .collect(Collectors.toList())));
+                    .map(TechCapabilityRelations::getBusinessCapability)
+                    .map(BusinessCapability::getId)
+                    .collect(Collectors.toList())));
             techCapabilityRelations.forEach(relation -> {
                 parents.add(businessCapabilityService.getParents(relation.getBusinessCapability().getId()));
             });
@@ -167,14 +190,14 @@ public class TechCapabilityService {
             if (techCapabilityHaveParents) {
                 log.info("create relations");
                 createRelations(currentTechCapability,
-                                businessCapabilityRepository.findAllByCodeIn(techCapability.getParents()));
+                        businessCapabilityRepository.findAllByCodeIn(techCapability.getParents()));
             }
             log.info("send notify");
             findNameSortTableService.updateVector(currentTechCapability.getId(),
-                                                  currentTechCapability.getName(),
-                                                  currentTechCapability.getDescription(),
-                                                  currentTechCapability.getCode(),
-                                                  ENTITY_TYPE_TECH_CAPABILITY);
+                    currentTechCapability.getName(),
+                    currentTechCapability.getDescription(),
+                    currentTechCapability.getCode(),
+                    ENTITY_TYPE_TECH_CAPABILITY);
         } else {
             log.info("currentTechCapabilityOpt is present");
             currentTechCapability = currentTechCapabilityOpt.get();
@@ -188,7 +211,7 @@ public class TechCapabilityService {
                     techCapability,
                     currentTechCapabilityDTO) && currentTechCapability.getDeletedDate() != null);
             if (shouldUpdate || !source.equals(currentTechCapability.getSource()) || !Objects.equals(productId,
-                                                                                                     currentTechCapability.getResponsibilityProductId())) {
+                    currentTechCapability.getResponsibilityProductId())) {
                 log.info("techCapability from dashboard: " + techCapability + " equals techCapability from BD " + currentTechCapabilityDTO);
                 log.info("old techCapability and new techCapability is not equals, and try update");
                 addToHistory(currentTechCapability);
@@ -196,16 +219,16 @@ public class TechCapabilityService {
                 log.info("delete old relations");
                 techCapabilityRelationsRepository.deleteAllByTechCapability(currentTechCapability);
                 findNameSortTableService.updateVector(currentTechCapability.getId(),
-                                                      currentTechCapability.getName(),
-                                                      currentTechCapability.getDescription(),
-                                                      currentTechCapability.getCode(),
-                                                      ENTITY_TYPE_TECH_CAPABILITY);
+                        currentTechCapability.getName(),
+                        currentTechCapability.getDescription(),
+                        currentTechCapability.getCode(),
+                        ENTITY_TYPE_TECH_CAPABILITY);
                 if (techCapabilityHaveParents) {
                     Collections.sort(currentTechCapabilityDTO.getParents());
                     Collections.sort(techCapability.getParents());
                     log.info("create new relations");
                     createRelations(currentTechCapability,
-                                    businessCapabilityRepository.findAllByCodeIn(techCapability.getParents()));
+                            businessCapabilityRepository.findAllByCodeIn(techCapability.getParents()));
                 }
             }
         }
@@ -215,26 +238,26 @@ public class TechCapabilityService {
         Optional<HistoryTechCapability> historyTechCapability = historyTechCapabilityRepository.findTopByIdRefOrderByVersionDesc(
                 currentTechCapability.getId());
         HistoryTechCapability newHistoryTechCapability = historyTechCapabilityRepository.save(HistoryTechCapability.builder()
-                                                                                                      .idRef(currentTechCapability.getId())
-                                                                                                      .version(
-                                                                                                              historyTechCapability.isPresent() ? historyTechCapability.get()
-                                                                                                                      .getVersion() + 1 : 1)
-                                                                                                      .code(currentTechCapability.getCode())
-                                                                                                      .name(currentTechCapability.getName())
-                                                                                                      .description(
-                                                                                                              currentTechCapability.getDescription())
-                                                                                                      .modifiedDate(
-                                                                                                              currentTechCapability.getLastModifiedDate() == null ? currentTechCapability.getCreatedDate() : currentTechCapability.getLastModifiedDate())
-                                                                                                      .deletedDate(
-                                                                                                              currentTechCapability.getDeletedDate())
-                                                                                                      .owner(currentTechCapability.getOwner())
-                                                                                                      .status(currentTechCapability.getStatus())
-                                                                                                      .link(currentTechCapability.getLink())
-                                                                                                      .author(currentTechCapability.getAuthor())
-                                                                                                      .source(currentTechCapability.getSource())
-                                                                                                      .responsibilityProductId(
-                                                                                                              currentTechCapability.getResponsibilityProductId())
-                                                                                                      .build());
+                .idRef(currentTechCapability.getId())
+                .version(
+                        historyTechCapability.isPresent() ? historyTechCapability.get()
+                                .getVersion() + 1 : 1)
+                .code(currentTechCapability.getCode())
+                .name(currentTechCapability.getName())
+                .description(
+                        currentTechCapability.getDescription())
+                .modifiedDate(
+                        currentTechCapability.getLastModifiedDate() == null ? currentTechCapability.getCreatedDate() : currentTechCapability.getLastModifiedDate())
+                .deletedDate(
+                        currentTechCapability.getDeletedDate())
+                .owner(currentTechCapability.getOwner())
+                .status(currentTechCapability.getStatus())
+                .link(currentTechCapability.getLink())
+                .author(currentTechCapability.getAuthor())
+                .source(currentTechCapability.getSource())
+                .responsibilityProductId(
+                        currentTechCapability.getResponsibilityProductId())
+                .build());
         List<TechCapabilityRelations> relations = techCapabilityRelationsRepository.findByTechCapability(
                 currentTechCapability);
         if (!relations.isEmpty()) {
@@ -276,7 +299,7 @@ public class TechCapabilityService {
             techCapabilityRelation.setTechCapability(currentTechCapability);
             log.info("check exist relations idBC=" + businessCapability.getId() + "and idTC=" + currentTechCapability.getId());
             if (!techCapabilityRelationsRepository.existsByBusinessCapabilityAndTechCapability(businessCapability,
-                                                                                               currentTechCapability)) {
+                    currentTechCapability)) {
                 techCapabilityRelations.add(techCapabilityRelation);
             }
         }
@@ -341,9 +364,9 @@ public class TechCapabilityService {
         calculateTree(parentNode, criteriasBcMap, quantityTc);
         criteriaBcRepository.deleteAllByCriterionId(quantityTc.getId());
         criteriaBcRepository.saveAll(criteriasBcMap.values()
-                                             .stream()
-                                             .filter(criteriaBc -> criteriaBc.getValue() > 0)
-                                             .collect(Collectors.toList()));
+                .stream()
+                .filter(criteriaBc -> criteriaBc.getValue() > 0)
+                .collect(Collectors.toList()));
     }
 
     private void calculateTree(Node node, Map<Long, CriteriasBc> criteriasBcMap, EnumCriteria quantityTc) {
@@ -393,7 +416,7 @@ public class TechCapabilityService {
 
     public Node findRootNode(Map<Long, Node> nodeMap, Long id) {
         return nodeMap.get(id).getParentId() != null ? findRootNode(nodeMap,
-                                                                    nodeMap.get(id).getParentId()) : nodeMap.get(id);
+                nodeMap.get(id).getParentId()) : nodeMap.get(id);
     }
 
     private Map<Long, Node> getNodeMap(List<TechCapabilityRelations> techCapabilityRelationsList) {
@@ -489,7 +512,7 @@ public class TechCapabilityService {
                         techCapability);
                 if (techCapabilityRelations.isEmpty()) {
                     throw new NotFoundException(String.format("Не найдено родительских BC для TC с Id: %s ",
-                                                              techCapability.getId()));
+                            techCapability.getId()));
                 }
                 List<ParentDTO> parentDTOS = new ArrayList<>();
                 for (TechCapabilityRelations techCapabilityRelation : techCapabilityRelations) {
@@ -533,7 +556,7 @@ public class TechCapabilityService {
         List<ParentDTO> parentDTOS = new ArrayList<>();
         if (result.isEmpty()) {
             throw new NotFoundException(String.format("Не найдено родительских Business Capability с Id: %s",
-                                                      historyTechCapability.getId()));
+                    historyTechCapability.getId()));
         }
         for (HistoryTechCapabilityRelations historyTechCapabilityRelations : result) {
             Optional<BusinessCapability> optionalBusinessCapability = businessCapabilityRepository.findById(
@@ -590,11 +613,11 @@ public class TechCapabilityService {
                 techCapabilityRepository.findAllByIdIn(tcIds) : new ArrayList<>();
         return ResponsibilityTcDTO.builder()
                 .responsibility(techCapabilities.stream()
-                                        .map(TechCapabilityMapper::convertToResponsibilityDTO)
-                                        .collect(Collectors.toList()))
+                        .map(TechCapabilityMapper::convertToResponsibilityDTO)
+                        .collect(Collectors.toList()))
                 .implemented(implemented.stream()
-                                     .map(TechCapabilityMapper::convertToResponsibilityDTO)
-                                     .collect(Collectors.toList()))
+                        .map(TechCapabilityMapper::convertToResponsibilityDTO)
+                        .collect(Collectors.toList()))
                 .build();
     }
 }
