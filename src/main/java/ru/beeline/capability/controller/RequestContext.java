@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 PJSC VimpelCom
+ */
+
 package ru.beeline.capability.controller;
 
 import java.util.List;
@@ -28,6 +32,28 @@ public class RequestContext {
     public static String getUserId() {
         return getHeaders().get(USER_ID_HEADER).toString();
     }
+
+    public static String getOpenaiHost() {
+        if (getHeaders() == null || getHeaders().get(OPENAI_HOST).toString() == null) {
+            return null;
+        }
+        return getHeaders().get(OPENAI_HOST).toString();
+    }
+
+    public static String getOpenaiToken() {
+        if (getHeaders() == null || getHeaders().get(OPENAI_TOKEN).toString() == null) {
+            return null;
+        }
+        return getHeaders().get(OPENAI_TOKEN).toString();
+    }
+
+    public static String getOpenaiModel() {
+        if (getHeaders() == null || getHeaders().get(OPENAI_MODEL).toString() == null) {
+            return null;
+        }
+        return getHeaders().get(OPENAI_MODEL).toString();
+    }
+
 
     public static List<Long> getUserProducts() {
         List<String> stringList = (List<String>) getHeaders().get(USER_PRODUCTS_IDS_HEADER);
