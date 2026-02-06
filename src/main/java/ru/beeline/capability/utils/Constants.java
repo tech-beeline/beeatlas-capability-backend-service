@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 PJSC VimpelCom
+ */
+
 package ru.beeline.capability.utils;
 
 public class Constants {
@@ -14,4 +18,7 @@ public class Constants {
     public static final String USER_ROLES_HEADER = "user-roles";
     public static final String SOURCE = "source";
     public static final String CONTENT_DISPOSITION = "Content-Disposition";
+    public static final String OPENAI_HOST = "openai-host";
+    public static final String OPENAI_TOKEN = "openai-token";
+    public static final String OPENAI_MODEL = "openai-model";
 }
