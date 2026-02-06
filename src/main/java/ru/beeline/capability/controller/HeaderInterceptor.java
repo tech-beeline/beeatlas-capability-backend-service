@@ -30,7 +30,7 @@ public class HeaderInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         try {
             String uri = request.getRequestURI();
-            if (isHeaderPath(uri)
+            if (!isHeaderPath(uri)
                     || uri.contains("/api/v1/business-capability/order/domains")
                     || (uri.contains("/api/v1/business-capability/order") && !uri.contains("/draft")
                     && request.getMethod().equals("GET"))
