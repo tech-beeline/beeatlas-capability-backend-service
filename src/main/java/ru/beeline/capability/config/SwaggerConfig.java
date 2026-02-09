@@ -24,7 +24,7 @@ public class SwaggerConfig {
                 .apiInfo(getApiInfo())
                 .useDefaultResponseMessages(false)
                 .globalResponses(HttpMethod.GET, getErrorResponses())
-                .globalResponses(HttpMethod.POST, getGlobalErrorResponses())
+                .globalResponses(HttpMethod.POST, getErrorResponses())
                 .globalResponses(HttpMethod.PUT, getGlobalErrorResponses())
                 .globalResponses(HttpMethod.DELETE, getGlobalErrorResponses())
                 .globalResponses(HttpMethod.PATCH, getGlobalErrorResponses())

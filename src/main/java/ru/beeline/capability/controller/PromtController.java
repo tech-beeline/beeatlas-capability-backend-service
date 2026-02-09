@@ -9,9 +9,11 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.beeline.capability.annotation.AiToolHeaders;
 import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.dto.PostPromtDTO;
 import ru.beeline.capability.dto.PromtDTO;
+import ru.beeline.capability.dto.aitooldto.ResultDTO;
 import ru.beeline.capability.service.PromtService;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -29,10 +31,11 @@ public class PromtController {
         return promtService.getPromtByAlias(alias);
     }
 
+    @AiToolHeaders
     @ApiErrorCodes({400, 404, 500})
     @PostMapping("/proxy")
     @ApiOperation(value = "Проксирования запроса в LLM с использованием сохраненного промота")
-    public ResponseEntity<String> getPromtProxy(@RequestBody PostPromtDTO postPromtDTO) {
+    public ResponseEntity<ResultDTO> getPromtProxy(@RequestBody PostPromtDTO postPromtDTO) {
         return ResponseEntity.ok(promtService.postPromtProxy(postPromtDTO));
     }
 }
