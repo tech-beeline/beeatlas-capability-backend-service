@@ -16,6 +16,7 @@ import ru.beeline.capability.dto.PostPromtDTO;
 import ru.beeline.capability.dto.PromtDTO;
 import ru.beeline.capability.dto.aitooldto.AiRequestDTO;
 import ru.beeline.capability.dto.aitooldto.MessageDTO;
+import ru.beeline.capability.dto.aitooldto.ResultDTO;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.repository.PromtRepository;
 
@@ -53,7 +54,7 @@ public class PromtService {
         return promt;
     }
 
-    public String postPromtProxy(PostPromtDTO postPromtDTO) {
+    public ResultDTO postPromtProxy(PostPromtDTO postPromtDTO) {
         validatePromtDTO(postPromtDTO);
         Promt promt = findPromtByAlias(postPromtDTO.getPromtAlias());
         String promtString = promt.getPromt();
@@ -70,11 +71,15 @@ public class PromtService {
             }
         }
         if (aiBeeline) {
-            return extractContentFromJson(aiToolClient
-                    .postAiToolBeeline(aiRequestBuilder(promt, replacedPromt, aiBeeline)));
+            return ResultDTO.builder()
+                    .result(extractContentFromJson(aiToolClient
+                            .postAiToolBeeline(aiRequestBuilder(promt, replacedPromt, aiBeeline))))
+                    .build();
         } else {
-            return extractContentFromJson(aiToolClient
-                    .postAiTool(aiRequestBuilder(promt, replacedPromt, aiBeeline)));
+            return ResultDTO.builder()
+                    .result(extractContentFromJson(aiToolClient
+                            .postAiTool(aiRequestBuilder(promt, replacedPromt, aiBeeline))))
+                    .build();
         }
     }
 
