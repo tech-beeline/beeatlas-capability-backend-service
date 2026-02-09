@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 PJSC VimpelCom
+ */
+
 package ru.beeline.capability.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -7,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import ru.beeline.capability.controller.RequestContext;
+import ru.beeline.capability.dto.aitooldto.AiRequestDTO;
 
 @Slf4j
 @Service
@@ -97,5 +103,36 @@ public class AIToolClient {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public String postAiToolBeeline(AiRequestDTO aiRequestDTO) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<AiRequestDTO> entity = new HttpEntity<>(aiRequestDTO, headers);
+
+            return restTemplate.exchange(aiToolServerUrl,
+                    HttpMethod.POST, entity, String.class).getBody();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
+    }
+
+    public String postAiTool(AiRequestDTO aiRequestDTO) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Authorization", "Bearer " + RequestContext.getOpenaiToken());
+
+            HttpEntity<AiRequestDTO> entity = new HttpEntity<>(aiRequestDTO, headers);
+
+            return restTemplate.exchange(RequestContext.getOpenaiHost() + "/ai-tool/api/v1/chat/completions",
+                    HttpMethod.POST, entity, String.class).getBody();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
     }
 }

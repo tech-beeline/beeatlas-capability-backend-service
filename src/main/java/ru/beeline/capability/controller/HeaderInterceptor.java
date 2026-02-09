@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 PJSC VimpelCom
+ */
+
 package ru.beeline.capability.controller;
 
 import org.slf4j.Logger;
@@ -10,10 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ru.beeline.capability.utils.Constants.USER_ID_HEADER;
-import static ru.beeline.capability.utils.Constants.USER_PERMISSION_HEADER;
-import static ru.beeline.capability.utils.Constants.USER_PRODUCTS_IDS_HEADER;
-import static ru.beeline.capability.utils.Constants.USER_ROLES_HEADER;
+import static ru.beeline.capability.utils.Constants.*;
 
 public class HeaderInterceptor implements HandlerInterceptor {
     private Logger logger = LoggerFactory.getLogger(HeaderInterceptor.class);
@@ -31,9 +32,14 @@ public class HeaderInterceptor implements HandlerInterceptor {
             String uri = request.getRequestURI();
             if (!isHeaderPath(uri)
                     || uri.contains("/api/v1/business-capability/order/domains")
-                    || (uri.contains("/api/v1/business-capability/order") && !uri.contains("/draft") && request.getMethod().equals("GET"))
-            )
-            {
+                    || (uri.contains("/api/v1/business-capability/order") && !uri.contains("/draft")
+                    && request.getMethod().equals("GET"))
+            ) {
+                Map<String, Object> headers = new HashMap<>();
+                headers.put(OPENAI_HOST, request.getHeader(OPENAI_HOST) != null ? request.getHeader(OPENAI_HOST).toString() : "");
+                headers.put(OPENAI_TOKEN, request.getHeader(OPENAI_TOKEN) != null ? request.getHeader(OPENAI_TOKEN).toString() : "");
+                headers.put(OPENAI_MODEL, request.getHeader(OPENAI_MODEL) != null ? request.getHeader(OPENAI_MODEL).toString() : "");
+                RequestContext.setHeaders(headers);
                 logger.info("without check headers");
                 return true;
             }
