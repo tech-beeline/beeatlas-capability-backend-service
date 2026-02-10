@@ -9,7 +9,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import ru.beeline.capability.dto.UserProfileDTO;
-import ru.beeline.fdmlib.dto.auth.EmailResponseDTO;
+import ru.beeline.capability.dto.auth.EmailResponseDTO;
 
 import java.util.Objects;
 

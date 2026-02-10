@@ -9,10 +9,10 @@ import ru.beeline.capability.domain.TechCapabilityRelations;
 import ru.beeline.capability.dto.HistoryTechCapabilityDTO;
 import ru.beeline.capability.dto.ParentDTO;
 import ru.beeline.capability.dto.ResponsibilityCapabilityDTO;
-import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
-import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTO;
-import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTOV2;
-import ru.beeline.fdmlib.dto.product.GetProductsByIdsDTO;
+import ru.beeline.capability.dto.PutTechCapabilityDTO;
+import ru.beeline.capability.dto.TechCapabilityShortDTO;
+import ru.beeline.capability.dto.TechCapabilityShortDTOV2;
+import ru.beeline.capability.dto.product.GetProductsByIdsDTO;
 
 import java.util.ArrayList;
 import java.util.Comparator;

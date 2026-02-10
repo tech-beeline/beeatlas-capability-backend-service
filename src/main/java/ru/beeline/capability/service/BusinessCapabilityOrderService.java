@@ -21,8 +21,8 @@ import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.mapper.BusinessCapabilityOrderMapper;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.OrderBusinessCapabilityRepository;
-import ru.beeline.fdmlib.dto.bpm.ApplicationExtendedDTO;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityOrderDraftResponseDTO;
+import ru.beeline.capability.dto.bpm.ApplicationExtendedDTO;
+import ru.beeline.capability.dto.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.time.LocalDateTime;
 import java.util.*;

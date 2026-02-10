@@ -7,9 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.dto.*;
 import ru.beeline.capability.service.BusinessCapabilityService;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenIdsDTO;
-import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
+import ru.beeline.capability.dto.BusinessCapabilityChildrenDTO;
+import ru.beeline.capability.dto.BusinessCapabilityChildrenIdsDTO;
+import ru.beeline.capability.dto.PutBusinessCapabilityDTO;
 
 import java.util.Collections;
 import java.util.List;

@@ -4,7 +4,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.service.BusinessCapabilityService;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTOV2;
+import ru.beeline.capability.dto.BusinessCapabilityChildrenDTOV2;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController

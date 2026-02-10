@@ -20,8 +20,8 @@ import ru.beeline.capability.mapper.TechCapabilityMapper;
 import ru.beeline.capability.repository.*;
 import ru.beeline.capability.utils.Node;
 import ru.beeline.capability.utils.UrlWrapper;
-import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
-import ru.beeline.fdmlib.dto.product.GetProductsByIdsDTO;
+import ru.beeline.capability.dto.PutTechCapabilityDTO;
+import ru.beeline.capability.dto.product.GetProductsByIdsDTO;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

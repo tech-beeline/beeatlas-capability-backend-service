@@ -16,8 +16,8 @@ import ru.beeline.capability.mapper.BusinessCapabilityMapper;
 import ru.beeline.capability.mapper.TechCapabilityMapper;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.TechCapabilityRepository;
-import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
-import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
+import ru.beeline.capability.dto.PutBusinessCapabilityDTO;
+import ru.beeline.capability.dto.PutTechCapabilityDTO;
 
 import java.io.File;
 import java.io.FileOutputStream;

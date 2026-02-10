@@ -11,7 +11,7 @@ import ru.beeline.capability.dto.BusinessCapabilityOrderPatchRequestDTO;
 import ru.beeline.capability.dto.BusinessCapabilityOrderRequestDTO;
 import ru.beeline.capability.dto.BusinessCapabilityOrderResponseDTO;
 import ru.beeline.capability.service.BusinessCapabilityOrderService;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityOrderDraftResponseDTO;
+import ru.beeline.capability.dto.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.util.List;
 

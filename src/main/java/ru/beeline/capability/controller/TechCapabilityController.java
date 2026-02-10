@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.dto.*;
 import ru.beeline.capability.service.TechCapabilityService;
-import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
+import ru.beeline.capability.dto.PutTechCapabilityDTO;
 
 import java.util.List;
 

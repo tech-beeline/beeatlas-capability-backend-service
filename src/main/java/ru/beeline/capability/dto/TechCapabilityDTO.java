@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import ru.beeline.capability.domain.TechCapability;
-import ru.beeline.fdmlib.dto.product.GetProductsByIdsDTO;
+import ru.beeline.capability.dto.product.GetProductsByIdsDTO;
 
 import java.util.*;
 
