@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 PJSC VimpelCom
+ */
+
 package ru.beeline.capability.controller.v2;
 
 import io.swagger.annotations.ApiOperation;
