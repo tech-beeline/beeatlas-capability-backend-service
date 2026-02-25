@@ -1,0 +1,159 @@
+/*
+ * Copyright (c) 2024 PJSC VimpelCom
+ */
+
+package ru.beeline.capability.mapper;
+
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import ru.beeline.capability.domain.HistoryTechCapability;
+import ru.beeline.capability.domain.TechCapability;
+import ru.beeline.capability.domain.TechCapabilityRelations;
+import ru.beeline.capability.dto.HistoryTechCapabilityDTO;
+import ru.beeline.capability.dto.ParentDTO;
+import ru.beeline.capability.dto.ResponsibilityCapabilityDTO;
+import ru.beeline.capability.dto.PutTechCapabilityDTO;
+import ru.beeline.capability.dto.TechCapabilityShortDTO;
+import ru.beeline.capability.dto.TechCapabilityShortDTOV2;
+import ru.beeline.capability.dto.product.GetProductsByIdsDTO;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Slf4j
+@Component
+public class TechCapabilityMapper {
+    public PutTechCapabilityDTO convertToPutTechCapabilityDTO(TechCapability techCapability) {
+        return PutTechCapabilityDTO.builder()
+                .code(techCapability.getCode())
+                .name(techCapability.getName())
+                .description(techCapability.getDescription())
+                .status(techCapability.getStatus())
+                .author(techCapability.getAuthor())
+                .link(techCapability.getLink())
+                .owner(techCapability.getOwner())
+                .parents(getParentsCodes(techCapability.getParents()))
+                .build();
+    }
+
+    public static ResponsibilityCapabilityDTO convertToResponsibilityDTO(TechCapability techCapability) {
+        return ResponsibilityCapabilityDTO.builder()
+                .id(techCapability.getId())
+                .code(techCapability.getCode())
+                .name(techCapability.getName())
+                .description(techCapability.getDescription())
+                .build();
+    }
+
+    public List<String> getParentsCodes(List<TechCapabilityRelations> techCapabilitiesRelations) {
+        return techCapabilitiesRelations.stream()
+                .map(relation -> relation.getBusinessCapability().getCode())
+                .collect(Collectors.toList());
+    }
+
+    public static List<TechCapabilityShortDTOV2> convertToTechCapabilityShortDTOList(List<TechCapability> techCapabilities,
+                                                                                     List<GetProductsByIdsDTO> products) {
+        List<TechCapabilityShortDTOV2> techCapabilityDTOS = new ArrayList<>();
+        for (TechCapability techCapability : techCapabilities) {
+            TechCapabilityShortDTOV2 techCapabilityDTO = convertToTechCapabilityShortDTO(techCapability, products);
+            techCapabilityDTOS.add(techCapabilityDTO);
+        }
+        techCapabilityDTOS.sort(Comparator.comparing(TechCapabilityShortDTOV2::getName));
+        return techCapabilityDTOS;
+    }
+
+
+    public static List<TechCapabilityShortDTO> convertToTechCapabilityShortDTOList(List<TechCapability> techCapabilities) {
+        List<TechCapabilityShortDTO> techCapabilityDTOS = new ArrayList<>();
+        for (TechCapability techCapability : techCapabilities) {
+            TechCapabilityShortDTO techCapabilityDTO = convertToTechCapabilityShortDTO(techCapability);
+            techCapabilityDTOS.add(techCapabilityDTO);
+        }
+        techCapabilityDTOS.sort(Comparator.comparing(TechCapabilityShortDTO::getName));
+        return techCapabilityDTOS;
+    }
+
+    public static TechCapabilityShortDTOV2 convertToTechCapabilityShortDTO(TechCapability techCapability,
+                                                                           List<GetProductsByIdsDTO> products) {
+        GetProductsByIdsDTO product = null;
+        if (products != null && !products.isEmpty()) {
+            product = products.stream()
+                    .filter(productElement -> productElement.getId().equals(techCapability.getResponsibilityProductId()))
+                    .findFirst()
+                    .get();
+        }
+        return TechCapabilityShortDTOV2.builder()
+                .id(techCapability.getId())
+                .code(techCapability.getCode())
+                .name(techCapability.getName())
+                .description(techCapability.getDescription())
+                .owner(techCapability.getOwner())
+                .product(product)
+                .author(techCapability.getAuthor())
+                .link(techCapability.getLink())
+                .createdDate(techCapability.getCreatedDate())
+                .lastModifiedDate(techCapability.getLastModifiedDate())
+                .build();
+    }
+
+    public static TechCapabilityShortDTO convertToTechCapabilityShortDTO(TechCapability techCapability) {
+        return TechCapabilityShortDTO.builder()
+                .id(techCapability.getId())
+                .code(techCapability.getCode())
+                .name(techCapability.getName())
+                .description(techCapability.getDescription())
+                .owner(techCapability.getOwner())
+                .author(techCapability.getAuthor())
+                .link(techCapability.getLink())
+                .createdDate(techCapability.getCreatedDate())
+                .lastModifiedDate(techCapability.getLastModifiedDate())
+                .systemId(techCapability.getResponsibilityProductId())
+                .build();
+    }
+
+    public HistoryTechCapabilityDTO toHistoryTechCapabilityDTO(HistoryTechCapability historyTechCapability,
+                                                               List<ParentDTO> parentDTOS,
+                                                               Long id,
+                                                               Integer version) {
+        return HistoryTechCapabilityDTO.builder()
+                .id(id)
+                .code(historyTechCapability.getCode())
+                .name(historyTechCapability.getName())
+                .description(historyTechCapability.getDescription())
+                .owner(historyTechCapability.getOwner())
+                .modifiedDate(historyTechCapability.getModifiedDate())
+                .deletedDate(historyTechCapability.getDeletedDate())
+                .status(historyTechCapability.getStatus())
+                .author(historyTechCapability.getAuthor())
+                .link(historyTechCapability.getLink())
+                .version(version)
+                .parents(parentDTOS)
+                .systemId(historyTechCapability.getResponsibilityProductId())
+                .build();
+    }
+
+    public HistoryTechCapabilityDTO toHistoryTechCapabilityDTO(TechCapability techCapability,
+                                                               List<ParentDTO> parentDTOS,
+                                                               Long id,
+                                                               Integer version) {
+        return HistoryTechCapabilityDTO.builder()
+                .id(id)
+                .code(techCapability.getCode())
+                .name(techCapability.getName())
+                .description(techCapability.getDescription())
+                .owner(techCapability.getOwner())
+                .modifiedDate(techCapability.getLastModifiedDate())
+                .deletedDate(techCapability.getDeletedDate())
+                .status(techCapability.getStatus())
+                .author(techCapability.getAuthor())
+                .link(techCapability.getLink())
+                .version(version)
+                .parents(parentDTOS)
+                .systemId(techCapability.getResponsibilityProductId())
+                .build();
+    }
+
+}
