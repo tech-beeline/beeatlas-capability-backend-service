@@ -11,7 +11,7 @@ services:
     volumes:
       - capability-postgres:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${CAPABILITY_POSTGRES_USER:-postgres}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${CAPABILITY_POSTGRES_USER:-postgres}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,6 +30,19 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
       RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE:-secret-cookie-for-dev}
+    command: >
+      sh -c "
+        rabbitmq-server &
+        sleep 20;
+        rabbitmqadmin declare queue name=tech_capability_queue durable=true;
+        rabbitmqadmin declare queue name=business_capability_queue durable=true;
+        rabbitmqadmin declare queue name=package_queue durable=true;
+        rabbitmqadmin declare queue name=tc_description_quality durable=true;
+        rabbitmqadmin declare queue name=bc_entry_in_sparx durable=true;
+        rabbitmqadmin declare queue name=product_availability durable=true;
+        rabbitmqadmin declare queue name=error_bc_entry_in_sparx durable=true;
+        wait
+      "
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
