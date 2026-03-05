@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.dto.*;
 import ru.beeline.capability.service.TechCapabilityService;
 import ru.beeline.capability.dto.PutTechCapabilityDTO;
@@ -27,6 +28,7 @@ public class TechCapabilityController {
     @Autowired
     private TechCapabilityService techCapabilityService;
 
+    @ApiErrorCodes({400, 500})
     @GetMapping
     @ApiOperation(value = "Получение технических возможностей")
     public List<TechCapabilityDTO> getTechCapabilities(@RequestParam(value = "limit", required = false) Integer limit,
@@ -34,30 +36,35 @@ public class TechCapabilityController {
         return techCapabilityService.getCapabilities(limit, offset);
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/{id}")
     @ApiOperation(value = "получение технической возможности", response = TechCapabilityDTO.class)
     public TechCapabilityDTO getAllTech(@PathVariable Long id) {
         return techCapabilityService.getCapabilityById(id);
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/{id}/parents")
     @ApiOperation(value = "Получение всех родительских технических возможностей", response = CapabilityParentDTO.class)
     public CapabilityParentDTO getParentsById(@PathVariable Long id) {
         return techCapabilityService.getParents(id);
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/history/{id}")
     @ApiOperation(value = "Получение списка версий TC")
     public List<GetHistoryByIdDTO> getTechCapabilityHistory(@PathVariable Long id) {
         return techCapabilityService.getTechCapabilityHistory(id);
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/product/{id}")
     @ApiOperation(value = "Получение списка ТС которые реализованы в продукте и за которые система ответственна")
     public ResponsibilityTcDTO getTechCapabilityResp(@PathVariable Integer id) {
         return techCapabilityService.getTechCapabilityResp(id);
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/history/compare/{id}/{version}")
     @ApiOperation(value = "Получение выбраных версий TC")
     public List<GetTcHistoryVersionDTO> getTechCapabilityHistoryVersion(@PathVariable Long id,
@@ -67,18 +74,21 @@ public class TechCapabilityController {
         return techCapabilityService.getTechCapabilityHistoryVersion(id, version, otherVersion);
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/list/by-ids")
     @ApiOperation(value = "получение списка технических возможностей")
     public ResponseEntity<List<ParentDTO>> getArrayTech(@RequestParam List<Long> ids) {
         return ResponseEntity.status(HttpStatus.OK).body(techCapabilityService.getArrayCapability(ids));
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/by-code")
     @ApiOperation(value = "получение списка id технической возможности по списку code")
     public List<IdCodeDTO> getAllTechIdsByCodes(@RequestParam List<String> codes) {
         return techCapabilityService.getAllTechIdsByCodes(codes);
     }
 
+    @ApiErrorCodes({400, 401, 403, 404, 409, 500})
     @PutMapping
     @ApiOperation(value = "Создание/Обновление технической возможности")
     public ResponseEntity putTechCapability(@RequestBody PutTechCapabilityDTO techCapability,
@@ -89,6 +99,7 @@ public class TechCapabilityController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @ApiErrorCodes({400, 401, 403, 404, 409, 500})
     @DeleteMapping("/{code}")
     @ApiOperation(value = "Удаление записи из таблицы find_name_sort_table со статусом TC")
     public ResponseEntity deleteTechCapability(@PathVariable String code) {

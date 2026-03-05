@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.dto.CapabilityExportDTO;
 import ru.beeline.capability.service.CapabilityExportService;
 
@@ -20,12 +21,14 @@ public class CapabilityExportController {
     @Autowired
     CapabilityExportService capabilityExportService;
 
+    @ApiErrorCodes({400, 500})
     @PostMapping("/business-capability/{doc_id}")
     @ApiOperation(value = "Export Business Capabilities")
     public ResponseEntity<CapabilityExportDTO> postExportBusinessCapabilities(@PathVariable(name = "doc_id") Integer docId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(capabilityExportService.postExportBusinessCapabilities(docId));
     }
 
+    @ApiErrorCodes({400, 500})
     @PostMapping("/tech-capability/{doc_id}")
     @ApiOperation(value = "Export Tech Capabilities")
     public ResponseEntity<CapabilityExportDTO> postExportTechCapabilities(@PathVariable(name = "doc_id") Integer docId) {

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.domain.EntityType;
 import ru.beeline.capability.service.CapabilityMapService;
 
@@ -26,6 +27,7 @@ public class CapabilityMapTypesController {
     @Autowired
     private CapabilityMapService capabilityMapService;
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/type")
     @ApiOperation(value = "Получение всех типов карт")
     public List<EntityType> getCapabilityMapTypes(HttpServletRequest request) {

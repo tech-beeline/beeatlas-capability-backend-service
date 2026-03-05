@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.dto.CreateCapabilityMapResponseDTO;
 import ru.beeline.capability.dto.GetCapabilityMapByIdDTO;
 import ru.beeline.capability.dto.NameAndDescriptionDTO;
@@ -38,6 +39,7 @@ public class CapabilityMapController {
     @Autowired
     private CapabilityMapService capabilityMapService;
 
+    @ApiErrorCodes({400, 500})
     @PostMapping("/v1/maps")
     @ApiOperation(value = "Создание карты возможностей")
     public ResponseEntity<CreateCapabilityMapResponseDTO> createCapabilityMap(@RequestBody PostCapabilityMapDTO postCapabilityMapDTO,
@@ -46,6 +48,7 @@ public class CapabilityMapController {
                 request.getHeader(USER_ID_HEADER)), HttpStatus.CREATED);
     }
 
+    @ApiErrorCodes({400, 401, 403, 404, 409, 500})
     @PatchMapping("/v1/maps/groups/{mapId}")
     @ApiOperation(value = "Обновления карты пользователя")
     public ResponseEntity patchCapabilityMap(@PathVariable Integer mapId,
@@ -55,6 +58,7 @@ public class CapabilityMapController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @ApiErrorCodes({400, 401, 403, 404, 409, 500})
     @DeleteMapping("/v1/maps/{mapId}")
     @ApiOperation(value = "Удаление карты пользователя")
     public ResponseEntity deleteCapabilityMap(@PathVariable Integer mapId, HttpServletRequest request) {
@@ -62,18 +66,21 @@ public class CapabilityMapController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/v1/maps/{Id}")
     @ApiOperation(value = "Получение карты по id")
     public GetCapabilityMapByIdDTO getCapabilityMapById(@PathVariable Integer Id) {
         return capabilityMapService.getCapabilityMapById(Id);
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/v1/maps")
     @ApiOperation(value = "Получение всех карт пользователя")
     public List<ShortCapabilityMapDTO> getCapabilityMaps(HttpServletRequest request) {
         return capabilityMapService.getCapabilityMaps(request.getHeader(USER_ID_HEADER));
     }
 
+    @ApiErrorCodes({400, 401, 403, 404, 409, 500})
     @PatchMapping("/v1/maps/{mapId}")
     @ApiOperation(value = "Изменение названия и описания карты")
     public ResponseEntity patchNameAndDescriptionCapabilityMap(@PathVariable Integer mapId,

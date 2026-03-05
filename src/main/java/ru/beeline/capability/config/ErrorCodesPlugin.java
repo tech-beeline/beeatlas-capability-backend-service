@@ -27,11 +27,17 @@ public class ErrorCodesPlugin implements OperationBuilderPlugin {
             if (context.operationBuilder().build().getResponses() != null) {
                 responses.addAll(context.operationBuilder().build().getResponses());
             }
+            Set<String> existingCodes = new HashSet<>();
+            for (Response r : responses) {
+                existingCodes.add(r.getCode());
+            }
             for (int code : annotation.value()) {
-                responses.add(new ResponseBuilder()
-                        .code(String.valueOf(code))
-                        .description(getMessage(code))
-                        .build());
+                if (!existingCodes.contains(String.valueOf(code))) {
+                    responses.add(new ResponseBuilder()
+                            .code(String.valueOf(code))
+                            .description(getMessage(code))
+                            .build());
+                }
             }
             context.operationBuilder().responses(responses);
         }

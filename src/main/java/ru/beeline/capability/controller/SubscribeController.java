@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.beeline.capability.EntityType.EntityType;
+import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.dto.CapabilitySubscribedDTO;
 import ru.beeline.capability.service.SubscribeService;
 
@@ -25,6 +26,7 @@ public class SubscribeController {
     @Autowired
     private SubscribeService subscribeService;
 
+    @ApiErrorCodes({400, 500})
     @GetMapping
     @ApiOperation(value = "Получение подписок на возможности")
     public List<CapabilitySubscribedDTO> getCapabilitiesSubscribed(@RequestParam(value = "entity-type") EntityType entityType) {

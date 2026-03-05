@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.dto.SearchCapabilityDTO;
 import ru.beeline.capability.service.SearchCapabilityService;
 
@@ -25,6 +26,7 @@ public class SearchCapabilityController {
     private SearchCapabilityService searchCapabilityService;
 
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/find")
     @ApiOperation(value = "Поиск по сущностям", response = SearchCapabilityDTO.class)
     public List<SearchCapabilityDTO> getAllTech(@RequestParam(value = "findBy", required = false, defaultValue = "ALL") String findBy,

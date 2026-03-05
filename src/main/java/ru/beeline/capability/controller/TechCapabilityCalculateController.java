@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.service.TechCapabilityService;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -23,6 +24,7 @@ public class TechCapabilityCalculateController {
     @Autowired
     private TechCapabilityService techCapabilityService;
 
+    @ApiErrorCodes({400, 500})
     @PostMapping("/calculate-total-tech-capabilities")
     @ApiOperation(value = "Запустить процесс общего расчета критериев для тепловых карт")
     public ResponseEntity calculateTotalTechCapabilitiesCount() {
@@ -30,6 +32,7 @@ public class TechCapabilityCalculateController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/tech-capability/recount-quality")
     @ApiOperation(value = "Вызова процесса пересчета качества описания ТС")
     public ResponseEntity getTechRecalculationProcess() {

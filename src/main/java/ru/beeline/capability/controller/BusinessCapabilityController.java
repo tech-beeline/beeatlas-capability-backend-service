@@ -5,10 +5,13 @@
 package ru.beeline.capability.controller;
 
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.dto.*;
 import ru.beeline.capability.service.BusinessCapabilityService;
 import ru.beeline.capability.dto.BusinessCapabilityChildrenDTO;
@@ -28,18 +31,21 @@ public class BusinessCapabilityController {
     @Autowired
     private BusinessCapabilityService businessCapabilityService;
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/{id}/children")
     @ApiOperation(value = "Получение всех дочерних бизнес возможностей", response = BusinessCapabilityChildrenDTO.class)
     public BusinessCapabilityChildrenDTO getKidsById(@PathVariable Long id) {
         return businessCapabilityService.getChildren(id);
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/{id}/children/all")
     @ApiOperation(value = "Получение всех дочерних бизнес возможностей", response = BusinessCapabilityChildrenDTO.class)
     public BusinessCapabilityChildrenIdsDTO getAllKidsIdById(@PathVariable Long id) {
         return businessCapabilityService.getChildrenIds(id);
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/{id}/parents")
     @ApiOperation(value = "Получение всех родительских бизнес возможностей", response = CapabilityParentDTO.class)
     public CapabilityParentDTO getParentsById(@PathVariable Long id) {
@@ -48,24 +54,28 @@ public class BusinessCapabilityController {
         return capabilityParentDTO;
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/{id}")
     @ApiOperation(value = "Получение бизнес возможности по идентификатору", response = BusinessCapabilityShortDTO.class)
     public BusinessCapabilityShortDTO getById(@PathVariable Long id) {
         return businessCapabilityService.getById(id);
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/tree")
     @ApiOperation(value = "Построение дерева", response = List.class)
     public List<BusinessCapabilityTreeDTO> getBusinessCapabilityTree() {
         return businessCapabilityService.getBusinessCapabilityTree();
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/tree/{id}")
     @ApiOperation(value = "Построение дерева по идентификатору возможности", response = List.class)
     public BusinessCapabilityTreeCustomDTO getBusinessCapabilityTreeById(@PathVariable Long id) {
         return businessCapabilityService.getBusinessCapabilityTreeById(id);
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping
     @ApiOperation(value = "Получение бизнес возможностей")
     public List<BusinessCapabilityShortDTO> getBusinessCapabilities(@RequestParam(value = "limit", required = false) Integer limit,
@@ -74,12 +84,14 @@ public class BusinessCapabilityController {
         return businessCapabilityService.getCapabilities(limit, offset, findBy);
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/history/{id}")
     @ApiOperation(value = "Получение списка версий ВС")
     public List<GetHistoryByIdDTO> getBusinessCapabilityHistory(@PathVariable Long id) {
         return businessCapabilityService.getBusinessCapabilityHistory(id);
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/history/compare/{id}/{version}")
     @ApiOperation(value = "Получение выбраных версий BC")
     public List<GetBcHistoryVersionDTO> getBusinessCapabilityHistoryVersion(@PathVariable Long id,
@@ -88,6 +100,7 @@ public class BusinessCapabilityController {
         return businessCapabilityService.getBusinessCapabilityHistoryVersion(id, version, otherVersion);
     }
 
+    @ApiErrorCodes({400, 401, 403, 404, 409, 500})
     @PutMapping
     @ApiOperation(value = "Создание/Обновление бизнес возможности")
     public ResponseEntity putBusinessCapability(@RequestBody PutBusinessCapabilityDTO capability,
@@ -103,17 +116,24 @@ public class BusinessCapabilityController {
 
     @DeleteMapping("/{code}")
     @ApiOperation(value = "Удаление записи из таблицы find_name_sort_table со статусом BC")
-    public ResponseEntity deleteBusinessCapability(@PathVariable String code,
-                                                   @RequestParam(value = "children-transfer", required = false) Boolean childrenTransfer) {
+    @ApiResponses({
+            @ApiResponse(code = 204, message = "no content"),
+            @ApiResponse(code = 400, message = "Выбранный business capability является корневым"),
+            @ApiResponse(code = 400, message = "Неверный тип параметра children-transfer")
+    })
+    public ResponseEntity<Void> deleteBusinessCapability(
+            @PathVariable String code,
+            @RequestParam(value = "children-transfer", required = false) Boolean childrenTransfer) {
+
         businessCapabilityService.deleteBusinessCapability(code, childrenTransfer);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.noContent().build();
     }
 
-
-
+    @ApiErrorCodes({500})
+    @ApiResponses(@ApiResponse(code = 404, message = "Продукт не найден"))
     @PostMapping("/public/{id}")
     @ApiOperation(value = "Публикация ВС")
-    public ResponseEntity postBusinessCapability(@PathVariable Integer id) {
+    public ResponseEntity<Void> postBusinessCapability(@PathVariable Integer id) {
         businessCapabilityService.postBusinessCapability(id);
         return new ResponseEntity<>(HttpStatus.OK);
 

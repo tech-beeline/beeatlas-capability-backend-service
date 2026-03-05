@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.dto.BusinessCapabilityOrderDomainDTO;
 import ru.beeline.capability.dto.BusinessCapabilityOrderDraftRequestDTO;
 import ru.beeline.capability.dto.BusinessCapabilityOrderPatchRequestDTO;
@@ -28,6 +29,7 @@ public class BusinessCapabilityOrderController {
     @Autowired
     private BusinessCapabilityOrderService orderService;
 
+    @ApiErrorCodes({400, 500})
     @PostMapping("/order")
     @ApiOperation(value = "Публикация каталога Capability")
     public ResponseEntity postOrder(@RequestBody BusinessCapabilityOrderRequestDTO request) {
@@ -35,18 +37,21 @@ public class BusinessCapabilityOrderController {
         return ResponseEntity.ok(new BusinessCapabilityOrderResponseDTO(businessKey));
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/order/draft")
     @ApiOperation(value = "Получение черновика", response = List.class)
     public List<BusinessCapabilityOrderDraftResponseDTO> getBusinessCapabilityOrderDraft() {
         return orderService.getBusinessCapabilityDraft();
     }
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/order/{id}")
     @ApiOperation(value = "Получение данных по идентификатору", response = BusinessCapabilityOrderDraftResponseDTO.class)
     public BusinessCapabilityOrderDraftResponseDTO getBusinessCapabilityOrderById(@PathVariable Integer id) {
         return orderService.getBusinessCapabilityOrderById(id);
     }
 
+    @ApiErrorCodes({400, 500})
     @PostMapping("/order/draft")
     @ApiOperation(value = "Публикация черновика")
     public ResponseEntity postOrderDraft(@RequestBody BusinessCapabilityOrderDraftRequestDTO request) {
@@ -54,12 +59,14 @@ public class BusinessCapabilityOrderController {
         return ResponseEntity.ok("");
     }
 
+    @ApiErrorCodes({400, 500})
     @PostMapping("/order/domains")
     @ApiOperation(value = "Информации о доменах по списку id")
     public List<BusinessCapabilityOrderDomainDTO> postOrderDomains(@RequestBody List<Integer> ids) {
         return orderService.getOrderDomains(ids);
     }
 
+    @ApiErrorCodes({400, 401, 403, 404, 409, 500})
     @PatchMapping("/order/{id}")
     @ApiOperation(value = "Управление каталогом Capability")
     public ResponseEntity patchOrder(@PathVariable Integer id,
@@ -69,6 +76,7 @@ public class BusinessCapabilityOrderController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    @ApiErrorCodes({400, 401, 403, 404, 409, 500})
     @PatchMapping("/order/draft/{id}")
     @ApiOperation(value = "Управление каталогом Capability")
     public ResponseEntity patchOrderDraft(@PathVariable Integer id,

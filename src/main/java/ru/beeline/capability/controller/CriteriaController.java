@@ -7,6 +7,7 @@ package ru.beeline.capability.controller;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.domain.EnumCriteria;
 import ru.beeline.capability.service.CriteriaService;
 
@@ -20,6 +21,7 @@ public class CriteriaController {
     @Autowired
     private CriteriaService criteriaService;
 
+    @ApiErrorCodes({400, 500})
     @GetMapping
     @ApiOperation(value = "Получение критерий")
     public List<EnumCriteria> getCriteriaList(@RequestParam(required = false) String filter) {

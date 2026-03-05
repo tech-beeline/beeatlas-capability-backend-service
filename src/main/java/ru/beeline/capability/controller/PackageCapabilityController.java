@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.dto.PostBusinessCapabilityDTO;
 import ru.beeline.capability.dto.PostTechCapabilityDTO;
 import ru.beeline.capability.dto.PackageRegistrationResponseDTO;
@@ -27,6 +28,7 @@ public class PackageCapabilityController {
     @Autowired
     private PackageCapabilityService packageCapabilityService;
 
+    @ApiErrorCodes({400, 500})
     @PostMapping("/package-tech-capabilities")
     @ApiOperation(value = "Пакетная загрузка технических возможностей")
     public ResponseEntity<PackageRegistrationResponseDTO> packLoadTechCapabilities(@RequestBody List<PostTechCapabilityDTO> techCapabilities) {
@@ -36,6 +38,7 @@ public class PackageCapabilityController {
         return new ResponseEntity<>(registeredCapabilityPackageInfo, HttpStatus.OK);
     }
 
+    @ApiErrorCodes({400, 500})
     @PostMapping("/package-business-capabilities")
     @ApiOperation(value = "Пакетная загрузка бизнес возможностей")
     public ResponseEntity<PackageRegistrationResponseDTO> packLoadBusinessCapabilities(@RequestBody List<PostBusinessCapabilityDTO> businessCapabilities) {
