@@ -595,6 +595,8 @@ public class TechCapabilityService {
                         .name(techCapability.getName())
                         .id(techCapability.getId())
                         .code(techCapability.getCode())
+                        .createdDate(techCapability.getCreatedDate())
+                        .deletedDate(techCapability.getDeletedDate())
                         .build())
                 .collect(Collectors.toList());
     }
