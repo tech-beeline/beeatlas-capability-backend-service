@@ -18,6 +18,7 @@ import ru.beeline.capability.client.ProductClient;
 import ru.beeline.capability.client.UserClient;
 import ru.beeline.capability.domain.*;
 import ru.beeline.capability.dto.*;
+import ru.beeline.capability.dto.product.GetProductsByIdsDTO;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
@@ -25,13 +26,6 @@ import ru.beeline.capability.mapper.BusinessCapabilityMapper;
 import ru.beeline.capability.repository.*;
 import ru.beeline.capability.utils.Node;
 import ru.beeline.capability.utils.UrlWrapper;
-import ru.beeline.capability.dto.BusinessCapabilityChildrenDTO;
-import ru.beeline.capability.dto.BusinessCapabilityChildrenDTOV2;
-import ru.beeline.capability.dto.BusinessCapabilityChildrenIdsDTO;
-import ru.beeline.capability.dto.CriteriaDTO;
-import ru.beeline.capability.dto.PutBusinessCapabilityDTO;
-import ru.beeline.capability.dto.TechCapabilityShortDTO;
-import ru.beeline.capability.dto.product.GetProductsByIdsDTO;
 
 import java.time.Instant;
 import java.util.*;
@@ -540,16 +534,16 @@ public class BusinessCapabilityService {
             if (optionalBusinessCapability.get().getDeletedDate() == null) {
                 Long businessCapabilityId = optionalBusinessCapability.get().getId();
                 optionalBusinessCapability.map(businessCapability -> {
-                    if(childrenTransfer){
+                    if (Boolean.TRUE.equals(childrenTransfer)) {
                         if (businessCapability.getParentId() == null) {
-                           throw new IllegalArgumentException("Выбранный business capability является корневым");
+                            throw new IllegalArgumentException("Выбранный business capability является корневым");
                         }
 
                         businessCapabilityRepository.updateParentIdForChildren(businessCapability.getId(),
-                                                                                       businessCapability.getParentId());
+                                                                               businessCapability.getParentId());
 
-                                       techCapabilityRelationsRepository.updateParentIdForChildren(businessCapability.getId(),
-                                                                                       businessCapability.getParentId());
+                        techCapabilityRelationsRepository.updateParentIdForChildren(businessCapability.getId(),
+                                                                                    businessCapability.getParentId());
 
 
                     }
