@@ -534,12 +534,25 @@ public class BusinessCapabilityService {
                 ENTITY_TYPE_BUSINESS_CAPABILITY);
     }
 
-    public void deleteBusinessCapability(String code) {
+    public void deleteBusinessCapability(String code, Boolean childrenTransfer) {
         Optional<BusinessCapability> optionalBusinessCapability = businessCapabilityRepository.findByCode(code);
         if (optionalBusinessCapability.isPresent()) {
             if (optionalBusinessCapability.get().getDeletedDate() == null) {
                 Long businessCapabilityId = optionalBusinessCapability.get().getId();
                 optionalBusinessCapability.map(businessCapability -> {
+                    if(childrenTransfer){
+                        if (businessCapability.getParentId() == null) {
+                           throw new IllegalArgumentException("Выбранный business capability является корневым");
+                        }
+
+                        businessCapabilityRepository.updateParentIdForChildren(businessCapability.getId(),
+                                                                                       businessCapability.getParentId());
+
+                                       techCapabilityRelationsRepository.updateParentIdForChildren(businessCapability.getId(),
+                                                                                       businessCapability.getParentId());
+
+
+                    }
                     businessCapability.setDeletedDate(new Date());
                     return businessCapabilityRepository.save(businessCapability);
                 });

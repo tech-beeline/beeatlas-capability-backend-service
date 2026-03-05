@@ -103,8 +103,9 @@ public class BusinessCapabilityController {
 
     @DeleteMapping("/{code}")
     @ApiOperation(value = "Удаление записи из таблицы find_name_sort_table со статусом BC")
-    public ResponseEntity deleteBusinessCapability(@PathVariable String code) {
-        businessCapabilityService.deleteBusinessCapability(code);
+    public ResponseEntity deleteBusinessCapability(@PathVariable String code,
+                                                   @RequestParam(value = "children-transfer", required = false) Boolean childrenTransfer) {
+        businessCapabilityService.deleteBusinessCapability(code, childrenTransfer);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
