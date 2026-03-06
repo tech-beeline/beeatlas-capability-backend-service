@@ -4,9 +4,7 @@
 
 package ru.beeline.capability.controller;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -115,16 +113,18 @@ public class BusinessCapabilityController {
     }
 
     @DeleteMapping("/{code}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "Удаление записи из таблицы find_name_sort_table со статусом BC")
     @ApiResponses({
             @ApiResponse(code = 204, message = "no content"),
-            @ApiResponse(code = 400, message = "Выбранный business capability является корневым"),
-            @ApiResponse(code = 400, message = "Неверный тип параметра children-transfer")
+            @ApiResponse(
+                    code = 400,
+                    message = "{\n" + "  \"errorMessage\": \"Выбранный business capability является корневым\"\n" + "}",
+                    response = ErrorResponse.class
+            )
     })
-    public ResponseEntity<Void> deleteBusinessCapability(
-            @PathVariable String code,
+    public ResponseEntity<Void> deleteBusinessCapability(@PathVariable String code,
             @RequestParam(value = "children-transfer", required = false) Boolean childrenTransfer) {
-
         businessCapabilityService.deleteBusinessCapability(code, childrenTransfer);
         return ResponseEntity.noContent().build();
     }
