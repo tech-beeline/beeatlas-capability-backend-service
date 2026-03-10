@@ -4,7 +4,11 @@
 
 package ru.beeline.capability.controller;
 
-import io.swagger.annotations.ApiOperation;
+ 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.service.TechCapabilityService;
 
+import java.util.List;
+
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/v1")
@@ -26,7 +32,14 @@ public class TechCapabilityCalculateController {
 
     @ApiErrorCodes({400, 500})
     @PostMapping("/calculate-total-tech-capabilities")
-    @ApiOperation(value = "Запустить процесс общего расчета критериев для тепловых карт")
+    @Operation(summary = "Запустить процесс общего расчета критериев для тепловых карт",
+            description = "Запустить процесс общего расчета критериев для тепловых карт",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Успешный ответ",
+                            content = @Content(schema = @Schema(implementation = List.class))),
+                    @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
+            })
     public ResponseEntity calculateTotalTechCapabilitiesCount() {
         techCapabilityService.calculateTotalTechCapabilitiesCount();
         return new ResponseEntity<>(HttpStatus.OK);
@@ -34,7 +47,14 @@ public class TechCapabilityCalculateController {
 
     @ApiErrorCodes({400, 500})
     @GetMapping("/tech-capability/recount-quality")
-    @ApiOperation(value = "Вызова процесса пересчета качества описания ТС")
+    @Operation(summary = "Вызова процесса пересчета качества описания ТС",
+            description = "Вызова процесса пересчета качества описания ТС",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Успешный ответ",
+                            content = @Content(schema = @Schema(implementation = List.class))),
+                    @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
+            })
     public ResponseEntity getTechRecalculationProcess() {
         techCapabilityService.getTechRecalculationProcess();
         return new ResponseEntity<>(HttpStatus.OK);

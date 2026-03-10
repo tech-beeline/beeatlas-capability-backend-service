@@ -4,12 +4,17 @@
 
 package ru.beeline.capability.controller.v2;
 
-import io.swagger.annotations.ApiOperation;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.service.BusinessCapabilityService;
 import ru.beeline.capability.dto.BusinessCapabilityChildrenDTOV2;
+
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
@@ -21,7 +26,14 @@ public class BusinessCapabilityControllerV2 {
 
     @ApiErrorCodes({400, 500})
     @GetMapping("/{id}/children")
-    @ApiOperation(value = "Получение всех дочерних бизнес возможностей", response = BusinessCapabilityChildrenDTOV2.class)
+    @Operation(summary = "Получение всех дочерних бизнес возможностей",
+            description = "",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Успешный ответ",
+                            content = @Content(schema = @Schema(implementation = BusinessCapabilityChildrenDTOV2.class))),
+                    @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
+            })
     public BusinessCapabilityChildrenDTOV2 getKidsById(@PathVariable Long id) {
         return businessCapabilityService.getChildrenV2(id);
     }

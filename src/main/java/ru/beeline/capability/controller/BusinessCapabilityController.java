@@ -4,7 +4,11 @@
 
 package ru.beeline.capability.controller;
 
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,21 +35,42 @@ public class BusinessCapabilityController {
 
     @ApiErrorCodes({400, 500})
     @GetMapping("/{id}/children")
-    @ApiOperation(value = "Получение всех дочерних бизнес возможностей", response = BusinessCapabilityChildrenDTO.class)
+    @Operation(summary = "Получение всех дочерних бизнес возможностей",
+            description = "Возвращает DTO c дочерними возможностями",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Успешный ответ",
+                            content = @Content(schema = @Schema(implementation = BusinessCapabilityChildrenDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Некорректный запрос")
+            })
     public BusinessCapabilityChildrenDTO getKidsById(@PathVariable Long id) {
         return businessCapabilityService.getChildren(id);
     }
 
     @ApiErrorCodes({400, 500})
     @GetMapping("/{id}/children/all")
-    @ApiOperation(value = "Получение всех дочерних бизнес возможностей", response = BusinessCapabilityChildrenDTO.class)
+    @Operation(summary = "Получение всех дочерних бизнес возможностей",
+            description = "Возвращает DTO c дочерними возможностями",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Успешный ответ",
+                            content = @Content(schema = @Schema(implementation = BusinessCapabilityChildrenDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Некорректный запрос")
+            })
     public BusinessCapabilityChildrenIdsDTO getAllKidsIdById(@PathVariable Long id) {
         return businessCapabilityService.getChildrenIds(id);
     }
 
     @ApiErrorCodes({400, 500})
     @GetMapping("/{id}/parents")
-    @ApiOperation(value = "Получение всех родительских бизнес возможностей", response = CapabilityParentDTO.class)
+    @Operation(summary = "Получение всех дочерних бизнес возможностей",
+            description = "Возвращает DTO c дочерними возможностями",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Успешный ответ",
+                            content = @Content(schema = @Schema(implementation = CapabilityParentDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Некорректный запрос")
+            })
     public CapabilityParentDTO getParentsById(@PathVariable Long id) {
         CapabilityParentDTO capabilityParentDTO = businessCapabilityService.getParentsWithoutDeleteDate(id);
         Collections.reverse(capabilityParentDTO.getParents());
@@ -54,28 +79,55 @@ public class BusinessCapabilityController {
 
     @ApiErrorCodes({400, 500})
     @GetMapping("/{id}")
-    @ApiOperation(value = "Получение бизнес возможности по идентификатору", response = BusinessCapabilityShortDTO.class)
+    @Operation(summary = "Получение бизнес возможности по идентификатору",
+            description = "Получение бизнес возможности по идентификатору",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Успешный ответ",
+                            content = @Content(schema = @Schema(implementation = BusinessCapabilityShortDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Некорректный запрос")
+            })
     public BusinessCapabilityShortDTO getById(@PathVariable Long id) {
         return businessCapabilityService.getById(id);
     }
-
     @ApiErrorCodes({400, 500})
     @GetMapping("/tree")
-    @ApiOperation(value = "Построение дерева", response = List.class)
+    @Operation(summary = "Построение дерева",
+            description = "Построение деревау",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Успешный ответ",
+                            content = @Content(schema = @Schema(implementation = List.class))),
+                    @ApiResponse(responseCode = "400", description = "Некорректный запрос")
+            })
     public List<BusinessCapabilityTreeDTO> getBusinessCapabilityTree() {
         return businessCapabilityService.getBusinessCapabilityTree();
     }
 
     @ApiErrorCodes({400, 500})
     @GetMapping("/tree/{id}")
-    @ApiOperation(value = "Построение дерева по идентификатору возможности", response = List.class)
+    @Operation(summary = "Построение дерева по идентификатору возможности",
+            description = "Построение дерева по идентификатору возможности",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Успешный ответ",
+                            content = @Content(schema = @Schema(implementation = List.class))),
+                    @ApiResponse(responseCode = "400", description = "Некорректный запрос")
+            })
     public BusinessCapabilityTreeCustomDTO getBusinessCapabilityTreeById(@PathVariable Long id) {
         return businessCapabilityService.getBusinessCapabilityTreeById(id);
     }
 
     @ApiErrorCodes({400, 500})
     @GetMapping
-    @ApiOperation(value = "Получение бизнес возможностей")
+    @Operation(summary = "Получение бизнес возможностей",
+            description = "Получение бизнес возможностей",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Успешный ответ",
+                            content = @Content(schema = @Schema(implementation = List.class))),
+                    @ApiResponse(responseCode = "400", description = "Некорректный запрос")
+            })
     public List<BusinessCapabilityShortDTO> getBusinessCapabilities(@RequestParam(value = "limit", required = false) Integer limit,
                                                                     @RequestParam(value = "findBy", required = false, defaultValue = "ALL") String findBy,
                                                                     @RequestParam(value = "offset", required = false) Integer offset) {
@@ -84,14 +136,28 @@ public class BusinessCapabilityController {
 
     @ApiErrorCodes({400, 500})
     @GetMapping("/history/{id}")
-    @ApiOperation(value = "Получение списка версий ВС")
+    @Operation(summary = "Получение списка версий ВС",
+            description = "Получение списка версий ВС",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Успешный ответ",
+                            content = @Content(schema = @Schema(implementation = List.class))),
+                    @ApiResponse(responseCode = "400", description = "Некорректный запрос")
+            })
     public List<GetHistoryByIdDTO> getBusinessCapabilityHistory(@PathVariable Long id) {
         return businessCapabilityService.getBusinessCapabilityHistory(id);
     }
 
     @ApiErrorCodes({400, 500})
     @GetMapping("/history/compare/{id}/{version}")
-    @ApiOperation(value = "Получение выбраных версий BC")
+    @Operation(summary = "Получение выбраных версий ВС",
+            description = "Получение выбраных версий ВС",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Успешный ответ",
+                            content = @Content(schema = @Schema(implementation = List.class))),
+                    @ApiResponse(responseCode = "400", description = "Некорректный запрос")
+            })
     public List<GetBcHistoryVersionDTO> getBusinessCapabilityHistoryVersion(@PathVariable Long id,
                                                                             @PathVariable Integer version,
                                                                             @RequestParam(value = "other_version", required = false) Integer otherVersion) {
@@ -100,7 +166,14 @@ public class BusinessCapabilityController {
 
     @ApiErrorCodes({400, 401, 403, 404, 409, 500})
     @PutMapping
-    @ApiOperation(value = "Создание/Обновление бизнес возможности")
+    @Operation(summary = "Создание/Обновление бизнес возможности",
+            description = "Создание/Обновление бизнес возможности",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Успешный ответ",
+                            content = @Content(schema = @Schema(implementation = List.class))),
+                    @ApiResponse(responseCode = "400", description = "Некорректный запрос")
+            })
     public ResponseEntity putBusinessCapability(@RequestBody PutBusinessCapabilityDTO capability,
                                                 @RequestHeader(value = USER_ID_HEADER, required = false) String userId,
                                                 @RequestHeader(value = USER_PRODUCTS_IDS_HEADER, required = false) String productIds,
@@ -114,13 +187,12 @@ public class BusinessCapabilityController {
 
     @DeleteMapping("/{code}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "Удаление записи из таблицы find_name_sort_table со статусом BC")
     @ApiResponses({
-            @ApiResponse(code = 204, message = "no content"),
+            @ApiResponse(responseCode = "204", description = "no content"),
             @ApiResponse(
-                    code = 400,
-                    message = "{\n" + "  \"errorMessage\": \"Выбранный business capability является корневым\"\n" + "}",
-                    response = ErrorResponse.class
+                    responseCode = "400",
+                    description = "Выбранный business capability является корневым",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
             )
     })
     public ResponseEntity<Void> deleteBusinessCapability(@PathVariable String code,
@@ -130,9 +202,17 @@ public class BusinessCapabilityController {
     }
 
     @ApiErrorCodes({500})
-    @ApiResponses(@ApiResponse(code = 404, message = "Продукт не найден"))
+    @ApiResponses(@ApiResponse(responseCode = "404", description = "Продукт не найден"))
     @PostMapping("/public/{id}")
-    @ApiOperation(value = "Публикация ВС")
+    @Operation(summary = "Публикация ВС",
+            description = "Публикация ВС",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Успешный ответ",
+                            content = @Content(schema = @Schema(implementation = List.class))),
+                    @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
+                    @ApiResponse(responseCode = "404", description = "Продукт не найден")
+            })
     public ResponseEntity<Void> postBusinessCapability(@PathVariable Integer id) {
         businessCapabilityService.postBusinessCapability(id);
         return new ResponseEntity<>(HttpStatus.OK);
