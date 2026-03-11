@@ -26,48 +26,55 @@ public class CustomExceptionHandler {
     @ExceptionHandler(ResponseException.class)
     public ResponseEntity<Object> handleException(ResponseException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(e.getStatus()).body(e.getMessage());
+        ErrorResponse error = new ErrorResponse(e.getMessage());
+        return ResponseEntity.status(e.getStatus()).body(error);
     }
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Object> handleException(NotFoundException e) {
         log.error(e.getMessage());
+        ErrorResponse error = new ErrorResponse(e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .header("content-type", MediaType.APPLICATION_JSON_VALUE)
-                .body(e.getMessage());
+                .body(error);
     }
 
     @ExceptionHandler(PackageRegistrationException.class)
     public ResponseEntity<Object> handleException(PackageRegistrationException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body("409 CONFLICT : " + e.getMessage());
+        ErrorResponse error = new ErrorResponse(e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<Object> handleException(ForbiddenException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("403 FORBIDDEN : " + e.getMessage());
+        ErrorResponse error = new ErrorResponse(e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<Object> handleException(ValidationException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body("409 Ошибка валидации тела запроса : " + e.getMessage());
+        ErrorResponse error = new ErrorResponse(e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     @ExceptionHandler(TooManyResultsException.class)
     public ResponseEntity<Object> handleException(TooManyResultsException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("422 UNPROCESSABLE_ENTITY : " + e.getMessage());
+        ErrorResponse error = new ErrorResponse(e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
     }
 
     @ExceptionHandler(DocumentServerException.class)
     public ResponseEntity<Object> handleException(DocumentServerException e) {
         log.error(e.getMessage());
+        ErrorResponse error = new ErrorResponse(e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.SERVICE_UNAVAILABLE)
                 .header("content-type", MediaType.APPLICATION_JSON_VALUE)
-                .body(e.getMessage());
+                .body(error);
     }
 }

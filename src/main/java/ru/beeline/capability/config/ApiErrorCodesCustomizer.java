@@ -18,7 +18,6 @@ public class ApiErrorCodesCustomizer implements OperationCustomizer {
 
         ApiErrorCodes annotation = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), ApiErrorCodes.class);
         if (annotation == null) {
-            // тоже проверяем класс‑уровень, если хотите
             annotation = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), ApiErrorCodes.class);
         }
 
