@@ -26,8 +26,8 @@ public class BusinessCapabilityControllerV2 {
 
     @ApiErrorCodes({400, 500})
     @GetMapping("/{id}/children")
-    @Operation(summary = "Получение всех дочерних бизнес возможностей",
-            description = "",
+    @Operation(summary = "Получение дочерних бизнес-возможностей (v2)",
+            description = "Возвращает DTO с дочерними возможностями",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",

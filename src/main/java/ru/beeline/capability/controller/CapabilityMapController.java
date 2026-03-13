@@ -6,6 +6,7 @@ package ru.beeline.capability.controller;
 
  
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -43,8 +44,8 @@ public class CapabilityMapController {
     @Operation(summary = "Создание карты возможностей",
             description = "Создание карты возможностей",
             responses = {
-                    @ApiResponse(responseCode = "200",
-                            description = "Успешный ответ",
+                    @ApiResponse(responseCode = "201",
+                            description = "Создано",
                             content = @Content(schema = @Schema(implementation = CreateCapabilityMapResponseDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
@@ -56,12 +57,12 @@ public class CapabilityMapController {
 
     @ApiErrorCodes({400, 401, 403, 404, 409, 500})
     @PatchMapping("/v1/maps/groups/{mapId}")
-    @Operation(summary = "Обновления карты пользователя",
-            description = "Обновления карты пользователя",
+    @Operation(summary = "Обновление карты пользователя",
+            description = "Обновление карты пользователя",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
-                            content = @Content(schema = @Schema(implementation = List.class))),
+                            content = @Content()),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public ResponseEntity patchCapabilityMap(@PathVariable Integer mapId,
@@ -78,7 +79,7 @@ public class CapabilityMapController {
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
-                            content = @Content(schema = @Schema(implementation = List.class))),
+                            content = @Content()),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public ResponseEntity deleteCapabilityMap(@PathVariable Integer mapId, HttpServletRequest request) {
@@ -107,7 +108,7 @@ public class CapabilityMapController {
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
-                            content = @Content(schema = @Schema(implementation = List.class))),
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = ShortCapabilityMapDTO.class)))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public List<ShortCapabilityMapDTO> getCapabilityMaps(HttpServletRequest request) {
@@ -121,7 +122,7 @@ public class CapabilityMapController {
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
-                            content = @Content(schema = @Schema(implementation = List.class))),
+                            content = @Content()),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public ResponseEntity patchNameAndDescriptionCapabilityMap(@PathVariable Integer mapId,

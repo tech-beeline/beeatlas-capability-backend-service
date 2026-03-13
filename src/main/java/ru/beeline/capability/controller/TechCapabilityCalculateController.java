@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.service.TechCapabilityService;
 
-import java.util.List;
-
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/v1")
@@ -35,9 +33,7 @@ public class TechCapabilityCalculateController {
     @Operation(summary = "Запустить процесс общего расчета критериев для тепловых карт",
             description = "Запустить процесс общего расчета критериев для тепловых карт",
             responses = {
-                    @ApiResponse(responseCode = "200",
-                            description = "Успешный ответ",
-                            content = @Content(schema = @Schema(implementation = List.class))),
+                    @ApiResponse(responseCode = "200", description = "Успешный ответ"),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public ResponseEntity calculateTotalTechCapabilitiesCount() {
@@ -47,12 +43,10 @@ public class TechCapabilityCalculateController {
 
     @ApiErrorCodes({400, 500})
     @GetMapping("/tech-capability/recount-quality")
-    @Operation(summary = "Вызова процесса пересчета качества описания ТС",
-            description = "Вызова процесса пересчета качества описания ТС",
+    @Operation(summary = "Запуск пересчета качества описания ТС",
+            description = "Запуск процесса пересчета качества описания технических возможностей",
             responses = {
-                    @ApiResponse(responseCode = "200",
-                            description = "Успешный ответ",
-                            content = @Content(schema = @Schema(implementation = List.class))),
+                    @ApiResponse(responseCode = "200", description = "Успешный ответ"),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public ResponseEntity getTechRecalculationProcess() {

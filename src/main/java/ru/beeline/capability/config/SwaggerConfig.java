@@ -19,7 +19,7 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         final String securitySchemeName = "bearerAuth";
 
-        return new OpenAPI().info(new Info().title("Architect Graph Service API")
+                return new OpenAPI().info(new Info().title("Architect Graph Service API")
                                           .version("1.0")
                                           .description("API документация")
                                           .contact(new Contact().name("Example")

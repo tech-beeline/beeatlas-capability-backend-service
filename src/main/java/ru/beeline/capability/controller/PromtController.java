@@ -20,8 +20,6 @@ import ru.beeline.capability.dto.PromtDTO;
 import ru.beeline.capability.dto.aitooldto.ResultDTO;
 import ru.beeline.capability.service.PromtService;
 
-import java.util.List;
-
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/v1/promt")
@@ -39,6 +37,7 @@ public class PromtController {
                             description = "Успешный ответ",
                             content = @Content(schema = @Schema(implementation = PromtDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
+                    @ApiResponse(responseCode = "404", description = "Ресурс не найден"),
             })
     public PromtDTO getPromtByAlias(@PathVariable String alias) {
         return promtService.getPromtByAlias(alias);
@@ -47,13 +46,14 @@ public class PromtController {
     @AiToolHeaders
     @ApiErrorCodes({400, 404, 500})
     @PostMapping("/proxy")
-    @Operation(summary = "Проксирования запроса в LLM с использованием сохраненного промота",
-            description = "Проксирования запроса в LLM с использованием сохраненного промота",
+    @Operation(summary = "Проксирование запроса в LLM с использованием сохраненного промпта",
+            description = "Проксирование запроса в LLM с использованием сохраненного промпта",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
                             content = @Content(schema = @Schema(implementation = ResultDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
+                    @ApiResponse(responseCode = "404", description = "Ресурс не найден"),
             })
     public ResponseEntity<ResultDTO> getPromtProxy(@RequestBody PostPromtDTO postPromtDTO) {
         return ResponseEntity.ok(promtService.postPromtProxy(postPromtDTO));

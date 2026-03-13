@@ -1,5 +1,8 @@
 package ru.beeline.capability.config;
 
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import org.springdoc.core.customizers.OperationCustomizer;
@@ -32,8 +35,20 @@ public class ApiErrorCodesCustomizer implements OperationCustomizer {
                 String codeStr = String.valueOf(code);
                 if (!responses.containsKey(codeStr)) {
                     ApiResponse resp = new ApiResponse()
-                            .description(getMessage(code));
+                            .description(getMessage(code))
+                            .content(new Content().addMediaType("application/json",
+                                    new MediaType().schema(new io.swagger.v3.oas.models.media.Schema<>()
+                                            .type("object")
+                                            .addProperty("message", new StringSchema().description("Сообщение об ошибке")))));
                     responses.addApiResponse(codeStr, resp);
+                } else if (code >= 400) {
+                    ApiResponse existingResp = responses.get(codeStr);
+                    if (existingResp != null) {
+                        existingResp.setContent(new Content().addMediaType("application/json",
+                                new MediaType().schema(new io.swagger.v3.oas.models.media.Schema<>()
+                                        .type("object")
+                                        .addProperty("message", new StringSchema().description("Сообщение об ошибке")))));
+                    }
                 }
             }
         }

@@ -6,6 +6,7 @@ package ru.beeline.capability.controller;
 
  
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -39,7 +40,7 @@ public class TechCapabilityController {
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
-                            content = @Content(schema = @Schema(implementation = List.class))),
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = TechCapabilityDTO.class)))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public List<TechCapabilityDTO> getTechCapabilities(@RequestParam(value = "limit", required = false) Integer limit,
@@ -82,7 +83,7 @@ public class TechCapabilityController {
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
-                            content = @Content(schema = @Schema(implementation = List.class))),
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = GetHistoryByIdDTO.class)))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public List<GetHistoryByIdDTO> getTechCapabilityHistory(@PathVariable Long id) {
@@ -110,7 +111,7 @@ public class TechCapabilityController {
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
-                            content = @Content(schema = @Schema(implementation = List.class))),
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = GetTcHistoryVersionDTO.class)))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public List<GetTcHistoryVersionDTO> getTechCapabilityHistoryVersion(@PathVariable Long id,
@@ -122,12 +123,12 @@ public class TechCapabilityController {
 
     @ApiErrorCodes({400, 500})
     @GetMapping("/list/by-ids")
-    @Operation(summary = "получение списка технических возможностей",
-            description = "получение списка технических возможностей",
+    @Operation(summary = "Получение списка технических возможностей",
+            description = "Получение списка технических возможностей",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
-                            content = @Content(schema = @Schema(implementation = List.class))),
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = ParentDTO.class)))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public ResponseEntity<List<ParentDTO>> getArrayTech(@RequestParam List<Long> ids) {
@@ -136,12 +137,12 @@ public class TechCapabilityController {
 
     @ApiErrorCodes({400, 500})
     @GetMapping("/by-code")
-    @Operation(summary = "получение списка id технической возможности по списку code",
-            description = "получение списка id технической возможности по списку code",
+    @Operation(summary = "Получение списка id технических возможностей по списку code",
+            description = "Получение списка id технических возможностей по списку code",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
-                            content = @Content(schema = @Schema(implementation = List.class))),
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = IdCodeDTO.class)))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public List<IdCodeDTO> getAllTechIdsByCodes(@RequestParam List<String> codes) {
@@ -153,8 +154,7 @@ public class TechCapabilityController {
     @Operation(summary = "Создание/Обновление технической возможности",
             description = "Создание/Обновление технической возможности",
             responses = {
-                    @ApiResponse(responseCode = "200",
-                            description = "Успешный ответ"),
+                    @ApiResponse(responseCode = "200", description = "Успешный ответ"),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public ResponseEntity putTechCapability(@RequestBody PutTechCapabilityDTO techCapability,
@@ -167,11 +167,10 @@ public class TechCapabilityController {
 
     @ApiErrorCodes({400, 401, 403, 404, 409, 500})
     @DeleteMapping("/{code}")
-    @Operation(summary = "Удаление записи из таблицы find_name_sort_table со статусом TC",
-            description = "Удаление записи из таблицы find_name_sort_table со статусом TC",
+    @Operation(summary = "Удаление технической возможности",
+            description = "Удаление технической возможности по коду",
             responses = {
-                    @ApiResponse(responseCode = "200",
-                            description = "Успешный ответ"),
+                    @ApiResponse(responseCode = "200", description = "Успешный ответ"),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public ResponseEntity deleteTechCapability(@PathVariable String code) {

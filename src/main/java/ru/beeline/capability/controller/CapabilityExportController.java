@@ -29,11 +29,11 @@ public class CapabilityExportController {
 
     @ApiErrorCodes({400, 500})
     @PostMapping("/business-capability/{doc_id}")
-    @Operation(summary = "Export Business Capabilities",
-            description = "Export Business Capabilities",
+    @Operation(summary = "Экспорт бизнес-возможностей",
+            description = "Экспорт бизнес-возможностей",
             responses = {
-                    @ApiResponse(responseCode = "200",
-                            description = "Успешный ответ",
+                    @ApiResponse(responseCode = "201",
+                            description = "Создано",
                             content = @Content(schema = @Schema(implementation = CapabilityExportDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
@@ -43,11 +43,11 @@ public class CapabilityExportController {
 
     @ApiErrorCodes({400, 500})
     @PostMapping("/tech-capability/{doc_id}")
-    @Operation(summary = "Export Tech Capabilities",
-            description = "Export Tech Capabilities",
+    @Operation(summary = "Экспорт технических возможностей",
+            description = "Экспорт технических возможностей",
             responses = {
-                    @ApiResponse(responseCode = "200",
-                            description = "Успешный ответ",
+                    @ApiResponse(responseCode = "201",
+                            description = "Создано",
                             content = @Content(schema = @Schema(implementation = CapabilityExportDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })

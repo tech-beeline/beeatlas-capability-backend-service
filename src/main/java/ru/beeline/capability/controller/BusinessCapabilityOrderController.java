@@ -6,6 +6,7 @@ package ru.beeline.capability.controller;
 
  
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -55,7 +56,7 @@ public class BusinessCapabilityOrderController {
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
-                            content = @Content(schema = @Schema(implementation = BusinessCapabilityOrderResponseDTO.class))),
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = BusinessCapabilityOrderDraftResponseDTO.class)))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public List<BusinessCapabilityOrderDraftResponseDTO> getBusinessCapabilityOrderDraft() {
@@ -93,12 +94,12 @@ public class BusinessCapabilityOrderController {
 
     @ApiErrorCodes({400, 500})
     @PostMapping("/order/domains")
-    @Operation(summary = "Информации о доменах по списку id",
-            description = "Информации о доменах по списку id",
+    @Operation(summary = "Информация о доменах по списку id",
+            description = "Получение информации о доменах по списку id",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
-                            content = @Content(schema = @Schema(implementation = List.class))),
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = BusinessCapabilityOrderDomainDTO.class)))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public List<BusinessCapabilityOrderDomainDTO> postOrderDomains(@RequestBody List<Integer> ids) {
@@ -110,9 +111,7 @@ public class BusinessCapabilityOrderController {
     @Operation(summary = "Управление каталогом Capability",
             description = "Управление каталогом Capability",
             responses = {
-                    @ApiResponse(responseCode = "200",
-                            description = "Успешный ответ",
-                            content = @Content(schema = @Schema(implementation = List.class))),
+                    @ApiResponse(responseCode = "200", description = "Успешный ответ"),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public ResponseEntity patchOrder(@PathVariable Integer id,
@@ -127,9 +126,7 @@ public class BusinessCapabilityOrderController {
     @Operation(summary = "Управление каталогом Capability",
             description = "Управление каталогом Capability",
             responses = {
-                    @ApiResponse(responseCode = "200",
-                            description = "Успешный ответ",
-                            content = @Content(schema = @Schema(implementation = List.class))),
+                    @ApiResponse(responseCode = "200", description = "Успешный ответ"),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public ResponseEntity patchOrderDraft(@PathVariable Integer id,

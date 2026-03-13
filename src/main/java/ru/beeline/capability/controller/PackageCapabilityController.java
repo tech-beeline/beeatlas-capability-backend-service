@@ -39,7 +39,7 @@ public class PackageCapabilityController {
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
-                            content = @Content(schema = @Schema(implementation = List.class))),
+                            content = @Content(schema = @Schema(implementation = PackageRegistrationResponseDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public ResponseEntity<PackageRegistrationResponseDTO> packLoadTechCapabilities(@RequestBody List<PostTechCapabilityDTO> techCapabilities) {
@@ -56,7 +56,7 @@ public class PackageCapabilityController {
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
-                            content = @Content(schema = @Schema(implementation = List.class))),
+                            content = @Content(schema = @Schema(implementation = PackageRegistrationResponseDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
     public ResponseEntity<PackageRegistrationResponseDTO> packLoadBusinessCapabilities(@RequestBody List<PostBusinessCapabilityDTO> businessCapabilities) {
