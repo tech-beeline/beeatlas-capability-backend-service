@@ -18,7 +18,7 @@ import java.util.List;
 
 import static ru.beeline.capability.utils.Constants.USER_ID_HEADER;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+
 @RestController
 @RequestMapping("/api/v1/capability")
 public class CapabilityMapTypesController {

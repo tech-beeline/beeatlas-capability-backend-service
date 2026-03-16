@@ -19,7 +19,7 @@ import ru.beeline.capability.dto.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+
 @RestController
 @RequestMapping("/api/v1/business-capability")
 public class BusinessCapabilityOrderController {

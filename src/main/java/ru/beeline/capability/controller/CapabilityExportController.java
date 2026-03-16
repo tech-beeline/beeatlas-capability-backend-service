@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.dto.CapabilityExportDTO;
 import ru.beeline.capability.service.CapabilityExportService;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+
 @RestController
 @RequestMapping("/api/v1/export")
 public class CapabilityExportController {

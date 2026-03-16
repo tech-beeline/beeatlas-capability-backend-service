@@ -19,7 +19,6 @@ import ru.beeline.capability.service.PackageCapabilityService;
 import java.util.List;
 
 @Slf4j
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/v1")
 public class PackageCapabilityController {

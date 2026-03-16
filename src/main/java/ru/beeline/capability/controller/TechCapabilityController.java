@@ -19,7 +19,6 @@ import java.util.List;
 import static ru.beeline.capability.utils.Constants.SOURCE;
 
 @Slf4j
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/v1/tech-capabilities")
 public class TechCapabilityController {

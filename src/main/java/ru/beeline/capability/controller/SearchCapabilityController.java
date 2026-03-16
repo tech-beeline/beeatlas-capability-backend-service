@@ -16,7 +16,6 @@ import ru.beeline.capability.service.SearchCapabilityService;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/v1")
 public class SearchCapabilityController {
