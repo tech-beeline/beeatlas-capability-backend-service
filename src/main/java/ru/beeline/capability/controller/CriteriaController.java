@@ -12,7 +12,7 @@ import ru.beeline.capability.service.CriteriaService;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+
 @RestController
 @RequestMapping("/api/v1/criterias")
 public class CriteriaController {
