@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 PJSC VimpelCom
+ */
+
 package ru.beeline.capability.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -14,6 +18,7 @@ import ru.beeline.capability.client.ProductClient;
 import ru.beeline.capability.client.UserClient;
 import ru.beeline.capability.domain.*;
 import ru.beeline.capability.dto.*;
+import ru.beeline.capability.dto.product.GetProductsByIdsDTO;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
@@ -21,13 +26,6 @@ import ru.beeline.capability.mapper.BusinessCapabilityMapper;
 import ru.beeline.capability.repository.*;
 import ru.beeline.capability.utils.Node;
 import ru.beeline.capability.utils.UrlWrapper;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTOV2;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenIdsDTO;
-import ru.beeline.fdmlib.dto.capability.CriteriaDTO;
-import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
-import ru.beeline.fdmlib.dto.capability.TechCapabilityShortDTO;
-import ru.beeline.fdmlib.dto.product.GetProductsByIdsDTO;
 
 import java.time.Instant;
 import java.util.*;
@@ -530,12 +528,25 @@ public class BusinessCapabilityService {
                 ENTITY_TYPE_BUSINESS_CAPABILITY);
     }
 
-    public void deleteBusinessCapability(String code) {
+    public void deleteBusinessCapability(String code, Boolean childrenTransfer) {
         Optional<BusinessCapability> optionalBusinessCapability = businessCapabilityRepository.findByCode(code);
         if (optionalBusinessCapability.isPresent()) {
             if (optionalBusinessCapability.get().getDeletedDate() == null) {
                 Long businessCapabilityId = optionalBusinessCapability.get().getId();
                 optionalBusinessCapability.map(businessCapability -> {
+                    if (Boolean.TRUE.equals(childrenTransfer)) {
+                        if (businessCapability.getParentId() == null) {
+                            throw new IllegalArgumentException("Выбранный business capability является корневым");
+                        }
+
+                        businessCapabilityRepository.updateParentIdForChildren(businessCapability.getId(),
+                                                                               businessCapability.getParentId());
+
+                        techCapabilityRelationsRepository.updateParentIdForChildren(businessCapability.getId(),
+                                                                                    businessCapability.getParentId());
+
+
+                    }
                     businessCapability.setDeletedDate(new Date());
                     return businessCapabilityRepository.save(businessCapability);
                 });

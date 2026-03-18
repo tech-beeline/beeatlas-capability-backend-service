@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 PJSC VimpelCom
+ */
+
 package ru.beeline.capability.service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +24,8 @@ import ru.beeline.capability.mapper.TechCapabilityMapper;
 import ru.beeline.capability.repository.*;
 import ru.beeline.capability.utils.Node;
 import ru.beeline.capability.utils.UrlWrapper;
-import ru.beeline.fdmlib.dto.capability.PutTechCapabilityDTO;
-import ru.beeline.fdmlib.dto.product.GetProductsByIdsDTO;
+import ru.beeline.capability.dto.PutTechCapabilityDTO;
+import ru.beeline.capability.dto.product.GetProductsByIdsDTO;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -591,6 +595,9 @@ public class TechCapabilityService {
                         .name(techCapability.getName())
                         .id(techCapability.getId())
                         .code(techCapability.getCode())
+                        .createdDate(techCapability.getCreatedDate())
+                        .updatedDate(techCapability.getLastModifiedDate())
+                        .deletedDate(techCapability.getDeletedDate())
                         .build())
                 .collect(Collectors.toList());
     }

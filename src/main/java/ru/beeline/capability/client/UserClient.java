@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 PJSC VimpelCom
+ */
+
 package ru.beeline.capability.client;
 
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +13,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import ru.beeline.capability.dto.UserProfileDTO;
-import ru.beeline.fdmlib.dto.auth.EmailResponseDTO;
+import ru.beeline.capability.dto.auth.EmailResponseDTO;
 
 import java.util.Objects;
 

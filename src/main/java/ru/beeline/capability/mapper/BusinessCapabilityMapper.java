@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 PJSC VimpelCom
+ */
+
 package ru.beeline.capability.mapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +15,11 @@ import ru.beeline.capability.dto.BusinessCapabilityTreeDTO;
 import ru.beeline.capability.dto.BusinessCapabilityTreeInfoDTO;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.TechCapabilityRelationsRepository;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTO;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityChildrenDTOV2;
-import ru.beeline.fdmlib.dto.capability.BusinessCapabilityDTO;
-import ru.beeline.fdmlib.dto.capability.PutBusinessCapabilityDTO;
-import ru.beeline.fdmlib.dto.product.GetProductsByIdsDTO;
+import ru.beeline.capability.dto.BusinessCapabilityChildrenDTO;
+import ru.beeline.capability.dto.BusinessCapabilityChildrenDTOV2;
+import ru.beeline.capability.dto.BusinessCapabilityDTO;
+import ru.beeline.capability.dto.PutBusinessCapabilityDTO;
+import ru.beeline.capability.dto.product.GetProductsByIdsDTO;
 
 import java.util.ArrayList;
 import java.util.Collections;

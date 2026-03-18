@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.dto.aitooldto.AiRequestDTO;
+import ru.beeline.capability.exception.ResponseException;
 
 @Slf4j
 @Service
@@ -32,7 +33,7 @@ public class AIToolClient {
         while (count < 3) {
             result = request(jsonBody);
 
-            if(result != null) {
+            if (result != null) {
                 break;
             }
             count++;
@@ -47,9 +48,9 @@ public class AIToolClient {
 
             HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
             ResponseEntity<String> response = restTemplate.exchange(aiToolServerUrl,
-                                                                    HttpMethod.POST,
-                                                                    entity,
-                                                                    String.class);
+                    HttpMethod.POST,
+                    entity,
+                    String.class);
 
             String responseBody = response.getBody();
             if (responseBody != null) {
@@ -127,12 +128,12 @@ public class AIToolClient {
             headers.set("Authorization", "Bearer " + RequestContext.getOpenaiToken());
 
             HttpEntity<AiRequestDTO> entity = new HttpEntity<>(aiRequestDTO, headers);
-
-            return restTemplate.exchange(RequestContext.getOpenaiHost() + "/ai-tool/api/v1/chat/completions",
+            log.info(RequestContext.getOpenaiHost() + "/api/v1/chat/completions");
+            return restTemplate.exchange(RequestContext.getOpenaiHost() + "/v1/chat/completions",
                     HttpMethod.POST, entity, String.class).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());
+            throw new ResponseException(HttpStatus.INTERNAL_SERVER_ERROR, "Ошибка при запросе в сторонний сервис: " + e.getMessage());
         }
-        return null;
     }
 }

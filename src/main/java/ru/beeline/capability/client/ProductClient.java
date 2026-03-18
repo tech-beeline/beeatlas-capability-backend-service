@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 PJSC VimpelCom
+ */
+
 package ru.beeline.capability.client;
 
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +15,7 @@ import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.dto.ProductAvailableDTO;
 import ru.beeline.capability.dto.ProductDTO;
 import ru.beeline.capability.exception.ResponseException;
-import ru.beeline.fdmlib.dto.product.GetProductsByIdsDTO;
+import ru.beeline.capability.dto.product.GetProductsByIdsDTO;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 PJSC VimpelCom
+ */
+
 package ru.beeline.capability.client;
 
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.dto.CommentDTO;
 import ru.beeline.capability.exception.ResponseException;
-import ru.beeline.fdmlib.dto.bpm.ApplicationExtendedDTO;
+import ru.beeline.capability.dto.bpm.ApplicationExtendedDTO;
 
 import java.util.HashMap;
 import java.util.Map;
