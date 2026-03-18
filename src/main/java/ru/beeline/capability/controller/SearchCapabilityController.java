@@ -4,13 +4,19 @@
 
 package ru.beeline.capability.controller;
 
-import io.swagger.annotations.ApiOperation;
+ 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.dto.SearchCapabilityDTO;
 import ru.beeline.capability.service.SearchCapabilityService;
 
@@ -24,8 +30,16 @@ public class SearchCapabilityController {
     private SearchCapabilityService searchCapabilityService;
 
 
+    @ApiErrorCodes({400, 500})
     @GetMapping("/find")
-    @ApiOperation(value = "Поиск по сущностям", response = SearchCapabilityDTO.class)
+    @Operation(summary = "Поиск по сущностям",
+            description = "Поиск по сущностям",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Успешный ответ",
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = SearchCapabilityDTO.class)))),
+                    @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
+            })
     public List<SearchCapabilityDTO> getAllTech(@RequestParam(value = "findBy", required = false, defaultValue = "ALL") String findBy,
                                                 @RequestParam(value = "search") String search) {
         return searchCapabilityService.searchCapability(search, findBy);

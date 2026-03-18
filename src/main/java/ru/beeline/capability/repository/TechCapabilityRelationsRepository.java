@@ -5,6 +5,7 @@
 package ru.beeline.capability.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -29,6 +30,12 @@ public interface TechCapabilityRelationsRepository extends JpaRepository<TechCap
     List<TechCapabilityRelations> findByBusinessCapability(BusinessCapability businessCapability);
 
     boolean existsByBusinessCapabilityAndTechCapability_DeletedDateIsNull(BusinessCapability businessCapability);
+
+    @Modifying
+    @Query("UPDATE TechCapabilityRelations tcr SET tcr.businessCapability.id = :newParentId " +
+            "WHERE tcr.businessCapability.id = :oldParentId")
+    void updateParentIdForChildren(@Param("oldParentId") Long oldParentId,
+                                   @Param("newParentId") Long newParentId);
 
     @Query("SELECT DISTINCT tcr.businessCapability.id FROM TechCapabilityRelations tcr " +
             "WHERE tcr.techCapability.deletedDate IS NULL " +
