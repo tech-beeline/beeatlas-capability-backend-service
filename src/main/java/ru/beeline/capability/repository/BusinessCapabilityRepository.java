@@ -7,6 +7,7 @@ package ru.beeline.capability.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -35,6 +36,11 @@ public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapa
     Optional<BusinessCapability> findByCode(String code);
 
     List<BusinessCapability> findAllByParentId(Long id);
+
+    @Modifying
+    @Query("UPDATE BusinessCapability bc SET bc.parentId = :newParentId WHERE bc.parentId = :oldParentId")
+    void updateParentIdForChildren(@Param("oldParentId") Long oldParentId,
+                                   @Param("newParentId") Long newParentId);
 
     BusinessCapability findFirstByOrderByIdDesc();
 
