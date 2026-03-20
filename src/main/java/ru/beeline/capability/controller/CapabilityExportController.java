@@ -19,7 +19,6 @@ import ru.beeline.capability.service.CapabilityExportService;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/v1/export")
 public class CapabilityExportController {
