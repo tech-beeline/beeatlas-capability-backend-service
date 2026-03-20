@@ -20,7 +20,6 @@ import ru.beeline.capability.dto.PromtDTO;
 import ru.beeline.capability.dto.aitooldto.ResultDTO;
 import ru.beeline.capability.service.PromtService;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/v1/promt")
 public class PromtController {

@@ -24,7 +24,6 @@ import ru.beeline.capability.service.SubscribeService;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/v1/capabilities-subscribed")
 public class SubscribeController {

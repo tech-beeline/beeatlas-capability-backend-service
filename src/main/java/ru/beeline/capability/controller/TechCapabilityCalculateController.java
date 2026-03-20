@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.service.TechCapabilityService;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/v1")
 public class TechCapabilityCalculateController {
