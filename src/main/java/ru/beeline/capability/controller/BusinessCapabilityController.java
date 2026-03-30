@@ -25,7 +25,6 @@ import java.util.List;
 
 import static ru.beeline.capability.utils.Constants.*;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/v1/business-capability")
 public class BusinessCapabilityController {
