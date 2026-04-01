@@ -1,128 +1,157 @@
-# capability-backend
+# capability-backend-service
 
-## Getting started
+Backend-сервис (Spring Boot) для модуля Capability. Запускается в контейнере, использует PostgreSQL и RabbitMQ.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Требования
 
-Already a pro? Just edit this README.md and make it your own. Want to make it
-easy? [Use the template at the bottom](#editing-this-readme)!
+- Java 17 (если запускаете локально без контейнера)
+- Maven (если запускаете локально без контейнера)
+- Podman + `podman compose` (Windows) или Docker + Docker Compose
 
-## Add your files
+## Быстрый старт (Podman Compose на Windows)
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file)
-  or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line)
-  or push an existing Git repository with the following command:
+Перейдите в корень репозитория (где лежит `docker-compose.yml`):
 
-```
-cd existing_repo
-git remote add origin https://git.vimpelcom.ru/products/eafdmmart/capability-backend.git
-git branch -M main
-git push -uf origin main
+```powershell
+cd D:\IDEA_project\beeatlas-capability-backend-service
 ```
 
-## Integrate with your tools
+Собрать и поднять:
 
-- [ ] [Set up project integrations](https://git.vimpelcom.ru/products/eafdmmart/capability-backend/-/settings/integrations)
+```powershell
+podman compose build
+podman compose up -d
+```
 
-## Collaborate with your team
+Остановить:
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+```powershell
+podman compose down
+```
 
-## Test and Deploy
+Посмотреть логи:
 
-Use the built-in continuous integration in GitLab.
+```powershell
+podman logs -f capability-backend-app
+```
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+Пересоздать контейнеры (когда меняли `docker-compose.yml` / переменные окружения):
 
-***
+```powershell
+podman compose down
+podman compose up -d --force-recreate
+```
 
-# Editing this README
+## Порты
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to
-structure it however you want - this is just a starting point!). Thank you
-to [makeareadme.com](https://www.makeareadme.com/) for this template.
+По умолчанию `docker-compose.yml` публикует порт сервиса:
 
-## Suggestions for a good README
+- `${CAPABILITY_SERVICE_PORT:-8082} -> 8080` (внутри контейнера приложение слушает `8080`)
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are
-suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long
-is better than too short. If you think your README is too long, consider utilizing another form of documentation rather
-than cutting out information.
+## Конфигурация
 
-## Name
+Сервис ожидает настройки через переменные окружения (см. `docker-compose.yml`).
 
-Choose a self-explaining name for your project.
+### RabbitMQ (обязательно)
 
-## Description
+Если не задать `exchange`/`routing-key`/`vhost`, Spring Boot упадёт на старте с ошибкой вида:
+`Could not resolve placeholder 'spring.rabbitmq.*'`.
 
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be
-unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your
-project, this is a good place to list differentiating factors.
+Минимально нужны:
 
-## Badges
+- `SPRING_RABBITMQ_HOST` (в compose сейчас: `shared-rabbitmq`)
+- `SPRING_RABBITMQ_PORT` (по умолчанию `5672`)
+- `SPRING_RABBITMQ_USERNAME`
+- `SPRING_RABBITMQ_PASSWORD`
+- `SPRING_RABBITMQ_VIRTUAL_HOST` (по умолчанию `/`)
+- `SPRING_RABBITMQ_TEMPLATE_EXCHANGE` (по умолчанию `capability.exchange`)
+- `SPRING_RABBITMQ_TEMPLATE_ROUTING_KEY` (по умолчанию `capability.routing`)
 
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the
-project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Проверить, что переменные реально попали в контейнер (PowerShell):
 
-## Visuals
+```powershell
+podman exec -it capability-backend-app printenv | findstr SPRING_RABBITMQ
+```
 
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see
-GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Примечание: предупреждения вида `Failed to obtain TTY size: The handle is invalid.` обычно не критичны.
+Если мешают — уберите `-t`:
 
-## Installation
+```powershell
+podman exec -i capability-backend-app printenv
+```
 
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew.
-However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing
-specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a
-specific context like a particular programming language version or operating system or has dependencies that have to be
-installed manually, also add a Requirements subsection.
+### PostgreSQL (обязательно)
 
-## Usage
+- `SPRING_DATASOURCE_URL` (в compose сейчас: `jdbc:postgresql://shared-postgres:5432/shared_db`)
+- `SPRING_DATASOURCE_USERNAME`
+- `SPRING_DATASOURCE_PASSWORD`
 
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of
-usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably
-include in the README.
+Также используются:
 
-## Support
+- `SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA` (по умолчанию `capability`)
+- `SPRING_FLYWAY_DEFAULT_SCHEMA` (по умолчанию `capability`)
 
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address,
-etc.
+### Интеграции (по окружению)
 
-## Roadmap
+В compose предусмотрены URL интеграционных сервисов:
 
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+- `INTEGRATION_NOTIFICATION_SERVER_URL`
+- `INTEGRATION_DOCUMENT_SERVER_URL`
+- `INTEGRATION_PRODUCT_SERVER_URL`
+- `INTEGRATION_BPM_SERVER_URL`
+- `INTEGRATION_PACK_LOADER_SERVER_URL`
+- `INTEGRATION_DASHBOARD_SERVER_URL`
+- `INTEGRATION_AUTH_SERVER_URL`
+- `INTEGRATION_AUTHSSO_SERVER_URL`
+- `INTEGRATION_AI_TOOL_SERVER_URL`
 
-## Contributing
+## Сети (shared infrastructure)
 
-State if you are open to contributions and what your requirements are for accepting them.
+Текущий `docker-compose.yml` подключает сервис к внешней сети:
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started.
-Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps
-explicit. These instructions could also be useful to your future self.
+- `shared-network` (external)
+- имя сети: `shared-infrastructure_shared-network`
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce
-the likelihood that the changes inadvertently break something. Having instructions for running tests is especially
-helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+Это означает, что перед запуском compose должна существовать внешняя сеть и в ней должны быть доступны хосты:
 
-## Authors and acknowledgment
+- `shared-postgres`
+- `shared-rabbitmq`
 
-Show your appreciation to those who have contributed to the project.
+Проверить сети:
 
-## License
+```powershell
+podman network ls
+```
 
-For open source projects, say how it is licensed.
+## Типовые проблемы
 
-## Project status
+### `Could not resolve placeholder 'spring.rabbitmq.template.exchange'`
 
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has
-slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or
-owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Причина: внутри контейнера нет `SPRING_RABBITMQ_TEMPLATE_EXCHANGE` (или `spring.rabbitmq.template.exchange`).
+
+Диагностика:
+
+```powershell
+podman exec -it capability-backend-app printenv | findstr SPRING_RABBITMQ
+```
+
+Если переменной нет — пересоздайте контейнеры:
+
+```powershell
+podman compose down
+podman compose up -d --force-recreate
+```
+
+## Локальный запуск (без контейнера)
+
+Сборка:
+
+```powershell
+mvn clean package -DskipTests
+```
+
+Запуск:
+
+```powershell
+java -jar .\target\capability-*.jar
+```
