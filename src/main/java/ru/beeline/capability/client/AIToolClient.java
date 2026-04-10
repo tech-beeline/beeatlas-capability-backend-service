@@ -47,6 +47,7 @@ public class AIToolClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
+            log.info("request to ai-tool ambassador: {}", aiToolServerUrl);
             ResponseEntity<String> response = restTemplate.exchange(aiToolServerUrl,
                     HttpMethod.POST,
                     entity,
@@ -80,6 +81,7 @@ public class AIToolClient {
 
 
     public static JsonNode cleanAndValidateJson(String rawContent) {
+        log.info("ai-tool ответ: {}",rawContent);
         if (rawContent == null) {
             return null;
         }
