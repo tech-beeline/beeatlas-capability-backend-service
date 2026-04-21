@@ -47,6 +47,7 @@ public class AIToolClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
+            log.info("request to ai-tool ambassador: {}", aiToolServerUrl);
             ResponseEntity<String> response = restTemplate.exchange(aiToolServerUrl,
                     HttpMethod.POST,
                     entity,
@@ -80,6 +81,7 @@ public class AIToolClient {
 
 
     public static JsonNode cleanAndValidateJson(String rawContent) {
+        log.info("ai-tool ответ: {}",rawContent);
         if (rawContent == null) {
             return null;
         }
@@ -128,8 +130,8 @@ public class AIToolClient {
             headers.set("Authorization", "Bearer " + RequestContext.getOpenaiToken());
 
             HttpEntity<AiRequestDTO> entity = new HttpEntity<>(aiRequestDTO, headers);
-            log.info(RequestContext.getOpenaiHost() + "/api/v1/chat/completions");
-            return restTemplate.exchange(RequestContext.getOpenaiHost() + "/v1/chat/completions",
+            log.info(RequestContext.getOpenaiHost() + "/api/v3/chat/completions");
+            return restTemplate.exchange(RequestContext.getOpenaiHost() + "/v3/chat/completions",
                     HttpMethod.POST, entity, String.class).getBody();
         } catch (Exception e) {
             log.error(e.getMessage());

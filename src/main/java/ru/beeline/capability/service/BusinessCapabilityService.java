@@ -499,6 +499,7 @@ public class BusinessCapabilityService {
         if (orderBusinessCapability.getMutableBcId() != null) {
             businessCapability = findById(orderBusinessCapability.getMutableBcId());
             businessCapability.setLastModifiedDate(new Date());
+            addToHistory(businessCapability);
         } else {
             Optional<BusinessCapability> bcByCode = businessCapabilityRepository.findByCode(orderBusinessCapability.getCode());
             if (bcByCode.isPresent()) {
