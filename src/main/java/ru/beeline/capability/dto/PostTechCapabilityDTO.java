@@ -1,0 +1,27 @@
+/*
+ * Copyright (c) 2024 PJSC VimpelCom
+ */
+
+package ru.beeline.capability.dto;
+
+import lombok.*;
+
+import java.util.List;
+
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@Builder
+public class PostTechCapabilityDTO {
+    private String code;
+    private String name;
+    private String description;
+    private String author;
+    private String link;
+    private String owner;
+    private String status;
+    private List<String> parents;
+    private String targetSystemCode;
+}
