@@ -20,6 +20,7 @@ import ru.beeline.capability.dto.PromtDTO;
 import ru.beeline.capability.dto.aitooldto.ResultDTO;
 import ru.beeline.capability.service.PromtService;
 
+
 @RestController
 @RequestMapping("/api/v1/promt")
 public class PromtController {
@@ -30,7 +31,7 @@ public class PromtController {
     @ApiErrorCodes({400, 404, 500})
     @GetMapping("/{alias}")
     @Operation(summary = "Промт по alias",
-            description = "Промт по alias",
+            description = "Возвращает сохраненный промпт по alias.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -46,7 +47,7 @@ public class PromtController {
     @ApiErrorCodes({400, 404, 500})
     @PostMapping("/proxy")
     @Operation(summary = "Проксирование запроса в LLM с использованием сохраненного промпта",
-            description = "Проксирование запроса в LLM с использованием сохраненного промпта",
+            description = "Отправляет запрос в LLM, применяя сохраненный промпт и параметры из тела запроса.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",

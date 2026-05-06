@@ -18,6 +18,7 @@ import ru.beeline.capability.service.CriteriaService;
 
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/api/v1/criterias")
 public class CriteriaController {
@@ -28,7 +29,7 @@ public class CriteriaController {
     @ApiErrorCodes({400, 500})
     @GetMapping
     @Operation(summary = "Получение критериев",
-            description = "Получение критериев",
+            description = "Возвращает список критериев с учетом опционального фильтра.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",

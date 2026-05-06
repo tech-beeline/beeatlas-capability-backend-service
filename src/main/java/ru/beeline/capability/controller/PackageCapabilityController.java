@@ -34,7 +34,7 @@ public class PackageCapabilityController {
     @ApiErrorCodes({400, 500})
     @PostMapping("/package-tech-capabilities")
     @Operation(summary = "Пакетная загрузка технических возможностей",
-            description = "Пакетная загрузка технических возможностей",
+            description = "Регистрирует пакет технических возможностей одним запросом.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -51,7 +51,7 @@ public class PackageCapabilityController {
     @ApiErrorCodes({400, 500})
     @PostMapping("/package-business-capabilities")
     @Operation(summary = "Пакетная загрузка бизнес возможностей",
-            description = "Пакетная загрузка бизнес возможностей",
+            description = "Регистрирует пакет бизнес-возможностей одним запросом.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",

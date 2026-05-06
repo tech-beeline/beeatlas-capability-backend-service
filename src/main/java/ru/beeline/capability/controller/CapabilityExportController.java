@@ -4,7 +4,7 @@
 
 package ru.beeline.capability.controller;
 
- 
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,7 +17,6 @@ import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.dto.CapabilityExportDTO;
 import ru.beeline.capability.service.CapabilityExportService;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/export")
@@ -29,7 +28,7 @@ public class CapabilityExportController {
     @ApiErrorCodes({400, 500})
     @PostMapping("/business-capability/{doc_id}")
     @Operation(summary = "Экспорт бизнес-возможностей",
-            description = "Экспорт бизнес-возможностей",
+            description = "Запускает экспорт бизнес-возможностей в документ с указанным id.",
             responses = {
                     @ApiResponse(responseCode = "201",
                             description = "Создано",
@@ -43,7 +42,7 @@ public class CapabilityExportController {
     @ApiErrorCodes({400, 500})
     @PostMapping("/tech-capability/{doc_id}")
     @Operation(summary = "Экспорт технических возможностей",
-            description = "Экспорт технических возможностей",
+            description = "Запускает экспорт технических возможностей в документ с указанным id.",
             responses = {
                     @ApiResponse(responseCode = "201",
                             description = "Создано",

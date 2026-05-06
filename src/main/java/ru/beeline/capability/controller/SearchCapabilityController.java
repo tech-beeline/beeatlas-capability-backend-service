@@ -33,7 +33,7 @@ public class SearchCapabilityController {
     @ApiErrorCodes({400, 500})
     @GetMapping("/find")
     @Operation(summary = "Поиск по сущностям",
-            description = "Поиск по сущностям",
+            description = "Ищет по сущностям по строке запроса и типу поиска.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",

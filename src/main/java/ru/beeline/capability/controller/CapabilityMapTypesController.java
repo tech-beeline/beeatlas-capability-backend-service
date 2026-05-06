@@ -24,6 +24,7 @@ import java.util.List;
 
 import static ru.beeline.capability.utils.Constants.USER_ID_HEADER;
 
+
 @RestController
 @RequestMapping("/api/v1/capability")
 public class CapabilityMapTypesController {
@@ -34,7 +35,7 @@ public class CapabilityMapTypesController {
     @ApiErrorCodes({400, 500})
     @GetMapping("/type")
     @Operation(summary = "Получение всех типов карт",
-            description = "Получение всех типов карт",
+            description = "Возвращает список типов карт, доступных пользователю.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",

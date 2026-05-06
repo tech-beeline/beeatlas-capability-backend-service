@@ -25,6 +25,7 @@ import ru.beeline.capability.dto.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/api/v1/business-capability")
 public class BusinessCapabilityOrderController {
@@ -36,7 +37,7 @@ public class BusinessCapabilityOrderController {
     @ApiErrorCodes({400, 500})
     @PostMapping("/order")
     @Operation(summary = "Публикация каталога Capability",
-            description = "Публикация каталога Capability",
+            description = "Создает задачу на публикацию каталога (возвращает businessKey).",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -51,7 +52,7 @@ public class BusinessCapabilityOrderController {
     @ApiErrorCodes({400, 500})
     @GetMapping("/order/draft")
     @Operation(summary = "Получение черновика",
-            description = "Получение черновика",
+            description = "Возвращает текущие черновики публикации каталога.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -65,7 +66,7 @@ public class BusinessCapabilityOrderController {
     @ApiErrorCodes({400, 500})
     @GetMapping("/order/{id}")
     @Operation(summary = "Получение данных по идентификатору",
-            description = "Получение данных по идентификатору",
+            description = "Возвращает черновик/заказ публикации по id.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -79,7 +80,7 @@ public class BusinessCapabilityOrderController {
     @ApiErrorCodes({400, 500})
     @PostMapping("/order/draft")
     @Operation(summary = "Публикация черновика",
-            description = "Публикация черновика",
+            description = "Создает задачу публикации на основе черновика.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -94,7 +95,7 @@ public class BusinessCapabilityOrderController {
     @ApiErrorCodes({400, 500})
     @PostMapping("/order/domains")
     @Operation(summary = "Информация о доменах по списку id",
-            description = "Получение информации о доменах по списку id",
+            description = "Возвращает информацию о доменах для списка id.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -108,7 +109,7 @@ public class BusinessCapabilityOrderController {
     @ApiErrorCodes({400, 401, 403, 404, 409, 500})
     @PatchMapping("/order/{id}")
     @Operation(summary = "Управление каталогом Capability",
-            description = "Управление каталогом Capability",
+            description = "Изменяет заказ публикации (статус и/или параметры).",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Успешный ответ"),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
@@ -123,7 +124,7 @@ public class BusinessCapabilityOrderController {
     @ApiErrorCodes({400, 401, 403, 404, 409, 500})
     @PatchMapping("/order/draft/{id}")
     @Operation(summary = "Управление каталогом Capability",
-            description = "Управление каталогом Capability",
+            description = "Редактирует черновик и при необходимости публикует его.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Успешный ответ"),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),

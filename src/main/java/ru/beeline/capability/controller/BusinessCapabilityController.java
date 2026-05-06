@@ -25,6 +25,7 @@ import java.util.List;
 
 import static ru.beeline.capability.utils.Constants.*;
 
+
 @RestController
 @RequestMapping("/api/v1/business-capability")
 public class BusinessCapabilityController {
@@ -35,7 +36,7 @@ public class BusinessCapabilityController {
     @ApiErrorCodes({400, 500})
     @GetMapping("/{id}/children")
     @Operation(summary = "Получение дочерних бизнес-возможностей",
-            description = "Возвращает DTO c дочерними возможностями",
+            description = "Возвращает список дочерних бизнес-возможностей для указанной.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -49,7 +50,7 @@ public class BusinessCapabilityController {
     @ApiErrorCodes({400, 500})
     @GetMapping("/{id}/children/all")
     @Operation(summary = "Получение id всех дочерних бизнес-возможностей",
-            description = "Возвращает DTO c дочерними возможностями",
+            description = "Возвращает идентификаторы всех дочерних бизнес-возможностей (включая вложенные).",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -63,7 +64,7 @@ public class BusinessCapabilityController {
     @ApiErrorCodes({400, 500})
     @GetMapping("/{id}/parents")
     @Operation(summary = "Получение родительских бизнес-возможностей",
-            description = "Возвращает DTO с родительскими возможностями",
+            description = "Возвращает цепочку родителей для указанной бизнес-возможности.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -79,7 +80,7 @@ public class BusinessCapabilityController {
     @ApiErrorCodes({400, 500})
     @GetMapping("/{id}")
     @Operation(summary = "Получение бизнес возможности по идентификатору",
-            description = "Получение бизнес возможности по идентификатору",
+            description = "Возвращает бизнес-возможность по её id.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -92,7 +93,7 @@ public class BusinessCapabilityController {
     @ApiErrorCodes({400, 500})
     @GetMapping("/tree")
     @Operation(summary = "Построение дерева",
-            description = "Построение дерева",
+            description = "Возвращает дерево бизнес-возможностей.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -106,7 +107,7 @@ public class BusinessCapabilityController {
     @ApiErrorCodes({400, 500})
     @GetMapping("/tree/{id}")
     @Operation(summary = "Построение дерева по идентификатору возможности",
-            description = "Построение дерева по идентификатору возможности",
+            description = "Возвращает дерево, построенное от указанной бизнес-возможности.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -120,7 +121,7 @@ public class BusinessCapabilityController {
     @ApiErrorCodes({400, 500})
     @GetMapping
     @Operation(summary = "Получение бизнес возможностей",
-            description = "Получение бизнес возможностей",
+            description = "Возвращает список бизнес-возможностей с учетом фильтров и пагинации.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -136,7 +137,7 @@ public class BusinessCapabilityController {
     @ApiErrorCodes({400, 500})
     @GetMapping("/history/{id}")
     @Operation(summary = "Получение списка версий ВС",
-            description = "Получение списка версий ВС",
+            description = "Возвращает историю версий бизнес-возможности.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -150,7 +151,7 @@ public class BusinessCapabilityController {
     @ApiErrorCodes({400, 500})
     @GetMapping("/history/compare/{id}/{version}")
     @Operation(summary = "Получение выбраных версий ВС",
-            description = "Получение выбраных версий ВС",
+            description = "Возвращает сравнение указанной версии с другой (при наличии параметра).",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -166,7 +167,7 @@ public class BusinessCapabilityController {
     @ApiErrorCodes({400, 401, 403, 404, 409, 500})
     @PutMapping
     @Operation(summary = "Создание/Обновление бизнес возможности",
-            description = "Создание/Обновление бизнес возможности",
+            description = "Создает или обновляет бизнес-возможность по переданным данным.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -188,7 +189,7 @@ public class BusinessCapabilityController {
     @DeleteMapping("/{code}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Удаление бизнес-возможности",
-            description = "Удаление бизнес-возможности. Выбранный business capability не должен быть корневым.",
+            description = "Удаляет бизнес-возможность по коду (корневую удалить нельзя).",
             responses = {
                     @ApiResponse(responseCode = "204", description = "Без содержимого"),
                     @ApiResponse(responseCode = "400", description = "Выбранный business capability является корневым"),
@@ -202,7 +203,7 @@ public class BusinessCapabilityController {
     @ApiErrorCodes({400, 404, 500})
     @PostMapping("/public/{id}")
     @Operation(summary = "Публикация ВС",
-            description = "Публикация ВС",
+            description = "Публикует бизнес-возможность по id.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Успешный ответ"),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),

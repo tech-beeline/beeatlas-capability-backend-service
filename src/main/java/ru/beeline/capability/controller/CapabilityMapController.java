@@ -31,6 +31,7 @@ import java.util.List;
 
 import static ru.beeline.capability.utils.Constants.USER_ID_HEADER;
 
+
 @RestController
 @RequestMapping("/api")
 public class CapabilityMapController {
@@ -41,7 +42,7 @@ public class CapabilityMapController {
     @ApiErrorCodes({400, 500})
     @PostMapping("/v1/maps")
     @Operation(summary = "Создание карты возможностей",
-            description = "Создание карты возможностей",
+            description = "Создает карту возможностей для пользователя из запроса.",
             responses = {
                     @ApiResponse(responseCode = "201",
                             description = "Создано",
@@ -57,7 +58,7 @@ public class CapabilityMapController {
     @ApiErrorCodes({400, 401, 403, 404, 409, 500})
     @PatchMapping("/v1/maps/groups/{mapId}")
     @Operation(summary = "Обновление карты пользователя",
-            description = "Обновление карты пользователя",
+            description = "Обновляет состав и порядок групп/элементов в карте пользователя.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -74,7 +75,7 @@ public class CapabilityMapController {
     @ApiErrorCodes({400, 401, 403, 404, 409, 500})
     @DeleteMapping("/v1/maps/{mapId}")
     @Operation(summary = "Удаление карты пользователя",
-            description = "Удаление карты пользователя",
+            description = "Удаляет карту пользователя по идентификатору.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -89,7 +90,7 @@ public class CapabilityMapController {
     @ApiErrorCodes({400, 500})
     @GetMapping("/v1/maps/{Id}")
     @Operation(summary = "Получение карты по id",
-            description = "Получение карты по id",
+            description = "Возвращает карту возможностей по идентификатору.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -103,7 +104,7 @@ public class CapabilityMapController {
     @ApiErrorCodes({400, 500})
     @GetMapping("/v1/maps")
     @Operation(summary = "Получение всех карт пользователя",
-            description = "Получение всех карт пользователя",
+            description = "Возвращает список всех карт, доступных пользователю.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -117,7 +118,7 @@ public class CapabilityMapController {
     @ApiErrorCodes({400, 401, 403, 404, 409, 500})
     @PatchMapping("/v1/maps/{mapId}")
     @Operation(summary = "Изменение названия и описания карты",
-            description = "Изменение названия и описания карты",
+            description = "Обновляет название и описание карты.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",

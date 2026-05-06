@@ -24,6 +24,7 @@ import ru.beeline.capability.service.SubscribeService;
 
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/api/v1/capabilities-subscribed")
 public class SubscribeController {
@@ -34,7 +35,7 @@ public class SubscribeController {
     @ApiErrorCodes({400, 500})
     @GetMapping
     @Operation(summary = "Получение подписок на возможности",
-            description = "Получение подписок на возможности",
+            description = "Возвращает подписки пользователя на возможности по типу сущности.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
