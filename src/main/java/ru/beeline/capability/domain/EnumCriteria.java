@@ -12,7 +12,10 @@ import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Builder
@@ -25,6 +28,8 @@ import javax.persistence.Table;
 public class EnumCriteria {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "enum_criterias_id_generator")
+    @SequenceGenerator(name = "enum_criterias_id_generator", sequenceName = "sequence_enum_criterias_id", allocationSize = 1)
     private Long id;
 
     private String name;

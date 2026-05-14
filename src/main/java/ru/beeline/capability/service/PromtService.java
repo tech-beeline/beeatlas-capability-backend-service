@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.beeline.capability.client.AIToolClient;
 import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.domain.Promt;
@@ -23,6 +24,7 @@ import ru.beeline.capability.repository.PromtRepository;
 import java.util.ArrayList;
 import java.util.List;
 
+@Transactional
 @Slf4j
 @Service
 public class PromtService {
