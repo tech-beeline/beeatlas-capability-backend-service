@@ -2,7 +2,7 @@
  * Copyright (c) 2024 PJSC VimpelCom
  */
 
-package ru.beeline.capability.dto;
+package ru.beeline.capability.dto.criteria;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
