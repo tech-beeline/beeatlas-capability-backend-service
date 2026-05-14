@@ -17,5 +17,5 @@ public interface CriteriaBcRepository extends JpaRepository<CriteriasBc, Long> {
 
     List<CriteriasBc> findAllByBcId(Long bcId);
 
-    Optional <CriteriasBc> findByBcIdAndCriterionId(Long bcId, Long criterionId);
+    Optional<CriteriasBc> findByBcIdAndCriterionId(Long bcId, Long criterionId);
 }

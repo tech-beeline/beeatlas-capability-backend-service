@@ -4,15 +4,13 @@
 
 package ru.beeline.capability.controller;
 
- 
+
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +20,7 @@ import ru.beeline.capability.service.TechCapabilityService;
 
 @RestController
 @RequestMapping("/api/v1")
+@Tag(name = "Расчёты TC", description = "Фоновые расчёты и пересчёт качества для технических возможностей")
 public class TechCapabilityCalculateController {
 
     @Autowired

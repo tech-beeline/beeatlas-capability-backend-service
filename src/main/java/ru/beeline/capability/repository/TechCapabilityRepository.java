@@ -23,6 +23,8 @@ public interface TechCapabilityRepository extends JpaRepository<TechCapability, 
 
     Optional<TechCapability> findByCode(String code);
 
+    Optional<TechCapability> findByCodeIgnoreCaseAndDeletedDateIsNull(String code);
+
     List<TechCapability> findAllByIdInAndDeletedDateIsNull(List<Long> ids);
 
     TechCapability findAllByIdAndDeletedDateIsNull(Long id);

@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,7 @@ import static ru.beeline.capability.utils.Constants.USER_ID_HEADER;
 
 @RestController
 @RequestMapping("/api")
+@Tag(name = "Карты возможностей", description = "Создание и изменение карт BC/TC")
 public class CapabilityMapController {
 
     @Autowired

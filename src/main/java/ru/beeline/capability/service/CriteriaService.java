@@ -7,10 +7,20 @@ package ru.beeline.capability.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.beeline.capability.domain.BusinessCapability;
+import ru.beeline.capability.domain.CriteriasBc;
+import ru.beeline.capability.domain.CriteriasTc;
 import ru.beeline.capability.domain.EnumCriteria;
-import ru.beeline.capability.dto.PutEnumCriteriaDTO;
+import ru.beeline.capability.domain.TechCapability;
+import ru.beeline.capability.dto.criteria.CriteriaRecordResponseDTO;
+import ru.beeline.capability.dto.criteria.PostCriteriaRecordDTO;
+import ru.beeline.capability.dto.criteria.PutEnumCriteriaDTO;
 import ru.beeline.capability.exception.ForbiddenException;
+import ru.beeline.capability.repository.BusinessCapabilityRepository;
+import ru.beeline.capability.repository.CriteriaBcRepository;
 import ru.beeline.capability.repository.CriteriaRepository;
+import ru.beeline.capability.repository.CriteriaTcRepository;
+import ru.beeline.capability.repository.TechCapabilityRepository;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -25,8 +35,24 @@ import static ru.beeline.capability.utils.Constants.USER_ROLES_HEADER;
 @Service
 public class CriteriaService {
 
+    private static final String TYPE_BUSINESS_CAPABILITY = "business_capability";
+    private static final String TYPE_TECH_CAPABILITY = "tech_capability";
+
     @Autowired
     private CriteriaRepository criteriaRepository;
+
+    @Autowired
+    private BusinessCapabilityRepository businessCapabilityRepository;
+
+    @Autowired
+    private TechCapabilityRepository techCapabilityRepository;
+
+    @Autowired
+    private CriteriaBcRepository criteriaBcRepository;
+
+    @Autowired
+    private CriteriaTcRepository criteriaTcRepository;
+
 
     public List<EnumCriteria> getCriteria(String filter) {
         List<EnumCriteria> result = null;
@@ -76,14 +102,106 @@ public class CriteriaService {
         return criteriaRepository.save(entity);
     }
 
-    private static void assertAdministrator(HttpServletRequest request) {
+    public CriteriaRecordResponseDTO upsertCriteriaRecord(PostCriteriaRecordDTO dto) {
+        validatePostCriteriaRecord(dto);
+        String typeNorm = dto.getType().trim();
+        if (!TYPE_BUSINESS_CAPABILITY.equalsIgnoreCase(typeNorm) && !TYPE_TECH_CAPABILITY.equalsIgnoreCase(typeNorm)) {
+            throw new IllegalArgumentException("Невозможный тип сущности для критерия");
+        }
+        if (TYPE_BUSINESS_CAPABILITY.equalsIgnoreCase(typeNorm)) {
+            BusinessCapability bc = businessCapabilityRepository
+                    .findByCodeIgnoreCaseAndDeletedDateIsNull(dto.getCode().trim())
+                    .orElseThrow(() -> new IllegalArgumentException("BC с таким кодом не существует"));
+            EnumCriteria criterion = criteriaRepository.findByNameIgnoreCase(dto.getCriterionName().trim())
+                    .orElseThrow(() -> new IllegalArgumentException("Критерий с таким названием не существует"));
+            return upsertCriteriaBc(bc.getId(), criterion.getId(), dto);
+        }
+        TechCapability tc = techCapabilityRepository
+                .findByCodeIgnoreCaseAndDeletedDateIsNull(dto.getCode().trim())
+                .orElseThrow(() -> new IllegalArgumentException("TC с таким кодом не существует"));
+        EnumCriteria criterion = criteriaRepository.findByNameIgnoreCase(dto.getCriterionName().trim())
+                .orElseThrow(() -> new IllegalArgumentException("Критерий с таким названием не существует"));
+        return upsertCriteriaTc(tc.getId(), criterion.getId(), dto);
+    }
+
+    private CriteriaRecordResponseDTO upsertCriteriaBc(Long bcId, Long criterionId, PostCriteriaRecordDTO dto) {
+        Integer grade = dto.getGrade();
+        String comment = dto.getComment();
+        Optional<CriteriasBc> existing = criteriaBcRepository.findByBcIdAndCriterionId(bcId, criterionId);
+        CriteriasBc entity;
+        if (existing.isPresent()) {
+            entity = existing.get();
+            entity.setValue(dto.getValue());
+            entity.setGrade(grade);
+            entity.setComment(comment);
+        } else {
+            entity = CriteriasBc.builder()
+                    .bcId(bcId)
+                    .criterionId(criterionId)
+                    .value(dto.getValue())
+                    .grade(grade)
+                    .comment(comment)
+                    .build();
+        }
+        entity = criteriaBcRepository.save(entity);
+        return CriteriaRecordResponseDTO.builder()
+                .id(entity.getId())
+                .criterionId(entity.getCriterionId())
+                .value(entity.getValue())
+                .grade(entity.getGrade())
+                .bcId(entity.getBcId())
+                .comment(entity.getComment())
+                .build();
+    }
+
+    private CriteriaRecordResponseDTO upsertCriteriaTc(Long tcId, Long criterionId, PostCriteriaRecordDTO dto) {
+        Integer grade = dto.getGrade();
+        String comment = dto.getComment();
+        Optional<CriteriasTc> existing = criteriaTcRepository.findByTcIdAndCriterionId(tcId, criterionId);
+        CriteriasTc entity;
+        if (existing.isPresent()) {
+            entity = existing.get();
+            entity.setValue(dto.getValue());
+            entity.setGrade(grade);
+            entity.setComment(comment);
+        } else {
+            entity = CriteriasTc.builder()
+                    .tcId(tcId)
+                    .criterionId(criterionId)
+                    .value(dto.getValue())
+                    .grade(grade)
+                    .comment(comment)
+                    .build();
+        }
+        entity = criteriaTcRepository.save(entity);
+        return CriteriaRecordResponseDTO.builder()
+                .id(entity.getId())
+                .criterionId(entity.getCriterionId())
+                .value(entity.getValue())
+                .grade(entity.getGrade())
+                .tcId(entity.getTcId())
+                .comment(entity.getComment())
+                .build();
+    }
+
+    private void validatePostCriteriaRecord(PostCriteriaRecordDTO dto) {
+        if (dto.getType() == null || dto.getType().isBlank()
+                || dto.getCode() == null || dto.getCode().isBlank()
+                || dto.getCriterionName() == null || dto.getCriterionName().isBlank()
+                || dto.getValue() == null) {
+            throw new IllegalArgumentException("Не переданы обязательные параметры");
+        }
+    }
+
+
+    private void assertAdministrator(HttpServletRequest request) {
         List<String> roles = parseRolesHeader(request.getHeader(USER_ROLES_HEADER));
         if (!roles.contains("ADMINISTRATOR")) {
             throw new ForbiddenException("Доступ запрещен");
         }
     }
 
-    private static List<String> parseRolesHeader(String value) {
+    private List<String> parseRolesHeader(String value) {
         if (value == null || value.isBlank()) {
             return Collections.emptyList();
         }

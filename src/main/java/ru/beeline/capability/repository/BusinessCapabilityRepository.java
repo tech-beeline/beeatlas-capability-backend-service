@@ -35,6 +35,8 @@ public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapa
 
     Optional<BusinessCapability> findByCode(String code);
 
+    Optional<BusinessCapability> findByCodeIgnoreCaseAndDeletedDateIsNull(String code);
+
     List<BusinessCapability> findAllByParentId(Long id);
 
     @Modifying
