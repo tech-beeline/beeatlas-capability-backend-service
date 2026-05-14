@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.beeline.capability.domain.*;
 import ru.beeline.capability.dto.*;
 import ru.beeline.capability.exception.ForbiddenException;
@@ -20,6 +21,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Transactional
 @Slf4j
 @Service
 public class CapabilityMapService {
