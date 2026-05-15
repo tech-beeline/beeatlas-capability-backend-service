@@ -113,7 +113,7 @@ public class CriteriaService {
     }
 
     private CriteriaRecordResponseDTO upsertCriteriaBc(Long bcId, Long criterionId, PostCriteriaRecordDTO dto) {
-        Integer grade = dto.getGrade();
+        Integer grade = dto.getGrade() == null ? dto.getValue() : dto.getGrade();
         String comment = dto.getComment();
         Optional<CriteriasBc> existing = criteriaBcRepository.findByBcIdAndCriterionId(bcId, criterionId);
         CriteriasBc entity;
@@ -143,7 +143,7 @@ public class CriteriaService {
     }
 
     private CriteriaRecordResponseDTO upsertCriteriaTc(Long tcId, Long criterionId, PostCriteriaRecordDTO dto) {
-        Integer grade = dto.getGrade();
+        Integer grade = dto.getGrade() == null ? dto.getValue() : dto.getGrade();
         String comment = dto.getComment();
         Optional<CriteriasTc> existing = criteriaTcRepository.findByTcIdAndCriterionId(tcId, criterionId);
         CriteriasTc entity;
