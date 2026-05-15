@@ -81,11 +81,9 @@ public class CriteriaService {
             entity.setRevers(revers);
             entity.setMinDesc(dto.getMinDesc());
             entity.setMaxDesc(dto.getMaxDesc());
+            entity.setThreshold(dto.getThreshold());
             if (dto.getType() != null) {
                 entity.setType(dto.getType());
-            }
-            if (dto.getThreshold() != null) {
-                entity.setThreshold(dto.getThreshold());
             }
         } else {
             entity = EnumCriteria.builder()
