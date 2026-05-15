@@ -7,20 +7,12 @@ package ru.beeline.capability.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.beeline.capability.domain.BusinessCapability;
-import ru.beeline.capability.domain.CriteriasBc;
-import ru.beeline.capability.domain.CriteriasTc;
-import ru.beeline.capability.domain.EnumCriteria;
-import ru.beeline.capability.domain.TechCapability;
+import ru.beeline.capability.domain.*;
 import ru.beeline.capability.dto.criteria.CriteriaRecordResponseDTO;
 import ru.beeline.capability.dto.criteria.PostCriteriaRecordDTO;
 import ru.beeline.capability.dto.criteria.PutEnumCriteriaDTO;
 import ru.beeline.capability.exception.ForbiddenException;
-import ru.beeline.capability.repository.BusinessCapabilityRepository;
-import ru.beeline.capability.repository.CriteriaBcRepository;
-import ru.beeline.capability.repository.CriteriaRepository;
-import ru.beeline.capability.repository.CriteriaTcRepository;
-import ru.beeline.capability.repository.TechCapabilityRepository;
+import ru.beeline.capability.repository.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -82,9 +74,7 @@ public class CriteriaService {
             entity.setMinDesc(dto.getMinDesc());
             entity.setMaxDesc(dto.getMaxDesc());
             entity.setThreshold(dto.getThreshold());
-            if (dto.getType() != null) {
-                entity.setType(dto.getType());
-            }
+            entity.setType(dto.getType());
         } else {
             entity = EnumCriteria.builder()
                     .name(name)
