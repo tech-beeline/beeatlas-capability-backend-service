@@ -14,6 +14,9 @@ import java.util.Optional;
 
 @Repository
 public interface CriteriaTcRepository extends JpaRepository<CriteriasTc, Long> {
+
+    void deleteAllByCriterionId(Long criterionId);
+
     List<CriteriasTc> findAllByTcId(Long tcId);
 
     Optional<CriteriasTc> findByTcIdAndCriterionId(Long tcId, Long criterionId);
