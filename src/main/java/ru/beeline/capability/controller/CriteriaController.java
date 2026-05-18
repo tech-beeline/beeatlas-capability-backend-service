@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.annotation.ApiErrorCodes;
@@ -84,6 +85,26 @@ public class CriteriaController {
             })
     public ResponseEntity<CriteriaRecordResponseDTO> postCriteriaRecord(@RequestBody PostCriteriaRecordDTO body) {
         return ResponseEntity.ok(criteriaService.upsertCriteriaRecord(body));
+    }
+
+    @ApiErrorCodes({400, 403, 404, 500})
+    @DeleteMapping("/{id}")
+    @Parameter(name = USER_ROLES_HEADER,
+            in = ParameterIn.HEADER,
+            description = "Для метода требуется роль ADMINISTRATOR",
+            example = "ADMINISTRATOR",
+            required = true)
+    @Operation(summary = "Удаление критерия",
+            description = "Удаляет критерий из enum_criterias и связанные записи в criterias_tc и criterias_bc. Требуется роль ADMINISTRATOR.",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Критерий удалён"),
+                    @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещён"),
+                    @ApiResponse(responseCode = "404", description = "Критерий не найден"),
+            })
+    public ResponseEntity<Void> deleteCriteria(@PathVariable Long id, HttpServletRequest request) {
+        criteriaService.deleteCriteria(id, request);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 }

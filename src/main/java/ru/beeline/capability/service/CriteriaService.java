@@ -12,6 +12,7 @@ import ru.beeline.capability.dto.criteria.CriteriaRecordResponseDTO;
 import ru.beeline.capability.dto.criteria.PostCriteriaRecordDTO;
 import ru.beeline.capability.dto.criteria.PutEnumCriteriaDTO;
 import ru.beeline.capability.exception.ForbiddenException;
+import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.repository.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -209,6 +210,24 @@ public class CriteriaService {
                 || dto.getMinDesc() == null || dto.getMinDesc().isBlank()
                 || dto.getMaxDesc() == null || dto.getMaxDesc().isBlank()) {
             throw new IllegalArgumentException("Не переданы обязательные параметры");
+        }
+    }
+
+    @Transactional
+    public void deleteCriteria(Long id, HttpServletRequest request) {
+        assertAdministrator(request);
+        validatePositiveId(id);
+        if (!criteriaRepository.existsById(id)) {
+            throw new NotFoundException("Критерий не найден");
+        }
+        criteriaTcRepository.deleteAllByCriterionId(id);
+        criteriaBcRepository.deleteAllByCriterionId(id);
+        criteriaRepository.deleteById(id);
+    }
+
+    private void validatePositiveId(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Идентификатор критерия должен быть положительным числом");
         }
     }
 }
