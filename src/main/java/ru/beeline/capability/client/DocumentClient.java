@@ -4,6 +4,8 @@
 
 package ru.beeline.capability.client;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -53,14 +55,29 @@ public class DocumentClient {
                 log.error("Failed to upload file: {}", response.getStatusCode());
             }
         } catch (HttpClientErrorException.NotFound e) {
-            throw new NotFoundException(e.getMessage());
+            throw new NotFoundException(extractErrorMessage(e.getResponseBodyAsString()));
         } catch (HttpClientErrorException.BadRequest e) {
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException(extractErrorMessage(e.getResponseBodyAsString()));
         } catch (HttpClientErrorException | HttpServerErrorException e) {
-            throw new DocumentServerException(e.getMessage());
+            throw new DocumentServerException(extractErrorMessage(e.getResponseBodyAsString()));
         } catch (RestClientException e) {
             log.error("Error while uploading file: {}", e.getMessage(), e);
             throw new RuntimeException("Error while uploading file");
         }
+    }
+
+    private String extractErrorMessage(String responseBody) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = mapper.readTree(responseBody);
+            if (node.has("errorMessage")) {
+                return node.get("errorMessage").asText();
+            }
+            if (node.has("message")) {
+                return node.get("message").asText();
+            }
+        } catch (Exception ignored) {
+        }
+        return responseBody;
     }
 }

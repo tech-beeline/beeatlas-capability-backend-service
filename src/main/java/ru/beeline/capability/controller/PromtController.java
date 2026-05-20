@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +21,10 @@ import ru.beeline.capability.dto.PromtDTO;
 import ru.beeline.capability.dto.aitooldto.ResultDTO;
 import ru.beeline.capability.service.PromtService;
 
+
 @RestController
 @RequestMapping("/api/v1/promt")
+@Tag(name = "Промты", description = "Сохранённые промпты для AI")
 public class PromtController {
 
     @Autowired
@@ -30,7 +33,7 @@ public class PromtController {
     @ApiErrorCodes({400, 404, 500})
     @GetMapping("/{alias}")
     @Operation(summary = "Промт по alias",
-            description = "Промт по alias",
+            description = "Возвращает сохраненный промпт по alias.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
@@ -46,7 +49,7 @@ public class PromtController {
     @ApiErrorCodes({400, 404, 500})
     @PostMapping("/proxy")
     @Operation(summary = "Проксирование запроса в LLM с использованием сохраненного промпта",
-            description = "Проксирование запроса в LLM с использованием сохраненного промпта",
+            description = "Отправляет запрос в LLM, применяя сохраненный промпт и параметры из тела запроса.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",

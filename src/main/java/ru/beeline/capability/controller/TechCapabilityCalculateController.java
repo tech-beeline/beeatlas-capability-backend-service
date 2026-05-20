@@ -4,15 +4,13 @@
 
 package ru.beeline.capability.controller;
 
- 
+
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +20,7 @@ import ru.beeline.capability.service.TechCapabilityService;
 
 @RestController
 @RequestMapping("/api/v1")
+@Tag(name = "Расчёты TC", description = "Фоновые расчёты и пересчёт качества для технических возможностей")
 public class TechCapabilityCalculateController {
 
     @Autowired
@@ -30,7 +29,7 @@ public class TechCapabilityCalculateController {
     @ApiErrorCodes({400, 500})
     @PostMapping("/calculate-total-tech-capabilities")
     @Operation(summary = "Запустить процесс общего расчета критериев для тепловых карт",
-            description = "Запустить процесс общего расчета критериев для тепловых карт",
+            description = "Запускает фоновый пересчет агрегатов для тепловых карт.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Успешный ответ"),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
@@ -43,7 +42,7 @@ public class TechCapabilityCalculateController {
     @ApiErrorCodes({400, 500})
     @GetMapping("/tech-capability/recount-quality")
     @Operation(summary = "Запуск пересчета качества описания ТС",
-            description = "Запуск процесса пересчета качества описания технических возможностей",
+            description = "Запускает пересчет метрик качества описаний технических возможностей.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Успешный ответ"),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),

@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
+@Tag(name = "Поиск", description = "Поиск по BC и TC")
 public class SearchCapabilityController {
 
     @Autowired
@@ -33,7 +35,7 @@ public class SearchCapabilityController {
     @ApiErrorCodes({400, 500})
     @GetMapping("/find")
     @Operation(summary = "Поиск по сущностям",
-            description = "Поиск по сущностям",
+            description = "Ищет по сущностям по строке запроса и типу поиска.",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "Успешный ответ",
