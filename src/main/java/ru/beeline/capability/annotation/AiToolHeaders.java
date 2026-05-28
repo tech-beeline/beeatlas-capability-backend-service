@@ -4,8 +4,10 @@
 
 package ru.beeline.capability.annotation;
 
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -16,10 +18,11 @@ import static ru.beeline.capability.utils.Constants.*;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@ApiImplicitParams({
-        @ApiImplicitParam(name = OPENAI_HOST, paramType = "header", dataType = "string", dataTypeClass = String.class),
-        @ApiImplicitParam(name = OPENAI_TOKEN, paramType = "header", dataType = "string", dataTypeClass = String.class),
-        @ApiImplicitParam(name = OPENAI_MODEL, paramType = "header", dataType = "string", dataTypeClass = String.class)
+@Parameters({
+        @Parameter(name = OPENAI_HOST, in = ParameterIn.HEADER, schema = @Schema(type = "string")),
+        @Parameter(name = OPENAI_TOKEN, in = ParameterIn.HEADER, schema = @Schema(type = "string")),
+        @Parameter(name = OPENAI_MODEL, in = ParameterIn.HEADER, schema = @Schema(type = "string"))
 })
 public @interface AiToolHeaders {
 }
+
