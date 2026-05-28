@@ -39,7 +39,7 @@ public class ApiErrorCodesCustomizer implements OperationCustomizer {
                             .content(new Content().addMediaType("application/json",
                                     new MediaType().schema(new io.swagger.v3.oas.models.media.Schema<>()
                                             .type("object")
-                                            .addProperty("message", new StringSchema().description("Сообщение об ошибке")))));
+                                            .addProperty("errorMessage", new StringSchema().description("Сообщение об ошибке")))));
                     responses.addApiResponse(codeStr, resp);
                 } else if (code >= 400) {
                     ApiResponse existingResp = responses.get(codeStr);
@@ -47,7 +47,7 @@ public class ApiErrorCodesCustomizer implements OperationCustomizer {
                         existingResp.setContent(new Content().addMediaType("application/json",
                                 new MediaType().schema(new io.swagger.v3.oas.models.media.Schema<>()
                                         .type("object")
-                                        .addProperty("message", new StringSchema().description("Сообщение об ошибке")))));
+                                        .addProperty("errorMessage", new StringSchema().description("Сообщение об ошибке")))));
                     }
                 }
             }
