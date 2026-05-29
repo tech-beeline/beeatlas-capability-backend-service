@@ -13,10 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.beeline.capability.client.BpmClient;
 import ru.beeline.capability.client.ProductClient;
-import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.domain.*;
 import ru.beeline.capability.dto.*;
-import ru.beeline.capability.exception.ForbiddenException;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
@@ -580,9 +578,6 @@ public class TechCapabilityService {
     }
 
     public void getTechRecalculationProcess() {
-        if (!RequestContext.getRoles().contains("ADMINISTRATOR")) {
-            throw new ForbiddenException("403 Forbidden.");
-        }
         String businessKey = "tc_desc_quality_" + LocalDateTime.now();
         String processKey = "Process_17o9bfd";
         bpmClient.startProcess(businessKey, processKey);

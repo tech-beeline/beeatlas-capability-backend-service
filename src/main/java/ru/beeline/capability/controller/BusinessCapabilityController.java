@@ -24,7 +24,8 @@ import ru.beeline.capability.dto.PutBusinessCapabilityDTO;
 import java.util.Collections;
 import java.util.List;
 
-import static ru.beeline.capability.utils.Constants.*;
+import static ru.beeline.capability.utils.Constants.SOURCE;
+import static ru.beeline.capability.utils.Constants.USER_ID_HEADER;
 
 
 @RestController
@@ -91,7 +92,9 @@ public class BusinessCapabilityController {
             })
     public BusinessCapabilityShortDTO getById(@PathVariable Long id) {
         return businessCapabilityService.getById(id);
+
     }
+
     @ApiErrorCodes({400, 500})
     @GetMapping("/tree")
     @Operation(summary = "Построение дерева",
@@ -178,12 +181,9 @@ public class BusinessCapabilityController {
             })
     public ResponseEntity putBusinessCapability(@RequestBody PutBusinessCapabilityDTO capability,
                                                 @RequestHeader(value = USER_ID_HEADER, required = false) String userId,
-                                                @RequestHeader(value = USER_PRODUCTS_IDS_HEADER, required = false) String productIds,
-                                                @RequestHeader(value = USER_ROLES_HEADER, required = false) String roles,
-                                                @RequestHeader(value = USER_PERMISSION_HEADER, required = false) String permissions,
                                                 @RequestHeader(value = SOURCE, required = false) String source) {
-        businessCapabilityService.validateBusinessCapabilityDTO(capability, userId, productIds, roles, permissions);
-        businessCapabilityService.putCapability(capability, userId, productIds, roles, permissions, source);
+        businessCapabilityService.validateBusinessCapabilityDTO(capability, userId);
+        businessCapabilityService.putCapability(capability, userId, source);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

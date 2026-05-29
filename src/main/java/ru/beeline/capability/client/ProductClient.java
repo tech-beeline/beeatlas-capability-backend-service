@@ -11,7 +11,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.dto.ProductAvailableDTO;
 import ru.beeline.capability.dto.ProductDTO;
 import ru.beeline.capability.exception.ResponseException;

@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
-import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.dto.CommentDTO;
 import ru.beeline.capability.exception.ResponseException;
 import ru.beeline.capability.dto.bpm.ApplicationExtendedDTO;
@@ -35,13 +34,10 @@ public class BpmClient {
         this.bpmBaseUrl = bpmBaseUrl;
     }
 
-    public void editStatusProcess(String comment, String businessKey, String statusAlias) {
+    public void editStatusProcess(String comment, String businessKey, String statusAlias, String userId) {
         try {
             HttpHeaders headers = new HttpHeaders();
-            headers.set(USER_ID_HEADER, RequestContext.getUserId());
-            headers.set(USER_PERMISSION_HEADER, RequestContext.getUserPermissions().toString());
-            headers.set(USER_PRODUCTS_IDS_HEADER, RequestContext.getUserProducts().toString());
-            headers.set(USER_ROLES_HEADER, RequestContext.getRoles().toString());
+            headers.set(USER_ID_HEADER, userId);
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<CommentDTO> entity = new HttpEntity<>(CommentDTO.builder().comment(comment).build(), headers);
@@ -100,14 +96,11 @@ public class BpmClient {
         restTemplate.postForEntity(url, body, Void.class);
     }
 
-    public ApplicationExtendedDTO getApplication(String businessKey) {
+    public ApplicationExtendedDTO getApplication(String businessKey, String userId) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set(USER_ID_HEADER, RequestContext.getUserId());
-            headers.set(USER_PERMISSION_HEADER, RequestContext.getUserPermissions().toString());
-            headers.set(USER_PRODUCTS_IDS_HEADER, RequestContext.getUserProducts().toString());
-            headers.set(USER_ROLES_HEADER, RequestContext.getRoles().toString());
+            headers.set(USER_ID_HEADER, userId);
 
             log.info("request to bpm");
             ResponseEntity<ApplicationExtendedDTO> response = restTemplate.exchange(bpmBaseUrl + "/camunda-process/api/v1" +

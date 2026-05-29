@@ -31,9 +31,9 @@ public class SubscribeService {
     private SubscribeCapabilityMapper subscribeCapabilityMapper;
 
 
-    public List<CapabilitySubscribedDTO> getCapabilitiesSubscribed(EntityType entityType) {
+    public List<CapabilitySubscribedDTO> getCapabilitiesSubscribed(EntityType entityType, String userId) {
         log.info("get subscribes method start");
-        List<Long> subscribes = notificationClient.getSubscribes(entityType);
+        List<Long> subscribes = notificationClient.getSubscribes(entityType, userId);
         log.info("the list has been received from notificationClient");
         if (subscribes.isEmpty()) {
             log.info("subscribes are empty");

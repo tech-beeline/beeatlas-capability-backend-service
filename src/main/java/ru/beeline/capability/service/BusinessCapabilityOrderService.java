@@ -8,16 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.beeline.capability.client.BpmClient;
 import ru.beeline.capability.client.UserClient;
-import ru.beeline.capability.controller.RequestContext;
 import ru.beeline.capability.domain.BusinessCapability;
 import ru.beeline.capability.domain.OrderBusinessCapability;
-import ru.beeline.capability.dto.BusinessCapabilityOrderDomainDTO;
-import ru.beeline.capability.dto.BusinessCapabilityOrderDraftRequestDTO;
-import ru.beeline.capability.dto.BusinessCapabilityOrderPatchRequestDTO;
-import ru.beeline.capability.dto.BusinessCapabilityOrderRequestDTO;
+import ru.beeline.capability.dto.*;
+import ru.beeline.capability.dto.bpm.ApplicationExtendedDTO;
 import ru.beeline.capability.exception.ForbiddenException;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ResponseException;
@@ -25,8 +21,6 @@ import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.mapper.BusinessCapabilityOrderMapper;
 import ru.beeline.capability.repository.BusinessCapabilityRepository;
 import ru.beeline.capability.repository.OrderBusinessCapabilityRepository;
-import ru.beeline.capability.dto.bpm.ApplicationExtendedDTO;
-import ru.beeline.capability.dto.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -53,29 +47,25 @@ public class BusinessCapabilityOrderService {
         return BusinessCapabilityOrderMapper.getBusinessCapabilityOrderDraftResponseDTO(order);
     }
 
-    public List<BusinessCapabilityOrderDraftResponseDTO> getBusinessCapabilityDraft() {
+    public List<BusinessCapabilityOrderDraftResponseDTO> getBusinessCapabilityDraft(String userId) {
         List<OrderBusinessCapability> orderBusinessCapabilities = orderBcRepository.findByOrderOwnerIdAndBusinessKeyIsNull(
-                Integer.parseInt(RequestContext.getUserId()));
+                Integer.parseInt(userId));
         return orderBusinessCapabilities.stream()
                 .sorted(Comparator.comparing(OrderBusinessCapability::getCreatedDate).reversed())
                 .map(BusinessCapabilityOrderMapper::getBusinessCapabilityOrderDraftResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    public void editOrderDraft(Integer id, BusinessCapabilityOrderRequestDTO request, Boolean publish) {
+    public void editOrderDraft(Integer id, BusinessCapabilityOrderRequestDTO request, Boolean publish, String userId) {
         OrderBusinessCapability orderBusinessCapability = orderBcRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("OrderBusinessCapability не найдена"));
 
-        if (orderBusinessCapability.getOrderOwnerId() != Integer.parseInt(RequestContext.getUserId())) {
-            throw new ForbiddenException("403 Forbidden");
-        }
         if (orderBusinessCapability.getBusinessKey() != null) {
             throw new IllegalArgumentException("Не является черновиком");
         }
         if (request.getParentId() != null) {
             bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
-                    .orElseThrow(() -> new IllegalArgumentException(
-                            "Указана несуществующая родительская возможность"));
+                    .orElseThrow(() -> new IllegalArgumentException("Указана несуществующая родительская возможность"));
         }
         Long mutableBcId = request.getMutableBcId();
 
@@ -127,7 +117,7 @@ public class BusinessCapabilityOrderService {
                 throw new IllegalArgumentException("изменение не существующей BC");
             }
             Map<String, Object> variables = new HashMap<>();
-            variables.put("authorId", Integer.parseInt(RequestContext.getUserId()));
+            variables.put("authorId", Integer.parseInt(userId));
             variables.put("type", mutableBcId == null ? "create_business_capability" : "update_business_capability");
             variables.put("comment", request.getComment() != null ? request.getComment() : "");
             variables.put("entityId", orderBusinessCapability.getId().intValue());
@@ -141,7 +131,10 @@ public class BusinessCapabilityOrderService {
         }
     }
 
-    public void editOrder(Integer id, BusinessCapabilityOrderPatchRequestDTO request, String statusAlias) {
+    public void editOrder(Integer id,
+                          BusinessCapabilityOrderPatchRequestDTO request,
+                          String statusAlias,
+                          String userId) {
         log.info("start edit order");
         OrderBusinessCapability orderBusinessCapability = orderBcRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("OrderBusinessCapability не найдена"));
@@ -152,10 +145,9 @@ public class BusinessCapabilityOrderService {
             bcRepository.findByIdAndDeletedDateIsNull(Long.parseLong(request.getParentId().toString()))
                     .orElseThrow(() -> new IllegalArgumentException("Указана несуществующая родительская возможность"));
         }
-        ApplicationExtendedDTO app = bpmClient.getApplication(orderBusinessCapability.getBusinessKey());
-        if (Integer.parseInt(RequestContext.getUserId()) != app.getAuthor()
-                .getId() && (app.getExecutor() == null || Integer.parseInt(RequestContext.getUserId()) != app.getExecutor()
-                .getId())) {
+        ApplicationExtendedDTO app = bpmClient.getApplication(orderBusinessCapability.getBusinessKey(), userId);
+        if (Integer.parseInt(userId) != app.getAuthor()
+                .getId() && (app.getExecutor() == null || Integer.parseInt(userId) != app.getExecutor().getId())) {
             throw new ForbiddenException("403 Forbidden");
         }
         boolean isUpdated = false;
@@ -192,7 +184,10 @@ public class BusinessCapabilityOrderService {
         if (statusAlias != null) {
             try {
                 log.info("call camunda editStatusProcess");
-                bpmClient.editStatusProcess(request.getComment(), orderBusinessCapability.getBusinessKey(), statusAlias);
+                bpmClient.editStatusProcess(request.getComment(),
+                                            orderBusinessCapability.getBusinessKey(),
+                                            statusAlias,
+                                            userId);
             } catch (ResponseException e) {
                 rollbackOrderChanges(orderBusinessCapability, oldOrderBusinessCapability);
                 throw e;
@@ -212,7 +207,7 @@ public class BusinessCapabilityOrderService {
         orderBusinessCapabilityRepository.save(current);
     }
 
-    public String createOrder(BusinessCapabilityOrderRequestDTO request) {
+    public String createOrder(BusinessCapabilityOrderRequestDTO request, String userId) {
         validateRequest(request);
         Long mutableBcId = request.getMutableBcId();
         String code;
@@ -240,21 +235,21 @@ public class BusinessCapabilityOrderService {
                 .name(request.getName())
                 .description(request.getDescription())
                 .owner(request.getOwner())
-                .author(userClient.getUserProfile(Integer.parseInt(RequestContext.getUserId())).getFullName())
+                .author(userClient.getUserProfile(Integer.parseInt(userId)).getFullName())
                 .status("PROPOSED")
                 .isDomain(false)
                 .parentId(request.getParentId())
                 .mutableBcId(mutableBcId)
                 .createdDate(LocalDateTime.now())
                 .businessKey(businessKey)
-                .orderOwnerId(Integer.parseInt(RequestContext.getUserId()))
+                .orderOwnerId(Integer.parseInt(userId))
                 .build();
         log.info("save bc");
         orderBc = orderBcRepository.save(orderBc);
         orderBcRepository.save(orderBc);
 
         Map<String, Object> variables = new HashMap<>();
-        variables.put("authorId", Integer.parseInt(RequestContext.getUserId()));
+        variables.put("authorId", Integer.parseInt(userId));
         variables.put("type", mutableBcId == null ? "create_business_capability" : "update_business_capability");
         variables.put("comment", request.getComment() != null ? request.getComment() : "");
         variables.put("entityId", orderBc.getId().intValue());
@@ -282,7 +277,7 @@ public class BusinessCapabilityOrderService {
         }
     }
 
-    public String createOrderDraft(BusinessCapabilityOrderDraftRequestDTO request) {
+    public String createOrderDraft(BusinessCapabilityOrderDraftRequestDTO request, String userId) {
         log.info("validate request");
         if (Objects.isNull(request.getName()) || request.getName().isEmpty()) {
             throw new ValidationException("Отсутствует обязательное поле name");
@@ -317,14 +312,14 @@ public class BusinessCapabilityOrderService {
                 .name(request.getName())
                 .description(request.getDescription())
                 .owner(request.getOwner())
-                .author(userClient.getUserProfile(Integer.parseInt(RequestContext.getUserId())).getFullName())
+                .author(userClient.getUserProfile(Integer.parseInt(userId)).getFullName())
                 .status("PROPOSED")
                 .isDomain(false)
                 .parentId(request.getParentId())
                 .mutableBcId(mutableBcId)
                 .createdDate(LocalDateTime.now())
                 .businessKey(null)
-                .orderOwnerId(Integer.parseInt(RequestContext.getUserId()))
+                .orderOwnerId(Integer.parseInt(userId))
                 .build();
         log.info("save bc");
         orderBc = orderBcRepository.save(orderBc);
@@ -347,12 +342,13 @@ public class BusinessCapabilityOrderService {
             Long parentId = capability.getParentId().longValue();
             while (true) {
                 BusinessCapability businessCapability = bcRepository.findById(parentId)
-                        .orElseThrow(() -> new IllegalArgumentException("Указана несуществующая родительская возможность"));
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "Указана несуществующая родительская возможность"));
                 if (businessCapability.isDomain()) {
                     result.add(BusinessCapabilityOrderDomainDTO.builder()
-                            .domainName(businessCapability.getName())
-                            .orderBcId(key)
-                            .build());
+                                       .domainName(businessCapability.getName())
+                                       .orderBcId(key)
+                                       .build());
                     break;
                 } else {
                     parentId = businessCapability.getParentId();

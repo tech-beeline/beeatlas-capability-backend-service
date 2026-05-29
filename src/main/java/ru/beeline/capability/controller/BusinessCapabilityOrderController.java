@@ -4,7 +4,7 @@
 
 package ru.beeline.capability.controller;
 
- 
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,12 +26,13 @@ import ru.beeline.capability.dto.BusinessCapabilityOrderDraftResponseDTO;
 
 import java.util.List;
 
+import static ru.beeline.capability.utils.Constants.USER_ID_HEADER;
+
 
 @RestController
 @RequestMapping("/api/v1/business-capability")
 @Tag(name = "Заказы BC", description = "Заказы на изменение бизнес-возможностей (BPM)")
 public class BusinessCapabilityOrderController {
-
 
     @Autowired
     private BusinessCapabilityOrderService orderService;
@@ -46,8 +47,10 @@ public class BusinessCapabilityOrderController {
                             content = @Content(schema = @Schema(implementation = BusinessCapabilityOrderResponseDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
-    public ResponseEntity postOrder(@RequestBody BusinessCapabilityOrderRequestDTO request) {
-        String businessKey = orderService.createOrder(request);
+    public ResponseEntity<BusinessCapabilityOrderResponseDTO> postOrder(
+            @RequestBody BusinessCapabilityOrderRequestDTO request,
+            @RequestHeader(value = USER_ID_HEADER) String userId) {
+        String businessKey = orderService.createOrder(request, userId);
         return ResponseEntity.ok(new BusinessCapabilityOrderResponseDTO(businessKey));
     }
 
@@ -61,8 +64,9 @@ public class BusinessCapabilityOrderController {
                             content = @Content(array = @ArraySchema(schema = @Schema(implementation = BusinessCapabilityOrderDraftResponseDTO.class)))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
-    public List<BusinessCapabilityOrderDraftResponseDTO> getBusinessCapabilityOrderDraft() {
-        return orderService.getBusinessCapabilityDraft();
+    public List<BusinessCapabilityOrderDraftResponseDTO> getBusinessCapabilityOrderDraft(
+            @RequestHeader(value = USER_ID_HEADER) String userId) {
+        return orderService.getBusinessCapabilityDraft(userId);
     }
 
     @ApiErrorCodes({400, 500})
@@ -89,8 +93,10 @@ public class BusinessCapabilityOrderController {
                             content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
-    public ResponseEntity postOrderDraft(@RequestBody BusinessCapabilityOrderDraftRequestDTO request) {
-        orderService.createOrderDraft(request);
+    public ResponseEntity<String> postOrderDraft(
+            @RequestBody BusinessCapabilityOrderDraftRequestDTO request,
+            @RequestHeader(value = USER_ID_HEADER) String userId) {
+        orderService.createOrderDraft(request, userId);
         return ResponseEntity.ok("");
     }
 
@@ -116,11 +122,12 @@ public class BusinessCapabilityOrderController {
                     @ApiResponse(responseCode = "200", description = "Успешный ответ"),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
-    public ResponseEntity patchOrder(@PathVariable Integer id,
-                                     @RequestBody BusinessCapabilityOrderPatchRequestDTO request,
-                                     @RequestParam(required = false) String statusAlias) {
-        orderService.editOrder(id, request, statusAlias);
-        return new ResponseEntity(HttpStatus.OK);
+    public ResponseEntity<Void> patchOrder(@PathVariable Integer id,
+                                           @RequestBody BusinessCapabilityOrderPatchRequestDTO request,
+                                           @RequestParam(required = false) String statusAlias,
+                                           @RequestHeader(value = USER_ID_HEADER) String userId) {
+        orderService.editOrder(id, request, statusAlias, userId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @ApiErrorCodes({400, 401, 403, 404, 409, 500})
@@ -131,10 +138,11 @@ public class BusinessCapabilityOrderController {
                     @ApiResponse(responseCode = "200", description = "Успешный ответ"),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
-    public ResponseEntity patchOrderDraft(@PathVariable Integer id,
-                                          @RequestBody BusinessCapabilityOrderRequestDTO request,
-                                          @RequestParam(required = false) boolean publish) {
-        orderService.editOrderDraft(id, request, publish);
-        return new ResponseEntity(HttpStatus.OK);
+    public ResponseEntity<Void> patchOrderDraft(@PathVariable Integer id,
+                                                @RequestBody BusinessCapabilityOrderRequestDTO request,
+                                                @RequestParam(required = false) boolean publish,
+                                                @RequestHeader(value = USER_ID_HEADER) String userId) {
+        orderService.editOrderDraft(id, request, publish, userId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
