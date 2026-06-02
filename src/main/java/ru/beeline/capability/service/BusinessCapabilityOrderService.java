@@ -60,6 +60,9 @@ public class BusinessCapabilityOrderService {
         OrderBusinessCapability orderBusinessCapability = orderBcRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("OrderBusinessCapability не найдена"));
 
+        if (orderBusinessCapability.getOrderOwnerId().equals(userId)) {
+            throw new ForbiddenException("403 Forbidden");
+        }
         if (orderBusinessCapability.getBusinessKey() != null) {
             throw new IllegalArgumentException("Не является черновиком");
         }
