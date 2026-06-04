@@ -4,6 +4,8 @@
 
 package ru.beeline.capability.client;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -13,13 +15,13 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import ru.beeline.capability.dto.CommentDTO;
-import ru.beeline.capability.exception.ResponseException;
 import ru.beeline.capability.dto.bpm.ApplicationExtendedDTO;
+import ru.beeline.capability.exception.ResponseException;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static ru.beeline.capability.utils.Constants.*;
+import static ru.beeline.capability.utils.Constants.USER_ID_HEADER;
 
 @Slf4j
 @Service
@@ -52,9 +54,7 @@ public class BpmClient {
             throw new ResponseException(HttpStatus.NOT_FOUND, msg);
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             log.error(e.getMessage());
-            throw new ResponseException(
-                    e.getStatusCode(), e.getResponseBodyAsString()
-            );
+            throw new ResponseException(e.getStatusCode(), extractErrorMessage(e.getResponseBodyAsString()));
         } catch (Exception e) {
             log.error("Неизвестная ошибка: {}", e.getMessage());
             throw new ResponseException(
@@ -116,5 +116,20 @@ public class BpmClient {
             log.warn(msg);
             throw new ResponseException(HttpStatus.NOT_FOUND, msg);
         }
+    }
+
+    private String extractErrorMessage(String responseBody) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = mapper.readTree(responseBody);
+            if (node.has("errorMessage")) {
+                return node.get("errorMessage").asText();
+            }
+            if (node.has("message")) {
+                return node.get("message").asText();
+            }
+        } catch (Exception ignored) {
+        }
+        return responseBody;
     }
 }
