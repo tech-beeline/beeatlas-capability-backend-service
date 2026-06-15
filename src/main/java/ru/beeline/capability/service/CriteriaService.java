@@ -11,18 +11,11 @@ import ru.beeline.capability.domain.*;
 import ru.beeline.capability.dto.criteria.CriteriaRecordResponseDTO;
 import ru.beeline.capability.dto.criteria.PostCriteriaRecordDTO;
 import ru.beeline.capability.dto.criteria.PutEnumCriteriaDTO;
-import ru.beeline.capability.exception.ForbiddenException;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.repository.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static ru.beeline.capability.utils.Constants.USER_ROLES_HEADER;
+import java.util.List;
 
 @Transactional
 @Service
@@ -59,8 +52,7 @@ public class CriteriaService {
         return result;
     }
 
-    public EnumCriteria upsertCriteria(PutEnumCriteriaDTO dto, HttpServletRequest request) {
-        assertAdministrator(request);
+    public EnumCriteria upsertCriteria(PutEnumCriteriaDTO dto) {
         validateRequired(dto);
         boolean revers = Boolean.TRUE.equals(dto.getRevers());
         String name = dto.getName().trim();
@@ -183,26 +175,6 @@ public class CriteriaService {
     }
 
 
-    private void assertAdministrator(HttpServletRequest request) {
-        List<String> roles = parseRolesHeader(request.getHeader(USER_ROLES_HEADER));
-        if (!roles.contains("ADMINISTRATOR")) {
-            throw new ForbiddenException("Доступ запрещен");
-        }
-    }
-
-    private List<String> parseRolesHeader(String value) {
-        if (value == null || value.isBlank()) {
-            return Collections.emptyList();
-        }
-        return Arrays.stream(value.split(","))
-                .map(str -> str.replaceAll("\"", ""))
-                .map(str -> str.replaceAll("]", ""))
-                .map(str -> str.replaceAll("\\[", ""))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.toList());
-    }
-
     private void validateRequired(PutEnumCriteriaDTO dto) {
         if (dto.getName() == null || dto.getName().isBlank()
                 || dto.getDescription() == null || dto.getDescription().isBlank()
@@ -214,8 +186,7 @@ public class CriteriaService {
     }
 
     @Transactional
-    public void deleteCriteria(Long id, HttpServletRequest request) {
-        assertAdministrator(request);
+    public void deleteCriteria(Long id) {
         validatePositiveId(id);
         if (!criteriaRepository.existsById(id)) {
             throw new NotFoundException("Критерий не найден");

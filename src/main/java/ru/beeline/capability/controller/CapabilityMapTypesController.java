@@ -13,13 +13,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.domain.EntityType;
 import ru.beeline.capability.service.CapabilityMapService;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import static ru.beeline.capability.utils.Constants.USER_ID_HEADER;
@@ -43,8 +43,8 @@ public class CapabilityMapTypesController {
                             content = @Content(array = @ArraySchema(schema = @Schema(implementation = EntityType.class)))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
-    public List<EntityType> getCapabilityMapTypes(HttpServletRequest request) {
-        return capabilityMapService.getCapabilityMapTypes(request.getHeader(USER_ID_HEADER));
+    public List<EntityType> getCapabilityMapTypes(@RequestHeader(value = USER_ID_HEADER) String userId) {
+        return capabilityMapService.getCapabilityMapTypes(userId);
 
     }
 }

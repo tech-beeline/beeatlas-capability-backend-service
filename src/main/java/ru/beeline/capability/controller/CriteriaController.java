@@ -4,10 +4,8 @@
 
 package ru.beeline.capability.controller;
 
- 
+
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,10 +22,7 @@ import ru.beeline.capability.dto.criteria.PostCriteriaRecordDTO;
 import ru.beeline.capability.dto.criteria.PutEnumCriteriaDTO;
 import ru.beeline.capability.service.CriteriaService;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-
-import static ru.beeline.capability.utils.Constants.USER_ROLES_HEADER;
 
 
 @RestController
@@ -54,11 +49,6 @@ public class CriteriaController {
 
     @ApiErrorCodes({400, 403, 500})
     @PutMapping
-    @Parameter(name = USER_ROLES_HEADER,
-            in = ParameterIn.HEADER,
-            description = "Для метода требуется роль ADMINISTRATOR",
-            example = "ADMINISTRATOR",
-            required = true)
     @Operation(summary = "Создание или обновление критерия",
             description = "Создаёт запись в enum_criterias или обновляет существующую по name (без учёта регистра). Требуется роль ADMINISTRATOR.",
             responses = {
@@ -68,9 +58,8 @@ public class CriteriaController {
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
                     @ApiResponse(responseCode = "403", description = "Доступ запрещён"),
             })
-    public ResponseEntity<EnumCriteria> putCriteria(@RequestBody PutEnumCriteriaDTO body,
-                                                    HttpServletRequest request) {
-        return ResponseEntity.ok(criteriaService.upsertCriteria(body, request));
+    public ResponseEntity<EnumCriteria> putCriteria(@RequestBody PutEnumCriteriaDTO body) {
+        return ResponseEntity.ok(criteriaService.upsertCriteria(body));
     }
 
     @ApiErrorCodes({400, 500})
@@ -89,11 +78,6 @@ public class CriteriaController {
 
     @ApiErrorCodes({400, 403, 404, 500})
     @DeleteMapping("/{id}")
-    @Parameter(name = USER_ROLES_HEADER,
-            in = ParameterIn.HEADER,
-            description = "Для метода требуется роль ADMINISTRATOR",
-            example = "ADMINISTRATOR",
-            required = true)
     @Operation(summary = "Удаление критерия",
             description = "Удаляет критерий из enum_criterias и связанные записи в criterias_tc и criterias_bc. Требуется роль ADMINISTRATOR.",
             responses = {
@@ -102,8 +86,8 @@ public class CriteriaController {
                     @ApiResponse(responseCode = "403", description = "Доступ запрещён"),
                     @ApiResponse(responseCode = "404", description = "Критерий не найден"),
             })
-    public ResponseEntity<Void> deleteCriteria(@PathVariable Long id, HttpServletRequest request) {
-        criteriaService.deleteCriteria(id, request);
+    public ResponseEntity<Void> deleteCriteria(@PathVariable Long id) {
+        criteriaService.deleteCriteria(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

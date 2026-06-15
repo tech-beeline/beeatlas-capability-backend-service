@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +23,8 @@ import ru.beeline.capability.dto.CapabilitySubscribedDTO;
 import ru.beeline.capability.service.SubscribeService;
 
 import java.util.List;
+
+import static ru.beeline.capability.utils.Constants.USER_ID_HEADER;
 
 
 @RestController
@@ -42,7 +45,8 @@ public class SubscribeController {
                             content = @Content(array = @ArraySchema(schema = @Schema(implementation = CapabilitySubscribedDTO.class)))),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
             })
-    public List<CapabilitySubscribedDTO> getCapabilitiesSubscribed(@RequestParam(value = "entity-type") EntityType entityType) {
-        return subscribeService.getCapabilitiesSubscribed(entityType);
+    public List<CapabilitySubscribedDTO> getCapabilitiesSubscribed(@RequestParam(value = "entity-type") EntityType entityType,
+                                                                    @RequestHeader(value = USER_ID_HEADER) String userId) {
+        return subscribeService.getCapabilitiesSubscribed(entityType, userId);
     }
 }

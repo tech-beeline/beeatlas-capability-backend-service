@@ -297,8 +297,7 @@ public class BusinessCapabilityService {
         return businessCapabilityMapper.convertToBusinessCapabilityShortDTOList(businessCapabilities.toList(), findBy);
     }
 
-    public void putCapability(PutBusinessCapabilityDTO capabilityDTO, String userId, String productIds, String roles,
-                              String permissions, String source) {
+    public void putCapability(PutBusinessCapabilityDTO capabilityDTO, String userId, String source) {
         if (source == null || source.isEmpty()) {
             source = "Sparx";
         }
@@ -324,19 +323,12 @@ public class BusinessCapabilityService {
             }
         } else {
             businessCapability = createCapabilities(capabilityDTO, source);
-            if (!areParametersValid(userId, productIds, roles, permissions)) {
-                findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
-                        businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
-                log.warn("One or more required parameters are null or empty. Business capability  has been preserved.");
-            } else {
-                findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
-                        businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
+            findNameSortTableService.updateVector(businessCapability.getId(), businessCapability.getName(),
+                    businessCapability.getDescription(), businessCapability.getCode(), ENTITY_TYPE_BUSINESS_CAPABILITY);
+            if (userId == null || userId.isEmpty()) {
+                log.warn("userId is null or empty. Business capability has been preserved.");
             }
         }
-    }
-
-    private boolean areParametersValid(String userId, String productIds, String roles, String permissions) {
-        return userId != null && !userId.isEmpty() && productIds != null && !productIds.isEmpty() && roles != null && !roles.isEmpty() && permissions != null && !permissions.isEmpty();
     }
 
     private void addToHistory(BusinessCapability businessCapability) {
@@ -447,12 +439,10 @@ public class BusinessCapabilityService {
     }
 
 
-    public void validateBusinessCapabilityDTO(PutBusinessCapabilityDTO capabilityDTO, String userId, String productIds,
-                                              String roles, String permissions) {
+    public void validateBusinessCapabilityDTO(PutBusinessCapabilityDTO capabilityDTO, String userId) {
         StringBuilder errMsg = new StringBuilder();
         if (capabilityDTO.getCode() == null || capabilityDTO.getCode().isEmpty()) {
-            if (Objects.nonNull(userId) && Objects.nonNull(productIds) && Objects.nonNull(roles) && Objects.nonNull(
-                    permissions)) {
+            if (Objects.nonNull(userId)) {
                 capabilityDTO.setCode(getPrefix(capabilityDTO) + Long.toString(businessCapabilityRepository.findFirstByOrderByIdDesc()
                         .getId() + 1));
             } else {
