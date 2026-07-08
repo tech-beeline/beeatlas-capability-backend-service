@@ -633,7 +633,7 @@ public class TechCapabilityService {
         List<TechCapability> techCapabilities = techCapabilityRepository.findAllByResponsibilityProductIdAndDeletedDateIsNull(id);
         List<Long> tcIds = productClient.getTCIdsByProductId(id);
         List<TechCapability> implemented = tcIds != null && tcIds.size() > 0 ?
-                techCapabilityRepository.findAllByIdIn(tcIds) : new ArrayList<>();
+                techCapabilityRepository.findAllByIdInAndDeletedDateIsNull(tcIds) : new ArrayList<>();
         return ResponsibilityTcDTO.builder()
                 .responsibility(techCapabilities.stream()
                         .map(TechCapabilityMapper::convertToResponsibilityDTO)
