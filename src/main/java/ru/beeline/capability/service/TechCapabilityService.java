@@ -355,6 +355,27 @@ public class TechCapabilityService {
         if (!errMsg.toString().isEmpty()) {
             throw new ValidationException(errMsg.toString());
         }
+        validateParents(techCapability.getParents());
+    }
+
+    private void validateParents(List<String> parents) {
+        if (parents == null || parents.isEmpty()) {
+            throw new NotFoundException(
+                    "Отсутствует обязательное поле parents: необходимо указать хотя бы один код Business Capability");
+        }
+        List<BusinessCapability> foundBusinessCapabilities = businessCapabilityRepository.findAllByCodeInAndDeletedDateIsNull(
+                parents);
+        Set<String> foundCodes = foundBusinessCapabilities.stream()
+                .map(BusinessCapability::getCode)
+                .collect(Collectors.toSet());
+        List<String> notFoundCodes = parents.stream()
+                .filter(code -> !foundCodes.contains(code))
+                .distinct()
+                .collect(Collectors.toList());
+        if (!notFoundCodes.isEmpty()) {
+            throw new NotFoundException(
+                    "Business Capability с кодами: " + notFoundCodes + " не найдено или было удалено");
+        }
     }
 
     public void calculateTotalTechCapabilitiesCount() {

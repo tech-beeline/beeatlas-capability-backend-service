@@ -33,6 +33,8 @@ public interface BusinessCapabilityRepository extends JpaRepository<BusinessCapa
 
     List<BusinessCapability> findAllByCodeIn(List<String> codes);
 
+    List<BusinessCapability> findAllByCodeInAndDeletedDateIsNull(List<String> codes);
+
     Optional<BusinessCapability> findByCode(String code);
 
     Optional<BusinessCapability> findByCodeIgnoreCaseAndDeletedDateIsNull(String code);
