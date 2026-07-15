@@ -182,6 +182,9 @@ public class BusinessCapabilityService {
         Map<Long, Node> bcMap = getNodeMap();
 
         BusinessCapability businessCapability = findById(id);
+        if (businessCapability.getDeletedDate() != null) {
+            throw new NotFoundException("Business Capability не найдено");
+        }
         businessCapability.setChildrenOfTree(bcMap.get(businessCapability.getId())
                 .getChildren()
                 .stream()
