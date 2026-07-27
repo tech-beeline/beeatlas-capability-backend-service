@@ -170,15 +170,70 @@ public class TechCapabilityService {
     }
 
     public void createOrUpdate(PutTechCapabilityDTO techCapability, String source) {
+        Integer productId = resolveProductId(techCapability.getTargetSystemCode());
+        createOrUpdate(techCapability, source, productId);
+    }
+
+    /**
+     * Пакетное создание/обновление TC одного продукта за один вызов: продукт резолвится один раз,
+     * а TC продукта, отсутствующие в переданном списке, помечаются удалёнными (deletedDate).
+     */
+    public void createOrUpdateForProduct(PutTechCapabilitiesForProductDTO request, String source) {
+        String targetSystemCode = request.getTargetSystemCode();
+        if (targetSystemCode == null || targetSystemCode.isEmpty()) {
+            throw new ValidationException("Отсутствует обязательное поле targetSystemCode");
+        }
+        List<PutTechCapabilityDTO> techCapabilities = request.getTechCapabilities() != null
+                ? request.getTechCapabilities() : Collections.emptyList();
+        techCapabilities.forEach(this::validateTechCapabilityDTO);
+
+        Integer productId = resolveProductId(targetSystemCode);
+        Set<String> incomingCodes = techCapabilities.stream()
+                .map(PutTechCapabilityDTO::getCode)
+                .collect(Collectors.toSet());
+
+        for (PutTechCapabilityDTO techCapability : techCapabilities) {
+            createOrUpdate(techCapability, source, productId);
+        }
+
+        if (productId != null) {
+            deleteMissingTechCapabilities(productId, incomingCodes);
+        }
+        log.info("Пакетное обновление TC для продукта {}: получено {}, productId={}",
+                targetSystemCode, techCapabilities.size(), productId);
+    }
+
+    private void deleteMissingTechCapabilities(Integer productId, Set<String> incomingCodes) {
+        List<TechCapability> existing = techCapabilityRepository.findAllByResponsibilityProductIdAndDeletedDateIsNull(productId);
+        List<TechCapability> toDelete = existing.stream()
+                .filter(tc -> !incomingCodes.contains(tc.getCode()))
+                .collect(Collectors.toList());
+        if (toDelete.isEmpty()) {
+            return;
+        }
+        Date now = new Date();
+        EntityType entityType = entityTypeRepository.findByName(ENTITY_TYPE_TECH_CAPABILITY);
+        for (TechCapability techCapability : toDelete) {
+            techCapability.setDeletedDate(now);
+            findNameSortTableRepository.deleteByRefIdAndType(techCapability.getId(), entityType);
+            techCapabilityRelationsRepository.deleteAllByTechCapability(techCapability);
+        }
+        techCapabilityRepository.saveAll(toDelete);
+        log.info("Помечено удалёнными TC, отсутствующих в новом списке продукта (productId={}): {}",
+                productId, toDelete.size());
+    }
+
+    private Integer resolveProductId(String targetSystemCode) {
+        if (targetSystemCode == null || targetSystemCode.isEmpty()) {
+            return null;
+        }
+        ProductDTO product = productClient.getProduct(targetSystemCode);
+        return product != null ? product.getId() : null;
+    }
+
+    private void createOrUpdate(PutTechCapabilityDTO techCapability, String source, Integer productId) {
         if (source == null || source.isEmpty()) {
             source = "Sparx";
-        }
-        Integer productId = null;
-        if (techCapability.getTargetSystemCode() != null && !techCapability.getTargetSystemCode().isEmpty()) {
-            ProductDTO product = productClient.getProduct(techCapability.getTargetSystemCode());
-            if (product != null) {
-                productId = product.getId();
-            }
         }
         Optional<TechCapability> currentTechCapabilityOpt = techCapabilityRepository.findByCode(techCapability.getCode());
         boolean techCapabilityHaveParents = techCapability.getParents() != null && !techCapability.getParents()

@@ -167,6 +167,22 @@ public class TechCapabilityController {
     }
 
     @ApiErrorCodes({400, 401, 403, 404, 409, 500})
+    @PutMapping("/product")
+    @Operation(summary = "Пакетное создание/обновление технических возможностей продукта",
+            description = "Создаёт/обновляет список TC продукта одним запросом (продукт резолвится один раз). " +
+                    "TC продукта, отсутствующие в переданном списке, помечаются удалёнными (deletedDate).",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Успешный ответ"),
+                    @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
+            })
+    public ResponseEntity putTechCapabilitiesForProduct(@RequestBody PutTechCapabilitiesForProductDTO request,
+                                                        @RequestHeader(value = SOURCE, required = false) String source) {
+        log.info("Receive batch Tech Capabilities for product: " + request.getTargetSystemCode());
+        techCapabilityService.createOrUpdateForProduct(request, source);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @ApiErrorCodes({400, 401, 403, 404, 409, 500})
     @DeleteMapping("/{code}")
     @Operation(summary = "Удаление технической возможности",
             description = "Удаляет техническую возможность по коду.",
