@@ -4,7 +4,7 @@
 
 package ru.beeline.capability.controller;
 
- 
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,8 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.beeline.capability.annotation.ApiErrorCodes;
 import ru.beeline.capability.dto.*;
+import ru.beeline.capability.dto.search.TechCapabilitySearchDTO;
 import ru.beeline.capability.service.TechCapabilityService;
-import ru.beeline.capability.dto.PutTechCapabilityDTO;
 
 import java.util.List;
 
@@ -63,16 +63,19 @@ public class TechCapabilityController {
         return techCapabilityService.getCapabilityById(id);
     }
 
+    @ApiErrorCodes({400, 404, 500})
+    @GetMapping("/{id}/for-search")
+    @Operation(summary = "Получение TC со списком доменов в которых находиться тс",
+            description = "Возвращает поля TC: id, code, name, description, system, список доменов "
+                    + "(isDomain=true) от ближайшего к корневому.")
+    public TechCapabilitySearchDTO getTechForSearch(@PathVariable Long id) {
+        return techCapabilityService.getCapabilityForSearch(id);
+    }
+
     @ApiErrorCodes({400, 500})
     @GetMapping("/{id}/parents")
-    @Operation(summary = "Получение всех родительских технических возможностей",
-            description = "Возвращает цепочку родителей для указанной технической возможности.",
-            responses = {
-                    @ApiResponse(responseCode = "200",
-                            description = "Успешный ответ",
-                            content = @Content(schema = @Schema(implementation = CapabilityParentDTO.class))),
-                    @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
-            })
+    @Operation(summary = "Получение всех родительских бизнес-возможностей",
+            description = "Возвращает цепочку id родительских BC для указанной технической возможности.")
     public CapabilityParentDTO getParentsById(@PathVariable Long id) {
         return techCapabilityService.getParents(id);
     }
