@@ -15,6 +15,8 @@ import ru.beeline.capability.client.BpmClient;
 import ru.beeline.capability.client.ProductClient;
 import ru.beeline.capability.domain.*;
 import ru.beeline.capability.dto.*;
+import ru.beeline.capability.dto.search.CapabilityDomainDTO;
+import ru.beeline.capability.dto.search.TechCapabilitySearchDTO;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
@@ -170,15 +172,70 @@ public class TechCapabilityService {
     }
 
     public void createOrUpdate(PutTechCapabilityDTO techCapability, String source) {
+        Integer productId = resolveProductId(techCapability.getTargetSystemCode());
+        createOrUpdate(techCapability, source, productId);
+    }
+
+    /**
+     * Пакетное создание/обновление TC одного продукта за один вызов: продукт резолвится один раз,
+     * а TC продукта, отсутствующие в переданном списке, помечаются удалёнными (deletedDate).
+     */
+    public void createOrUpdateForProduct(PutTechCapabilitiesForProductDTO request, String source) {
+        String targetSystemCode = request.getTargetSystemCode();
+        if (targetSystemCode == null || targetSystemCode.isEmpty()) {
+            throw new ValidationException("Отсутствует обязательное поле targetSystemCode");
+        }
+        List<PutTechCapabilityDTO> techCapabilities = request.getTechCapabilities() != null
+                ? request.getTechCapabilities() : Collections.emptyList();
+        techCapabilities.forEach(this::validateTechCapabilityDTO);
+
+        Integer productId = resolveProductId(targetSystemCode);
+        Set<String> incomingCodes = techCapabilities.stream()
+                .map(PutTechCapabilityDTO::getCode)
+                .collect(Collectors.toSet());
+
+        for (PutTechCapabilityDTO techCapability : techCapabilities) {
+            createOrUpdate(techCapability, source, productId);
+        }
+
+        if (productId != null) {
+            deleteMissingTechCapabilities(productId, incomingCodes);
+        }
+        log.info("Пакетное обновление TC для продукта {}: получено {}, productId={}",
+                targetSystemCode, techCapabilities.size(), productId);
+    }
+
+    private void deleteMissingTechCapabilities(Integer productId, Set<String> incomingCodes) {
+        List<TechCapability> existing = techCapabilityRepository.findAllByResponsibilityProductIdAndDeletedDateIsNull(productId);
+        List<TechCapability> toDelete = existing.stream()
+                .filter(tc -> !incomingCodes.contains(tc.getCode()))
+                .collect(Collectors.toList());
+        if (toDelete.isEmpty()) {
+            return;
+        }
+        Date now = new Date();
+        EntityType entityType = entityTypeRepository.findByName(ENTITY_TYPE_TECH_CAPABILITY);
+        for (TechCapability techCapability : toDelete) {
+            techCapability.setDeletedDate(now);
+            findNameSortTableRepository.deleteByRefIdAndType(techCapability.getId(), entityType);
+            techCapabilityRelationsRepository.deleteAllByTechCapability(techCapability);
+        }
+        techCapabilityRepository.saveAll(toDelete);
+        log.info("Помечено удалёнными TC, отсутствующих в новом списке продукта (productId={}): {}",
+                productId, toDelete.size());
+    }
+
+    private Integer resolveProductId(String targetSystemCode) {
+        if (targetSystemCode == null || targetSystemCode.isEmpty()) {
+            return null;
+        }
+        ProductDTO product = productClient.getProduct(targetSystemCode);
+        return product != null ? product.getId() : null;
+    }
+
+    private void createOrUpdate(PutTechCapabilityDTO techCapability, String source, Integer productId) {
         if (source == null || source.isEmpty()) {
             source = "Sparx";
-        }
-        Integer productId = null;
-        if (techCapability.getTargetSystemCode() != null && !techCapability.getTargetSystemCode().isEmpty()) {
-            ProductDTO product = productClient.getProduct(techCapability.getTargetSystemCode());
-            if (product != null) {
-                productId = product.getId();
-            }
         }
         Optional<TechCapability> currentTechCapabilityOpt = techCapabilityRepository.findByCode(techCapability.getCode());
         boolean techCapabilityHaveParents = techCapability.getParents() != null && !techCapability.getParents()
@@ -642,5 +699,74 @@ public class TechCapabilityService {
                         .map(TechCapabilityMapper::convertToResponsibilityDTO)
                         .collect(Collectors.toList()))
                 .build();
+    }
+
+    public TechCapabilitySearchDTO getCapabilityForSearch(Long id) {
+        TechCapability techCapability = findActiveTechCapability(id);
+        GetProductsByIdsDTO system = resolveSystem(techCapability.getResponsibilityProductId());
+        List<CapabilityDomainDTO> domains = collectDomains(techCapability);
+        return TechCapabilitySearchDTO.builder()
+                .id(techCapability.getId())
+                .code(techCapability.getCode())
+                .name(techCapability.getName())
+                .description(techCapability.getDescription())
+                .system(system)
+                .domains(domains)
+                .build();
+    }
+
+    private TechCapability findActiveTechCapability(Long id) {
+        TechCapability techCapability = techCapabilityRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Tech Capability не найдено"));
+        if (techCapability.getDeletedDate() != null) {
+            throw new NotFoundException("Tech Capability не найдено");
+        }
+        return techCapability;
+    }
+
+    private GetProductsByIdsDTO resolveSystem(Integer systemId) {
+        if (systemId == null) {
+            return null;
+        }
+        List<GetProductsByIdsDTO> products = productClient.getProductsByIds(List.of(systemId));
+        if (products != null && !products.isEmpty()) {
+            return products.get(0);
+        }
+        return null;
+    }
+
+    private List<CapabilityDomainDTO> collectDomains(TechCapability techCapability) {
+        List<TechCapabilityRelations> relations =
+                techCapabilityRelationsRepository.findByTechCapability(techCapability);
+        Map<Long, CapabilityDomainDTO> domainsById = new LinkedHashMap<>();
+        Set<Long> visitedBcIds = new HashSet<>();
+        for (TechCapabilityRelations relation : relations) {
+            BusinessCapability current = relation.getBusinessCapability();
+            while (current != null) {
+                if (current.getDeletedDate() != null) {
+                    break;
+                }
+                if (!visitedBcIds.add(current.getId())) {
+                    break;
+                }
+                if (current.isDomain()) {
+                    domainsById.putIfAbsent(
+                            current.getId(),
+                            CapabilityDomainDTO.builder()
+                                    .id(current.getId())
+                                    .code(current.getCode())
+                                    .name(current.getName())
+                                    .isDomain(true)
+                                    .build()
+                    );
+                }
+                Long parentId = current.getParentId();
+                if (parentId == null) {
+                    break;
+                }
+                current = businessCapabilityRepository.findById(parentId).orElse(null);
+            }
+        }
+        return new ArrayList<>(domainsById.values());
     }
 }

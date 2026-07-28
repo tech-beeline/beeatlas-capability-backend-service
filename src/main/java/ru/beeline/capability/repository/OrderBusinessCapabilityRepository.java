@@ -17,4 +17,8 @@ public interface OrderBusinessCapabilityRepository extends JpaRepository<OrderBu
     List<OrderBusinessCapability> findByOrderOwnerIdAndBusinessKeyIsNull(Integer orderOwnerId);
 
     List<OrderBusinessCapability> findByIdIn(List<Integer> ids);
+
+    List<OrderBusinessCapability> findAllByParentId (Integer parentId);
+
+    List<OrderBusinessCapability> findAllByMutableBcId(Long mutableBcId);
 }

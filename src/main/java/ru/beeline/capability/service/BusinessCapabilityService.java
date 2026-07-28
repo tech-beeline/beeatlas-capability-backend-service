@@ -182,6 +182,9 @@ public class BusinessCapabilityService {
         Map<Long, Node> bcMap = getNodeMap();
 
         BusinessCapability businessCapability = findById(id);
+        if (businessCapability.getDeletedDate() != null) {
+            throw new NotFoundException("Business Capability не найдено");
+        }
         businessCapability.setChildrenOfTree(bcMap.get(businessCapability.getId())
                 .getChildren()
                 .stream()
@@ -522,6 +525,14 @@ public class BusinessCapabilityService {
     public void deleteBusinessCapability(String code, Boolean childrenTransfer) {
         Optional<BusinessCapability> optionalBusinessCapability = businessCapabilityRepository.findByCode(code);
         if (optionalBusinessCapability.isPresent()) {
+            BusinessCapability bc = optionalBusinessCapability.get();
+            List<OrderBusinessCapability> orderBusinessCapabilities = orderBusinessCapabilityRepository.findAllByParentId(bc.getId().intValue());
+            orderBusinessCapabilities.addAll(orderBusinessCapabilityRepository.findAllByMutableBcId(bc.getId()));
+            if (!orderBusinessCapabilities.isEmpty()) {
+                List<String> codes = orderBusinessCapabilities.stream().map(OrderBusinessCapability::getCode).toList();
+                throw new ValidationException("Удаляемая BC была указана как родительская в заявках на создание новых BC с codes: " +
+                        codes);
+            }
             if (optionalBusinessCapability.get().getDeletedDate() == null) {
                 Long businessCapabilityId = optionalBusinessCapability.get().getId();
                 optionalBusinessCapability.map(businessCapability -> {
@@ -531,10 +542,10 @@ public class BusinessCapabilityService {
                         }
 
                         businessCapabilityRepository.updateParentIdForChildren(businessCapability.getId(),
-                                                                               businessCapability.getParentId());
+                                businessCapability.getParentId());
 
                         techCapabilityRelationsRepository.updateParentIdForChildren(businessCapability.getId(),
-                                                                                    businessCapability.getParentId());
+                                businessCapability.getParentId());
 
 
                     }
