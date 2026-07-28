@@ -176,10 +176,6 @@ public class TechCapabilityService {
         createOrUpdate(techCapability, source, productId);
     }
 
-    /**
-     * Пакетное создание/обновление TC одного продукта за один вызов: продукт резолвится один раз,
-     * а TC продукта, отсутствующие в переданном списке, помечаются удалёнными (deletedDate).
-     */
     public void createOrUpdateForProduct(PutTechCapabilitiesForProductDTO request, String source) {
         String targetSystemCode = request.getTargetSystemCode();
         if (targetSystemCode == null || targetSystemCode.isEmpty()) {
@@ -189,10 +185,14 @@ public class TechCapabilityService {
                 ? request.getTechCapabilities() : Collections.emptyList();
         techCapabilities.forEach(this::validateTechCapabilityDTO);
 
+        Map<String, PutTechCapabilityDTO> dedupedByCode = new LinkedHashMap<>();
+        for (PutTechCapabilityDTO techCapability : techCapabilities) {
+            dedupedByCode.put(techCapability.getCode(), techCapability);
+        }
+        techCapabilities = new ArrayList<>(dedupedByCode.values());
+
         Integer productId = resolveProductId(targetSystemCode);
-        Set<String> incomingCodes = techCapabilities.stream()
-                .map(PutTechCapabilityDTO::getCode)
-                .collect(Collectors.toSet());
+        Set<String> incomingCodes = dedupedByCode.keySet();
 
         for (PutTechCapabilityDTO techCapability : techCapabilities) {
             createOrUpdate(techCapability, source, productId);
