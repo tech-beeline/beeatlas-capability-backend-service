@@ -65,9 +65,9 @@ public class TechCapabilityController {
 
     @ApiErrorCodes({400, 404, 500})
     @GetMapping("/{id}/for-search")
-    @Operation(summary = "Получение TC со списком доменов в которых находиться тс",
-            description = "Возвращает поля TC: id, code, name, description, system, список доменов "
-                    + "(isDomain=true) от ближайшего к корневому.")
+    @Operation(summary = "Получение TC с родительскими BC",
+            description = "Возвращает поля TC, id, code, name, description, system), плюс список всех "
+                    + "родительских BC по иерархии вверх (ближайший → корневой).")
     public TechCapabilitySearchDTO getTechForSearch(@PathVariable Long id) {
         return techCapabilityService.getCapabilityForSearch(id);
     }
