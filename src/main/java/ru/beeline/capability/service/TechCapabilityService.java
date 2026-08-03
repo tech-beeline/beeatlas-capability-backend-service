@@ -176,10 +176,6 @@ public class TechCapabilityService {
         createOrUpdate(techCapability, source, productId);
     }
 
-    /**
-     * Пакетное создание/обновление TC одного продукта за один вызов: продукт резолвится один раз,
-     * а TC продукта, отсутствующие в переданном списке, помечаются удалёнными (deletedDate).
-     */
     public void createOrUpdateForProduct(PutTechCapabilitiesForProductDTO request, String source) {
         String targetSystemCode = request.getTargetSystemCode();
         if (targetSystemCode == null || targetSystemCode.isEmpty()) {
@@ -189,10 +185,14 @@ public class TechCapabilityService {
                 ? request.getTechCapabilities() : Collections.emptyList();
         techCapabilities.forEach(this::validateTechCapabilityDTO);
 
+        Map<String, PutTechCapabilityDTO> dedupedByCode = new LinkedHashMap<>();
+        for (PutTechCapabilityDTO techCapability : techCapabilities) {
+            dedupedByCode.put(techCapability.getCode(), techCapability);
+        }
+        techCapabilities = new ArrayList<>(dedupedByCode.values());
+
         Integer productId = resolveProductId(targetSystemCode);
-        Set<String> incomingCodes = techCapabilities.stream()
-                .map(PutTechCapabilityDTO::getCode)
-                .collect(Collectors.toSet());
+        Set<String> incomingCodes = dedupedByCode.keySet();
 
         for (PutTechCapabilityDTO techCapability : techCapabilities) {
             createOrUpdate(techCapability, source, productId);
@@ -704,14 +704,14 @@ public class TechCapabilityService {
     public TechCapabilitySearchDTO getCapabilityForSearch(Long id) {
         TechCapability techCapability = findActiveTechCapability(id);
         GetProductsByIdsDTO system = resolveSystem(techCapability.getResponsibilityProductId());
-        List<CapabilityDomainDTO> domains = collectDomains(techCapability);
+        List<CapabilityDomainDTO> parents = collectParents(techCapability);
         return TechCapabilitySearchDTO.builder()
                 .id(techCapability.getId())
                 .code(techCapability.getCode())
                 .name(techCapability.getName())
                 .description(techCapability.getDescription())
                 .system(system)
-                .domains(domains)
+                .parents(parents)
                 .build();
     }
 
@@ -735,10 +735,10 @@ public class TechCapabilityService {
         return null;
     }
 
-    private List<CapabilityDomainDTO> collectDomains(TechCapability techCapability) {
+    private List<CapabilityDomainDTO> collectParents(TechCapability techCapability) {
         List<TechCapabilityRelations> relations =
                 techCapabilityRelationsRepository.findByTechCapability(techCapability);
-        Map<Long, CapabilityDomainDTO> domainsById = new LinkedHashMap<>();
+        Map<Long, CapabilityDomainDTO> parentsById = new LinkedHashMap<>();
         Set<Long> visitedBcIds = new HashSet<>();
         for (TechCapabilityRelations relation : relations) {
             BusinessCapability current = relation.getBusinessCapability();
@@ -749,17 +749,15 @@ public class TechCapabilityService {
                 if (!visitedBcIds.add(current.getId())) {
                     break;
                 }
-                if (current.isDomain()) {
-                    domainsById.putIfAbsent(
-                            current.getId(),
-                            CapabilityDomainDTO.builder()
-                                    .id(current.getId())
-                                    .code(current.getCode())
-                                    .name(current.getName())
-                                    .isDomain(true)
-                                    .build()
-                    );
-                }
+                parentsById.putIfAbsent(
+                        current.getId(),
+                        CapabilityDomainDTO.builder()
+                                .id(current.getId())
+                                .code(current.getCode())
+                                .name(current.getName())
+                                .isDomain(current.isDomain())
+                                .build()
+                );
                 Long parentId = current.getParentId();
                 if (parentId == null) {
                     break;
@@ -767,6 +765,6 @@ public class TechCapabilityService {
                 current = businessCapabilityRepository.findById(parentId).orElse(null);
             }
         }
-        return new ArrayList<>(domainsById.values());
+        return new ArrayList<>(parentsById.values());
     }
 }

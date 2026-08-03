@@ -15,7 +15,6 @@ public class CapabilityDomainDTO {
     private Long id;
     private String code;
     private String name;
-    @JsonProperty("isDomain")
     private boolean isDomain;
 }
 

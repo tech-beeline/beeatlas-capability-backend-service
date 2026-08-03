@@ -49,6 +49,9 @@ public class TechCapabilityMapper {
     }
 
     public List<String> getParentsCodes(List<TechCapabilityRelations> techCapabilitiesRelations) {
+        if (techCapabilitiesRelations == null) {
+            return new ArrayList<>();
+        }
         return techCapabilitiesRelations.stream()
                 .map(relation -> relation.getBusinessCapability().getCode())
                 .collect(Collectors.toList());
