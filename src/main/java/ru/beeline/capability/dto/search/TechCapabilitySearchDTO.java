@@ -19,5 +19,5 @@ public class TechCapabilitySearchDTO {
     private String name;
     private String description;
     private GetProductsByIdsDTO system;
-    private List<CapabilityDomainDTO> domains;
+    private List<CapabilityDomainDTO> parents;
 }
