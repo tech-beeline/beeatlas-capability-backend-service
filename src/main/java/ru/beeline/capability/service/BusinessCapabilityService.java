@@ -19,6 +19,8 @@ import ru.beeline.capability.client.UserClient;
 import ru.beeline.capability.domain.*;
 import ru.beeline.capability.dto.*;
 import ru.beeline.capability.dto.product.GetProductsByIdsDTO;
+import ru.beeline.capability.dto.search.BusinessCapabilitySearchDTO;
+import ru.beeline.capability.dto.search.CapabilityDomainDTO;
 import ru.beeline.capability.exception.NotFoundException;
 import ru.beeline.capability.exception.ValidationException;
 import ru.beeline.capability.helper.pagination.OffsetBasedPageRequest;
@@ -298,6 +300,39 @@ public class BusinessCapabilityService {
                 throw new IllegalArgumentException("Unsupported FindBy value");
         }
         return businessCapabilityMapper.convertToBusinessCapabilityShortDTOList(businessCapabilities.toList(), findBy);
+    }
+
+    public BusinessCapabilitySearchDTO getCapabilityForSearch(Long id) {
+        BusinessCapability businessCapability = businessCapabilityRepository.findByIdAndDeletedDateIsNull(id)
+                .orElseThrow(() -> new NotFoundException("Business Capability с id: " + id + " не найдено"));
+        return BusinessCapabilitySearchDTO.builder()
+                .id(businessCapability.getId())
+                .code(businessCapability.getCode())
+                .name(businessCapability.getName())
+                .description(businessCapability.getDescription())
+                .isDomain(businessCapability.isDomain())
+                .parents(collectParentsForSearch(businessCapability))
+                .build();
+    }
+
+    private List<CapabilityDomainDTO> collectParentsForSearch(BusinessCapability businessCapability) {
+        List<CapabilityDomainDTO> parents = new ArrayList<>();
+        Set<Long> visited = new HashSet<>();
+        Long parentId = businessCapability.getParentId();
+        while (parentId != null && visited.add(parentId)) {
+            BusinessCapability parent = businessCapabilityRepository.findById(parentId).orElse(null);
+            if (parent == null || parent.getDeletedDate() != null) {
+                break;
+            }
+            parents.add(CapabilityDomainDTO.builder()
+                    .id(parent.getId())
+                    .code(parent.getCode())
+                    .name(parent.getName())
+                    .isDomain(parent.isDomain())
+                    .build());
+            parentId = parent.getParentId();
+        }
+        return parents;
     }
 
     public void putCapability(PutBusinessCapabilityDTO capabilityDTO, String userId, String source) {
